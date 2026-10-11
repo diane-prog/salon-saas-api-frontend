@@ -41,6 +41,10 @@ const nextConfig: NextConfig = {
     agentFeedback: true,
   },
   cacheComponents: true,
+  images: {
+    // Next 16 exige une liste blanche de qualités ; 90 pour la photo plein cadre du hero.
+    qualities: [75, 90],
+  },
   partialPrefetching: true,
   async redirects() {
     return redirects.map((r) => ({

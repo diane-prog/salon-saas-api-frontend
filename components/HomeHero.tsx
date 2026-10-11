@@ -5,25 +5,27 @@ import Link from "next/link";
 import { ArrowUpRight } from "@/components/Icons";
 import Reveal from "@/components/Reveal";
 import { ButtonLink } from "@/components/ui";
+import HeroSearch from "@/components/HeroSearch";
 import { useDictionary } from "@/components/DictionaryProvider";
 
 export default function HomeHero() {
   const { dict, locale } = useDictionary();
   const { hero, ui } = dict;
   const href = (p: string) => `/${locale}${p === "/" ? "" : p}`;
-  const highlights = dict.services.slice(0, 3);
 
   return (
     <section className="relative isolate flex min-h-[92vh] flex-col overflow-hidden bg-navy-deep pt-32 pb-10 sm:pt-40 sm:pb-14">
       <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
         <Image
-          src="/img/hero.png"
+          src="/img/hero3.png"
           alt=""
           fill
           priority
+          quality={90}
           sizes="100vw"
           className="object-cover object-center"
         />
+        {/* <div className="absolute inset-0 bg-black/30" /> */}
       </div>
 
       <div className="relative mx-auto flex w-full max-w-[90rem] flex-1 flex-col px-5 md:px-8 xl:px-10">
@@ -37,7 +39,7 @@ export default function HomeHero() {
               {hero.lead}
             </h1>
 
-            <p className="max-w-xl text-base leading-relaxed text-white/85 [text-shadow:0_1px_2px_rgb(0_9_42_/_0.45),0_6px_24px_rgb(0_9_42_/_0.35)] sm:text-lg">
+            <p className="max-w-xl text-base leading-relaxed text-white [text-shadow:0_1px_2px_rgb(0_9_42_/_0.45),0_6px_24px_rgb(0_9_42_/_0.35)] sm:text-lg">
               {hero.body}
             </p>
 
@@ -54,20 +56,8 @@ export default function HomeHero() {
           </Reveal>
         </div>
 
-        <div className="mt-14 grid gap-3 sm:grid-cols-3">
-          {highlights.map((s, i) => (
-            <Reveal key={s.slug} delay={i * 90}>
-              <Link
-                href={href(`/services/${s.slug}`)}
-                className="flex h-full flex-col rounded-card bg-white px-5 py-4 shadow-soft transition-all duration-300 hover:-translate-y-1 hover:shadow-lift"
-              >
-                <span className="text-[0.7rem] font-semibold uppercase tracking-[0.16em] text-navy">
-                  {s.title}
-                </span>
-                <span className="mt-1 line-clamp-1 text-xs text-muted">{s.short}</span>
-              </Link>
-            </Reveal>
-          ))}
+        <div className="mt-12">
+          <HeroSearch />
         </div>
       </div>
     </section>

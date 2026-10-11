@@ -514,6 +514,9 @@ export const ui = {
   notFoundBody: "It looks like nothing was found here. Head back home to keep browsing.",
   backHome: "Back to home",
   languageLabel: "Language",
+  searchLabel: "Search the site",
+  searchPlaceholder: "Search a service, a project…",
+  searchNoResults: "No results",
 };
 const dictionary = {
   site, nav, services, hero, stats, about, projects, filters,

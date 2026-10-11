@@ -514,6 +514,9 @@ export const ui = {
   notFoundBody: "On dirait que rien n'a été trouvé à cet endroit. Retournez à l'accueil pour poursuivre votre navigation.",
   backHome: "Retour à l'accueil",
   languageLabel: "Langue",
+  searchLabel: "Rechercher sur le site",
+  searchPlaceholder: "Rechercher un service, une réalisation…",
+  searchNoResults: "Aucun résultat",
 };
 
 const dictionary = {
