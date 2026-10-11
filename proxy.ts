@@ -1,7 +1,8 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { defaultLocale, isLocale, locales } from "@/lib/dictionaries";
 
-const PUBLIC_FILE = /\.(?:png|jpg|jpeg|svg|webp|ico|woff2?|xml|txt|json|webmanifest)$/i;
+const PUBLIC_FILE =
+  /\.(?:png|jpe?g|svg|webp|avif|gif|ico|woff2?|ttf|otf|xml|txt|json|webmanifest|mp4|webm|ogv|mov|m4v|mp3|wav|m4a|pdf)$/i;
 
 function detectLocale(request: NextRequest): string {
   const cookie = request.cookies.get("leegi-locale")?.value;

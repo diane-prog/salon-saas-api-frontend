@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight } from "@/components/Icons";
@@ -12,6 +13,16 @@ export default function HomeHero() {
   const { dict, locale } = useDictionary();
   const { hero, ui } = dict;
   const href = (p: string) => `/${locale}${p === "/" ? "" : p}`;
+  const [allowVideo, setAllowVideo] = useState(false);
+
+  // Vidéo de fond chargée uniquement si l'utilisateur n'a pas demandé moins d'animations.
+  useEffect(() => {
+    const query = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const update = () => setAllowVideo(!query.matches);
+    update();
+    query.addEventListener("change", update);
+    return () => query.removeEventListener("change", update);
+  }, []);
 
   return (
     <section className="relative isolate flex min-h-[92vh] border-b border-gray-100 flex-col overflow-hidden bg-navy-deep pt-32 pb-10 sm:pt-40 sm:pb-14">
@@ -25,6 +36,21 @@ export default function HomeHero() {
           sizes="100vw"
           className="object-cover object-center"
         />
+
+        {allowVideo && (
+          <video
+            className="absolute inset-0 h-full w-full object-cover object-center"
+            src="/img/video.mp4"
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="metadata"
+            aria-hidden
+            tabIndex={-1}
+          />
+        )}
+
         {/* <div className="absolute inset-0 bg-black/30" /> */}
       </div>
 
