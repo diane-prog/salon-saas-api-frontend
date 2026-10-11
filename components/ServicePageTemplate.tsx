@@ -3,6 +3,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import Reveal from "@/components/Reveal";
+import Parallax from "@/components/Parallax";
+import SplitText from "@/components/SplitText";
 import { ButtonLink, CheckList, Eyebrow, SectionHeading } from "@/components/ui";
 import { ArrowRight, serviceIcons } from "@/components/Icons";
 import { useDictionary } from "@/components/DictionaryProvider";
@@ -32,9 +34,12 @@ export default function ServicePageTemplate({ service }: { service: Service }) {
                   <Icon className="h-6 w-6" />
                 </span>
               )}
-              <h1 className="text-4xl leading-[1.08] text-white sm:text-5xl lg:text-[3.5rem] lg:leading-[1.05]">
-                {service.heroTitle}
-              </h1>
+              <SplitText
+                as="h1"
+                text={service.heroTitle}
+                delay={0.08}
+                className="text-4xl leading-[1.08] text-white sm:text-5xl lg:text-[3.5rem] lg:leading-[1.05]"
+              />
             </div>
             <p className="max-w-xl text-lg font-medium text-turquoise sm:text-xl">{service.heroSubtitle}</p>
             <ButtonLink href={href("/devis")}>{ui.freeQuote === "Devis gratuit" ? "Demander un devis" : "Get a quote"}</ButtonLink>
@@ -44,14 +49,16 @@ export default function ServicePageTemplate({ service }: { service: Service }) {
             <div className="relative">
               <div aria-hidden className="absolute -inset-3 rounded-[1.75rem] bg-gradient-to-br from-brand/25 to-turquoise/25 blur-2xl" />
               <div className="relative aspect-[4/3] overflow-hidden rounded-[1.25rem] shadow-lift ring-1 ring-white/10">
-                <Image
-                  src={service.image}
-                  alt={service.heroTitle}
-                  fill
-                  priority
-                  sizes="(max-width: 1024px) 100vw, 50vw"
-                  className="object-cover"
-                />
+                <Parallax className="absolute inset-0" amount={5} scale={1.08}>
+                  <Image
+                    src={service.image}
+                    alt={service.heroTitle}
+                    fill
+                    priority
+                    sizes="(max-width: 1024px) 100vw, 50vw"
+                    className="object-cover"
+                  />
+                </Parallax>
               </div>
             </div>
           </Reveal>
@@ -63,7 +70,11 @@ export default function ServicePageTemplate({ service }: { service: Service }) {
           <Reveal>
             <div className="flex flex-col items-start gap-4 lg:sticky lg:top-28">
               <span className="text-xs font-medium uppercase tracking-[0.18em] text-brand">{ui.presentation}</span>
-              <h2 className="text-3xl leading-[1.15] text-navy sm:text-4xl">{service.whyTitle}</h2>
+              <SplitText
+                as="h2"
+                text={service.whyTitle}
+                className="text-3xl leading-[1.15] text-navy sm:text-4xl"
+              />
               <div aria-hidden className="mt-2 h-1 w-16 rounded-full bg-gradient-to-r from-brand to-turquoise" />
             </div>
           </Reveal>
@@ -121,7 +132,11 @@ export default function ServicePageTemplate({ service }: { service: Service }) {
         <div aria-hidden className="pointer-events-none absolute inset-y-0 right-0 w-px bg-gradient-to-b from-transparent via-turquoise/30 to-transparent" />
         <div className="container-x">
           <Reveal className="mx-auto flex max-w-3xl flex-col items-center gap-6 text-center">
-            <h2 className="text-3xl leading-[1.12] text-navy sm:text-4xl">{service.ctaTitle}</h2>
+            <SplitText
+              as="h2"
+              text={service.ctaTitle}
+              className="text-3xl leading-[1.12] text-navy sm:text-4xl"
+            />
             <p className="max-w-xl text-base leading-relaxed text-muted sm:text-lg">{service.ctaBody}</p>
             <ButtonLink href={href("/devis")} className="mt-2">
               {ui.discussProject}

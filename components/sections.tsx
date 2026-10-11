@@ -5,6 +5,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, ArrowUpRight, Quote, serviceIcons } from "@/components/Icons";
 import Reveal from "@/components/Reveal";
+import SplitText from "@/components/SplitText";
+import Parallax from "@/components/Parallax";
 import Counter from "@/components/Counter";
 import { ButtonLink, Eyebrow, SectionHeading } from "@/components/ui";
 import { useDictionary } from "@/components/DictionaryProvider";
@@ -33,9 +35,14 @@ export function HeroSection({
       <div className="container-x relative">
         <div className="flex max-w-4xl flex-col items-start gap-7">
           <Eyebrow tone="dark">{eyebrow}</Eyebrow>
-          <h1 className="text-4xl leading-[1.08] text-white sm:text-5xl lg:text-[4.25rem] lg:leading-[1.04]">
-            {title} {highlight && <span className="text-gradient">{highlight}</span>}
-          </h1>
+          <SplitText
+            as="h1"
+            text={title}
+            accent={highlight}
+            accentClassName="text-gradient"
+            delay={0.08}
+            className="text-4xl leading-[1.08] text-white sm:text-5xl lg:text-[4.25rem] lg:leading-[1.04]"
+          />
           <p className="max-w-2xl text-base leading-relaxed text-slate-300 sm:text-lg">{body}</p>
           {children}
         </div>
@@ -98,7 +105,7 @@ export function ServiceGrid() {
           <Reveal as="li" key={s.slug} delay={i * 70} className="h-full">
             <Link
               href={href(`/services/${s.slug}`)}
-              className="glow-card group flex h-full flex-col gap-4 bg-white p-7 shadow-soft"
+              className="group flex h-full flex-col gap-4 rounded-lg border border-line bg-white p-7 shadow-soft transition-shadow duration-300 hover:shadow-lift"
             >
               <span className="grid h-12 w-12 place-items-center rounded-xl bg-gradient-to-br from-brand to-turquoise text-white shadow-soft transition-transform duration-300 group-hover:scale-105">
                 {Icon && <Icon />}
@@ -236,7 +243,11 @@ export function SplitShowcase({
       <Reveal className={reverse ? "lg:order-2" : ""}>
         <div className="flex flex-col items-start gap-5">
           <Eyebrow>{eyebrow}</Eyebrow>
-          <h2 className="text-3xl leading-[1.15] text-navy sm:text-4xl">{title}</h2>
+          <SplitText
+            as="h2"
+            text={title}
+            className="text-3xl leading-[1.15] text-navy sm:text-4xl"
+          />
           <p className="text-base leading-relaxed text-muted">{body}</p>
           {points && (
             <ul className="mt-1 grid gap-3">
@@ -264,7 +275,9 @@ export function SplitShowcase({
         <div className="relative">
           <div aria-hidden className="absolute -inset-3 rounded-[1.75rem] bg-gradient-to-br from-brand/15 to-turquoise/15 blur-2xl" />
           <div className="relative aspect-[4/3] overflow-hidden rounded-[1.25rem] shadow-lift">
-            <Image src={image} alt={imageAlt} fill sizes="(max-width: 1024px) 100vw, 50vw" className="object-cover" />
+            <Parallax className="absolute inset-0" amount={6} scale={1.1}>
+              <Image src={image} alt={imageAlt} fill sizes="(max-width: 1024px) 100vw, 50vw" className="object-cover" />
+            </Parallax>
           </div>
         </div>
       </Reveal>

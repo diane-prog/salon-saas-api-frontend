@@ -3,11 +3,13 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { Close, Menu, ChevronDown, ArrowRight } from "@/components/Icons";
 import { switchLocalePath, type Locale } from "@/lib/dictionaries";
 import { useDictionary } from "@/components/DictionaryProvider";
 import HeaderSearch from "@/components/HeaderSearch";
+import { usePageTransition } from "@/components/PageTransition";
+import { lockScroll } from "@/lib/scroll";
 
 const switchLabels: Record<Locale, { fr: string; en: string }> = {
   fr: { fr: "FR", en: "EN" },
@@ -20,7 +22,7 @@ export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [servicesOpen, setServicesOpen] = useState(false);
   const pathname = usePathname();
-  const router = useRouter();
+  const { navigate } = usePageTransition();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -29,18 +31,17 @@ export default function Header() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  // Menu plein écran : on met aussi Lenis en pause pour figer la page derrière.
   useEffect(() => {
-    document.body.style.overflow = open ? "hidden" : "";
-    return () => {
-      document.body.style.overflow = "";
-    };
+    lockScroll(open);
+    return () => lockScroll(false);
   }, [open]);
 
   const href = (path: string) => `/${locale}${path === "/" ? "" : path}`;
 
   const changeLocale = (next: Locale) => {
     document.cookie = `leegi-locale=${next};path=/;max-age=31536000;samesite=lax`;
-    router.push(switchLocalePath(next, pathname));
+    navigate(switchLocalePath(next, pathname), next === "fr" ? "Français" : "English");
   };
 
   return (
@@ -52,15 +53,15 @@ export default function Header() {
             : "border-b border-transparent bg-transparent py-4"
         }`}
       >
-        <div className="container-x flex items-center justify-between gap-6">
+        <div className="max-w-[90rem] mx-auto flex items-center justify-between gap-6">
           <Link href={href("/")} aria-label="LEEGI Group" className="relative z-10 flex items-center">
             <Image
               src={scrolled ? "/img/logo-navy.png" : "/img/logo.png"}
               alt="LEEGI Group"
-              width={150}
-              height={60}
+              width={180}
+              height={80}
               priority
-              className={`w-auto transition-all duration-300 ${scrolled ? "h-8" : "h-10"}`}
+              className={`w-auto transition-all duration-300 ${scrolled ? "h-8" : "h-14"}`}
             />
           </Link>
 

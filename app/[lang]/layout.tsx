@@ -2,6 +2,9 @@ import { DictionaryProvider } from "@/components/DictionaryProvider";
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
 import { JsonLd } from "@/components/JsonLd";
+import PageFade from "@/components/PageFade";
+import PageTransition from "@/components/PageTransition";
+import SmoothScroll from "@/components/SmoothScroll";
 import { getDictionary, isLocale, localePath, locales, localeTags } from "@/lib/dictionaries";
 import { SITE_URL } from "@/lib/seo";
 import type { Metadata } from "next";
@@ -132,9 +135,14 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[la
       <body className="flex min-h-full flex-col">
         <JsonLd data={jsonLd} />
         <DictionaryProvider dict={dict as never} locale={lang}>
-          <Header />
-          <main className="flex-1">{children}</main>
-          <Footer />
+          <SmoothScroll />
+          <PageTransition>
+            <Header />
+            <main className="flex-1">
+              <PageFade>{children}</PageFade>
+            </main>
+            <Footer />
+          </PageTransition>
         </DictionaryProvider>
       </body>
     </html>

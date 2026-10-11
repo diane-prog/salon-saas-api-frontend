@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { ArrowRight } from "@/components/Icons";
 import Reveal from "@/components/Reveal";
+import SplitText from "@/components/SplitText";
 
 export function SectionHeading({
   eyebrow,
@@ -29,13 +30,14 @@ export function SectionHeading({
           {eyebrow}
         </span>
       )}
-      <h2
+      <SplitText
+        as="h2"
+        text={title}
+        delay={0.05}
         className={`text-3xl leading-[1.15] sm:text-4xl lg:text-[2.75rem] ${
           isDark ? "text-white" : "text-navy"
         }`}
-      >
-        {title}
-      </h2>
+      />
       {body && (
         <p className={`text-base leading-relaxed sm:text-lg ${isDark ? "text-slate-300" : "text-muted"}`}>
           {body}

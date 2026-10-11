@@ -201,6 +201,103 @@ html[data-js] .reveal.reveal-visible {
   transform: none;
 }
 
+/* Révélation de texte mot à mot : le mot remonte dans un cadre masqué.
+   Le masquage n'existe que si JavaScript est actif (sinon le texte reste lisible). */
+.split-mask {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: bottom;
+  padding-bottom: 0.14em;
+  margin-bottom: -0.14em;
+}
+
+.split-word {
+  display: inline-block;
+  transform: none;
+  transition:
+    transform var(--w-duration, 0.9s) cubic-bezier(0.22, 1, 0.36, 1) var(--w-delay, 0ms),
+    opacity calc(var(--w-duration, 0.9s) * 0.5) ease var(--w-delay, 0ms);
+}
+
+html[data-js] .split:not(.split-in) .split-word {
+  opacity: 0;
+  transform: translateY(115%);
+}
+
+/* Variante jouée dès le montage (rideau de transition) : l'animation porte le délai,
+   donc les mots démarrent tous à coup sûr, sans attendre un IntersectionObserver. */
+@keyframes split-word-in {
+  from {
+    opacity: 0;
+    transform: translateY(115%);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+html[data-js] .split-anim .split-word {
+  animation: split-word-in var(--w-duration, 0.9s) cubic-bezier(0.22, 1, 0.36, 1) var(--w-delay, 0ms) both;
+}
+
+/* Rideau de transition : le grand panneau est animé en CSS (et non en JS) pour que le
+   navigateur compose la rotation hors du thread principal — mesuré ~55 fps contre ~20 fps
+   quand la même rotation est pilotée image par image par JavaScript. */
+.curtain-panel {
+  position: absolute;
+  inset: 0;
+  background: var(--color-navy-deep);
+  backface-visibility: hidden;
+  will-change: transform;
+}
+
+.curtain-cover {
+  transform-origin: 50% 0%;
+  animation: curtain-cover var(--curtain-cover, 0.52s) cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.curtain-reveal {
+  transform-origin: 50% 100%;
+  animation: curtain-reveal var(--curtain-reveal, 0.62s) cubic-bezier(0.64, 0, 0.78, 0) both;
+}
+
+@keyframes curtain-cover {
+  from {
+    transform: rotateX(-92deg);
+  }
+  to {
+    transform: rotateX(0deg);
+  }
+}
+
+@keyframes curtain-reveal {
+  from {
+    transform: rotateX(0deg);
+  }
+  to {
+    transform: rotateX(92deg);
+  }
+}
+
+/* Entrée de page : jouée pendant que le rideau couvre encore l'écran.
+   Volontairement en opacité seule : avec `fill-mode: both`, une déformation
+   (même `transform: none`) reste appliquée sous forme de matrice identité, ce qui crée un
+   containing block et casse le `position: fixed` des sections épinglées par ScrollTrigger
+   (la section « services » défilait au lieu de rester figée). */
+@keyframes page-enter {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+html[data-js] .page-enter {
+  animation: page-enter 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
 .counter-live {
   display: none;
 }

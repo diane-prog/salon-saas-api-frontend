@@ -2,10 +2,10 @@ import Link from "next/link";
 import Reveal from "@/components/Reveal";
 import CtaBand from "@/components/CtaBand";
 import HomeHero from "@/components/HomeHero";
+import ServiceScroll from "@/components/ServiceScroll";
 import {
   ClientsMarquee,
   ProjectGrid,
-  ServiceGrid,
   SplitShowcase,
   StatsSection,
   TestimonialsSection,
@@ -43,22 +43,15 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
         </div>
       </section>
 
-      <section className="relative overflow-hidden bg-navy/[0.03] py-24 sm:py-28">
-        <div className="container-x">
-          <SectionHeading
-            eyebrow={ui.expertise}
-            title={lang === "fr" ? "Nos Services" : "Our Services"}
-            body={
-              lang === "fr"
-                ? "Nous accompagnons les entreprises africaines et leurs partenaires à chaque étape de leur développement digital."
-                : "We support African companies and their partners at every stage of their digital development."
-            }
-          />
-          <div className="mt-14">
-            <ServiceGrid />
-          </div>
-        </div>
-      </section>
+      <ServiceScroll
+        eyebrow={ui.expertise}
+        title={lang === "fr" ? "Nos Services" : "Our Services"}
+        body={
+          lang === "fr"
+            ? "Nous accompagnons les entreprises africaines et leurs partenaires à chaque étape de leur développement digital."
+            : "We support African companies and their partners at every stage of their digital development."
+        }
+      />
 
       <section className="py-24 sm:py-28">
         <div className="container-x">

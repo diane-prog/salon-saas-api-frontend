@@ -2,6 +2,7 @@
 
 import { ButtonLink } from "@/components/ui";
 import Reveal from "@/components/Reveal";
+import SplitText from "@/components/SplitText";
 import { useDictionary } from "@/components/DictionaryProvider";
 
 export default function CtaBand() {
@@ -21,9 +22,11 @@ export default function CtaBand() {
           <span className="text-xs font-medium uppercase tracking-[0.18em] text-turquoise">
             {dict.ui.talkToUs}
           </span>
-          <h2 className="text-3xl leading-[1.12] text-white sm:text-4xl lg:text-[2.75rem]">
-            {finalCta.title}
-          </h2>
+          <SplitText
+            as="h2"
+            text={finalCta.title}
+            className="text-3xl leading-[1.12] text-white sm:text-4xl lg:text-[2.75rem]"
+          />
           <p className="max-w-xl text-base leading-relaxed text-slate-300 sm:text-lg">
             {finalCta.body}
           </p>

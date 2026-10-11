@@ -5,6 +5,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight } from "@/components/Icons";
 import Reveal from "@/components/Reveal";
+import Parallax from "@/components/Parallax";
+import SplitText from "@/components/SplitText";
 import { ButtonLink } from "@/components/ui";
 import HeroSearch from "@/components/HeroSearch";
 import { useDictionary } from "@/components/DictionaryProvider";
@@ -27,29 +29,32 @@ export default function HomeHero() {
   return (
     <section className="relative isolate flex min-h-[92vh] border-b border-gray-100 flex-col overflow-hidden bg-navy-deep pt-32 pb-10 sm:pt-40 sm:pb-14">
       <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-        <Image
-          src="/img/hero3.png"
-          alt=""
-          fill
-          priority
-          quality={90}
-          sizes="100vw"
-          className="object-cover object-center"
-        />
-
-        {allowVideo && (
-          <video
-            className="absolute inset-0 h-full w-full object-cover object-center"
-            src="/img/video.mp4"
-            autoPlay
-            muted
-            loop
-            playsInline
-            preload="metadata"
-            aria-hidden
-            tabIndex={-1}
+        {/* Cadre plus haut que le hero : le média peut glisser sans découvrir les bords. */}
+        <Parallax className="absolute -inset-y-[9%] inset-x-0" amount={5} scale={1.06}>
+          <Image
+            src="/img/hero3.png"
+            alt=""
+            fill
+            priority
+            quality={90}
+            sizes="100vw"
+            className="object-cover object-center"
           />
-        )}
+
+          {allowVideo && (
+            <video
+              className="absolute inset-0 h-full w-full object-cover object-center"
+              src="/img/video3.mp4"
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="metadata"
+              aria-hidden
+              tabIndex={-1}
+            />
+          )}
+        </Parallax>
 
         {/* <div className="absolute inset-0 bg-black/30" /> */}
       </div>
@@ -67,9 +72,13 @@ export default function HomeHero() {
               {ui.agency}
             </span>
 
-            <h1 className="max-w-3xl font-medium text-4xl leading-[1.06] text-white [text-shadow:0_1px_2px_rgb(0_9_42_/_0.45),0_6px_24px_rgb(0_9_42_/_0.35)] sm:text-5xl lg:text-[4.25rem] lg:leading-[1.02]">
-              {hero.lead}
-            </h1>
+            <SplitText
+              as="h1"
+              text={hero.lead}
+              delay={0.12}
+              stagger={0.06}
+              className="max-w-3xl font-medium text-4xl leading-[1.06] text-white [text-shadow:0_1px_2px_rgb(0_9_42_/_0.45),0_6px_24px_rgb(0_9_42_/_0.35)] sm:text-5xl lg:text-[4.25rem] lg:leading-[1.02]"
+            />
 
             <p className="max-w-xl text-base leading-relaxed text-white [text-shadow:0_1px_2px_rgb(0_9_42_/_0.45),0_6px_24px_rgb(0_9_42_/_0.35)] sm:text-lg">
               {hero.body}
