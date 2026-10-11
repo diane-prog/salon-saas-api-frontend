@@ -5,11 +5,11 @@ import { JsonLd } from "@/components/JsonLd";
 import { getDictionary, isLocale, localePath, locales, localeTags } from "@/lib/dictionaries";
 import { SITE_URL } from "@/lib/seo";
 import type { Metadata } from "next";
-import { Raleway } from "next/font/google";
+import { Plus_Jakarta_Sans, Raleway } from "next/font/google";
 import { notFound } from "next/navigation";
 import "../globals.css";
 
-const poppins = Raleway({
+const poppins = Plus_Jakarta_Sans({
   variable: "--font-poppins",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700", "800"],

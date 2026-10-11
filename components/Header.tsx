@@ -7,6 +7,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { Close, Menu, ChevronDown, ArrowRight } from "@/components/Icons";
 import { switchLocalePath, type Locale } from "@/lib/dictionaries";
 import { useDictionary } from "@/components/DictionaryProvider";
+import HeaderSearch from "@/components/HeaderSearch";
 
 const switchLabels: Record<Locale, { fr: string; en: string }> = {
   fr: { fr: "FR", en: "EN" },
@@ -66,9 +67,10 @@ export default function Header() {
           <nav className="hidden items-center gap-1 lg:flex" aria-label="Navigation principale">
             {dict.nav.map((item) =>
               item.href === "/services" ? (
-                <div key={item.href} className="group relative">
+                <div key={item.href} className="group">
                   <Link
                     href={href(item.href)}
+                    aria-haspopup="true"
                     className={`flex items-center gap-1 rounded-full px-4 py-2 text-sm font-medium transition-colors ${
                       scrolled ? "text-navy hover:text-brand" : "text-white/85 hover:text-white"
                     }`}
@@ -76,23 +78,53 @@ export default function Header() {
                     {item.label}
                     <ChevronDown className="h-3.5 w-3.5 transition-transform duration-300 group-hover:rotate-180" />
                   </Link>
-                  <div className="invisible absolute left-1/2 top-full w-[30rem] -translate-x-1/2 translate-y-2 pt-4 opacity-0 transition-all duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100">
-                    <div className="grid grid-cols-2 gap-1 rounded-2xl border border-navy/8 bg-white p-2 shadow-lift">
-                      {dict.services.map((s) => (
-                        <Link
-                          key={s.slug}
-                          href={href(`/services/${s.slug}`)}
-                          className="group/item rounded-xl px-4 py-3 transition-colors hover:bg-brand/[0.06]"
-                        >
-                          <span className="flex items-center justify-between gap-2 text-sm font-semibold text-navy">
-                            {s.title}
-                            <ArrowRight className="h-3.5 w-3.5 -translate-x-1 text-brand opacity-0 transition-all group-hover/item:translate-x-0 group-hover/item:opacity-100" />
-                          </span>
-                          <span className="mt-1 block line-clamp-2 text-xs leading-relaxed text-muted">
-                            {s.short}
-                          </span>
-                        </Link>
-                      ))}
+
+                  {/* Mega menu Services : bandeau pleine largeur sous le header. */}
+                  <div className="invisible absolute inset-x-0 top-full translate-y-2 pt-4 opacity-0 transition-all duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100">
+                    <div className="container-x">
+                      <div className="grid gap-6 rounded-2xl border border-navy/8 bg-white p-6 shadow-lift lg:grid-cols-[1.6fr_1fr]">
+                        <div className="grid content-start gap-1 sm:grid-cols-2">
+                          {dict.services.map((s) => (
+                            <Link
+                              key={s.slug}
+                              href={href(`/services/${s.slug}`)}
+                              className="group/item rounded-xl px-4 py-3 transition-colors hover:bg-brand/[0.06]"
+                            >
+                              <span className="flex items-center justify-between gap-2 text-sm font-semibold text-navy">
+                                {s.title}
+                                <ArrowRight className="h-3.5 w-3.5 -translate-x-1 text-brand opacity-0 transition-all group-hover/item:translate-x-0 group-hover/item:opacity-100" />
+                              </span>
+                              <span className="mt-1 block line-clamp-2 text-xs leading-relaxed text-muted">
+                                {s.short}
+                              </span>
+                            </Link>
+                          ))}
+                        </div>
+
+                        <div className="relative hidden overflow-hidden rounded-xl lg:block">
+                          <Image
+                            src="/img/partenaires.jpg"
+                            alt=""
+                            fill
+                            sizes="(max-width: 1024px) 0px, 360px"
+                            className="object-cover"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-navy-deep/90 via-navy-deep/45 to-navy-deep/10" />
+                          <div className="relative flex h-full min-h-[13rem] flex-col justify-end gap-3 p-5">
+                            <span className="text-[0.68rem] font-medium uppercase tracking-[0.16em] text-turquoise">
+                              {dict.ui.expertise}
+                            </span>
+                            <p className="text-lg font-semibold leading-snug text-white">{dict.ui.talkToUs}</p>
+                            <Link
+                              href={href("/devis")}
+                              className="inline-flex w-fit items-center gap-2 rounded-full bg-white px-4 py-2 text-xs font-semibold text-navy transition-transform duration-300 hover:-translate-y-0.5"
+                            >
+                              {dict.ui.freeQuote}
+                              <ArrowRight className="h-3.5 w-3.5" />
+                            </Link>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -118,12 +150,7 @@ export default function Header() {
               label={dict.ui.languageLabel}
             />
 
-            <Link
-              href={href("/devis")}
-              className="hidden rounded-full bg-gradient-to-r from-brand to-turquoise px-5 py-2.5 text-sm font-semibold text-white shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lift sm:inline-flex"
-            >
-              {locale === "fr" ? "Demander un devis" : "Get a quote"}
-            </Link>
+            <HeaderSearch scrolled={scrolled} />
 
             <button
               type="button"

@@ -14,7 +14,7 @@ export default function HomeHero() {
   const href = (p: string) => `/${locale}${p === "/" ? "" : p}`;
 
   return (
-    <section className="relative isolate flex min-h-[92vh] flex-col overflow-hidden bg-navy-deep pt-32 pb-10 sm:pt-40 sm:pb-14">
+    <section className="relative isolate flex min-h-[92vh] border-b border-gray-100 flex-col overflow-hidden bg-navy-deep pt-32 pb-10 sm:pt-40 sm:pb-14">
       <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
         <Image
           src="/img/hero3.png"
@@ -28,6 +28,12 @@ export default function HomeHero() {
         {/* <div className="absolute inset-0 bg-black/30" /> */}
       </div>
 
+      {/* Overlay blanc en bas du hero : la photo se fond dans la section blanche suivante. */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-36 bg-gradient-to-t from-white to-transparent sm:h-44"
+      />
+
       <div className="relative mx-auto flex w-full max-w-[90rem] flex-1 flex-col px-5 md:px-8 xl:px-10">
         <div className="flex max-w-3xl flex-1 flex-col justify-center">
           <Reveal className="flex flex-col items-start gap-6">
@@ -35,7 +41,7 @@ export default function HomeHero() {
               {ui.agency}
             </span>
 
-            <h1 className="max-w-3xl text-4xl leading-[1.06] text-white [text-shadow:0_1px_2px_rgb(0_9_42_/_0.45),0_6px_24px_rgb(0_9_42_/_0.35)] sm:text-5xl lg:text-[4.25rem] lg:leading-[1.02]">
+            <h1 className="max-w-3xl font-medium text-4xl leading-[1.06] text-white [text-shadow:0_1px_2px_rgb(0_9_42_/_0.45),0_6px_24px_rgb(0_9_42_/_0.35)] sm:text-5xl lg:text-[4.25rem] lg:leading-[1.02]">
               {hero.lead}
             </h1>
 
@@ -56,8 +62,8 @@ export default function HomeHero() {
           </Reveal>
         </div>
 
-        <div className="mt-12">
-          <HeroSearch />
+        <div className="mt-12 flex justify-center">
+          {/* <HeroSearch /> */}
         </div>
       </div>
     </section>

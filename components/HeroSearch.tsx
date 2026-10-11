@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowRight, Search } from "@/components/Icons";
 import { useDictionary } from "@/components/DictionaryProvider";
-import { searchEntries, type SearchEntry } from "@/lib/search";
+import { buildSearchEntries, searchEntries } from "@/lib/search";
 
 export default function HeroSearch() {
   const { dict, locale } = useDictionary();
@@ -14,22 +14,19 @@ export default function HeroSearch() {
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
 
-  const entries = useMemo<SearchEntry[]>(() => {
-    const prefix = (path: string) => `/${locale}${path === "/" ? "" : path}`;
-    return [
-      ...services.map((s) => ({
-        label: s.title,
-        href: prefix(`/services/${s.slug}`),
-        group: ui.expertise,
-      })),
-      ...projects.map((p) => ({
-        label: p.title,
-        href: prefix("/realisations"),
-        group: ui.portfolio,
-      })),
-      ...nav.map((n) => ({ label: n.label, href: prefix(n.href), group: ui.presentation })),
-    ];
-  }, [services, projects, nav, ui.expertise, ui.portfolio, ui.presentation, locale]);
+  const entries = useMemo(
+    () =>
+      buildSearchEntries(
+        {
+          services,
+          projects,
+          nav,
+          groups: { expertise: ui.expertise, portfolio: ui.portfolio, presentation: ui.presentation },
+        },
+        locale,
+      ),
+    [services, projects, nav, ui.expertise, ui.portfolio, ui.presentation, locale],
+  );
 
   const results = useMemo(() => searchEntries(entries, query), [entries, query]);
   const showResults = open && query.trim().length >= 2;
