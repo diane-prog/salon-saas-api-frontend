@@ -73,7 +73,7 @@ export const services: Service[] = [
   {
     slug: "site-web",
     title: "Création de Sites Web",
-    short: "Sites web modernes, performants et optimisés pour une expérience utilisateur exceptionnelle.",
+    short: "Sites responsive, performants et optimisés pour convertir vos visiteurs.",
     heroTitle: "Site Web",
     heroSubtitle: "Votre vitrine digitale haute performance",
     whyTitle: "Pourquoi le site web ?",
@@ -102,7 +102,7 @@ export const services: Service[] = [
   {
     slug: "seo",
     title: "Seo",
-    short: "Audit, optimisation et stratégie pour mieux positionner votre site et dominer les résultats de recherche.",
+    short: "Audit, optimisation et stratégie pour dominer les résultats de recherche.",
     heroTitle: "Seo",
     heroSubtitle: "Dominez les résultats de recherche",
     whyTitle: "Pourquoi le seo ?",
@@ -163,8 +163,7 @@ export const services: Service[] = [
   {
     slug: "evenementiel",
     title: "Événementiel",
-    short:
-      "Organisation et coordination d'événements qui marquent les esprits et boostent votre visibilité.",
+    short: "Organisation et coordination d'événements qui marquent les esprits.",
     heroTitle: "Événementiel",
     heroSubtitle: "Créez des expériences mémorables",
     whyTitle: "Pourquoi le événementiel ?",
@@ -192,9 +191,9 @@ export const services: Service[] = [
   },
   {
     slug: "strategie-communication",
-    title: "Communication & Marketing",
+    title: "Stratégie & Marketing",
     short:
-      "Planifiez, communiquez, convertissez. Analyse, et actions concrètes pour faire parler votre marque et attirer vos clients.",
+      "Analyse, positionnement et plan d'action pour développer votre visibilité et renforcer l'efficacité de votre communication.",
     heroTitle: "stratégie de communication & marketing",
     heroSubtitle: "Transformez votre communication en résultats",
     whyTitle: "Pourquoi une stratégie de communication et marketing ?",

@@ -73,7 +73,8 @@ export const services: Service[] = [
   {
     slug: "site-web",
     title: "Website Development",
-    short: "Modern, high-performance websites optimised for an outstanding user experience.",
+    short:
+      "Responsive, high-performance websites optimised to convert your visitors.",
     heroTitle: "Websites",
     heroSubtitle: "Your high-performance digital storefront",
     whyTitle: "Why a website?",
@@ -102,7 +103,7 @@ export const services: Service[] = [
   {
     slug: "seo",
     title: "SEO",
-    short: "Audit, optimisation and strategy to rank higher and dominate search results.",
+    short: "Audit, optimisation and strategy to dominate search results.",
     heroTitle: "SEO",
     heroSubtitle: "Dominate search results",
     whyTitle: "Why SEO?",
@@ -163,8 +164,7 @@ export const services: Service[] = [
   {
     slug: "evenementiel",
     title: "Events",
-    short:
-      "Planning and coordination of events that make an impact and boost your visibility.",
+    short: "Planning and coordination of events that make an impact.",
     heroTitle: "Events",
     heroSubtitle: "Create unforgettable experiences",
     whyTitle: "Why events?",
@@ -194,7 +194,7 @@ export const services: Service[] = [
     slug: "strategie-communication",
     title: "Strategy & Marketing",
     short:
-      "Plan, communicate, convert. Analysis and concrete actions to get your brand talking and attract customers.",
+      "Analysis, positioning and action plan to grow your visibility and strengthen your communication.",
     heroTitle: "Communication & Marketing Strategy",
     heroSubtitle: "Turn your communication into results",
     whyTitle: "Why a communication and marketing strategy?",

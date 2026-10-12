@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowUpRight } from "@/components/Icons";
+import { ArrowUpRight, serviceIcons } from "@/components/Icons";
 import Reveal from "@/components/Reveal";
 import SplitText from "@/components/SplitText";
 import { ButtonLink, Eyebrow } from "@/components/ui";
@@ -18,23 +18,17 @@ type ServicesGlassProps = {
 
 const TOP_COUNT = 3;
 
-/** Positions de la diagonale, desktop : haut-gauche, puis on descend vers la droite. */
-const DIAGONAL = ["lg:top-0 lg:left-0", "lg:top-1/3 lg:left-1/2 lg:-translate-x-1/2", "lg:bottom-0 lg:right-0"];
-
 /**
- * Section services, sur le modèle « Your Questions » de qoves.com.
+ * Section services — la vidéo, puis deux vagues de trois services.
  *
- * Le fond est une vidéo `sticky` de 100vh dont la hauteur est retranchée au flux
- * (`-mb-[100svh]`) : elle reste figée pendant toute la traversée de la section et le
- * contenu défile simplement par-dessus. La section est en `overflow-clip` — un
- * `overflow:hidden` casserait le `sticky`.
+ * La vidéo est collée en haut et sa hauteur est retranchée au flux (`-mb-[100svh]`) :
+ * elle ne bouge jamais, tout le reste défile par-dessus. La section est en
+ * `overflow-clip` — un `overflow:hidden` casserait le `sticky`.
  *
- * Deux temps, comme la référence :
- *   1. le titre, puis une grille de trois services alignés sur trois colonnes ;
- *   2. les trois services restants, posés en diagonale sur une hauteur d'écran —
- *      un en haut à gauche, un au centre, un en bas à droite — la vidéo restant
- *      nue entre eux. Un voile flouté très léger se pose sur la vidéo à mesure
- *      qu'on descend, pour accompagner le mouvement sans masquer l'image.
+ *   1. le titre puis trois services alignés sur trois colonnes ;
+ *   2. un interstice où la vidéo reste seule à l'écran ;
+ *   3. les trois services restants, sur la même grille. Un voile flouté se pose
+ *      sur la vidéo pendant l'interstice et se retire ensuite.
  */
 export default function ServicesGlass({ eyebrow, title, body }: ServicesGlassProps) {
   const { dict, locale } = useDictionary();
@@ -43,8 +37,8 @@ export default function ServicesGlass({ eyebrow, title, body }: ServicesGlassPro
 
   const root = useRef<HTMLElement>(null);
   const video = useRef<HTMLVideoElement>(null);
-  const blur = useRef<HTMLDivElement>(null);
   const gapRef = useRef<HTMLDivElement>(null);
+  const blurRef = useRef<HTMLDivElement>(null);
 
   const top = services.slice(0, TOP_COUNT);
   const bottom = services.slice(TOP_COUNT);
@@ -58,7 +52,6 @@ export default function ServicesGlass({ eyebrow, title, body }: ServicesGlassPro
     return () => query.removeEventListener("change", update);
   }, []);
 
-  /* Lecture seulement quand la section est à l'écran : pas de décodage dans le vide. */
   useEffect(() => {
     const el = root.current;
     const media = video.current;
@@ -78,8 +71,8 @@ export default function ServicesGlass({ eyebrow, title, body }: ServicesGlassPro
   /* Le voile flouté se pose sur la vidéo pendant l'interstice, puis se retire. */
   useEffect(() => {
     const gap = gapRef.current;
-    const layer = blur.current;
-    if (!gap || !layer) return;
+    const veil = blurRef.current;
+    if (!gap || !veil) return;
 
     let frame = 0;
     const update = () => {
@@ -89,7 +82,7 @@ export default function ServicesGlass({ eyebrow, title, body }: ServicesGlassPro
       const centre = window.innerHeight / 2;
       const dist = Math.abs(rect.top + rect.height / 2 - centre);
       const reach = window.innerHeight / 2 + rect.height / 2;
-      layer.style.opacity = String(Math.max(0, 1 - dist / reach));
+      veil.style.opacity = String(Math.max(0, 1 - dist / reach));
     };
     const onScroll = () => {
       if (!frame) frame = requestAnimationFrame(update);
@@ -107,7 +100,7 @@ export default function ServicesGlass({ eyebrow, title, body }: ServicesGlassPro
 
   return (
     <section ref={root} className="relative isolate overflow-clip text-white">
-      {/* La vidéo, figée derrière toute la section. */}
+      {/* 1. La vidéo : figée, elle ne fait pas partie du flux. */}
       <div className="sticky top-0 -z-10 -mb-[100svh] h-[100svh] bg-black">
         <Image
           src="/img/hero.jpeg"
@@ -129,14 +122,17 @@ export default function ServicesGlass({ eyebrow, title, body }: ServicesGlassPro
             tabIndex={-1}
           />
         )}
-        {/* Overlay noir semi-transparent : c'est lui qui garantit la lisibilité. */}
         <div aria-hidden className="absolute inset-0 bg-black/45" />
-        {/* Le léger flou qui accompagne le scroll. */}
-        <div ref={blur} aria-hidden className="absolute inset-0 bg-black/5 opacity-0 backdrop-blur-[2px]" />
+        {/* Le voile flouté, piloté par l'interstice plus bas. */}
+        <div
+          ref={blurRef}
+          aria-hidden
+          className="absolute inset-0 bg-black/5 opacity-0 backdrop-blur-[1px]"
+        />
       </div>
 
       <div className="relative mx-auto w-full max-w-[80rem] border-x border-white/15">
-        {/* ---------- 1. Titre + trois services alignés ---------- */}
+        {/* 1. Titre + trois services alignés. */}
         <div className="flex min-h-[100svh] flex-col justify-end">
           <div className="max-w-2xl px-5 pb-14 pt-28 sm:px-8 sm:pb-16 sm:pt-40 lg:px-10">
             <Eyebrow tone="dark">{eyebrow}</Eyebrow>
@@ -149,13 +145,13 @@ export default function ServicesGlass({ eyebrow, title, body }: ServicesGlassPro
             <p className="mt-6 text-base leading-relaxed text-white/70">{body}</p>
           </div>
 
-          <ul className="grid border-y border-white/15 sm:grid-cols-3 [&>li+li]:border-t sm:[&>li+li]:border-t-0 sm:[&>li+li]:border-l">
+          <ul className="grid border-y border-white/15 sm:grid-cols-3">
             {top.map((service, index) => (
               <Reveal
                 as="li"
                 key={service.slug}
                 delay={index * 70}
-                className="border-white/15 px-1.5 py-5 sm:px-2.5"
+                className={`border-white/15 px-1.5 py-5 sm:px-2.5 ${index > 0 ? "border-t sm:border-t-0 sm:border-l" : ""}`}
               >
                 <ServiceCard service={service} href={href(service.slug)} label={ui.viewDetails} />
               </Reveal>
@@ -163,26 +159,23 @@ export default function ServicesGlass({ eyebrow, title, body }: ServicesGlassPro
           </ul>
         </div>
 
-        {/* ---------- Interstice : la vidéo seule, aucune carte à l'écran ---------- */}
-        <div ref={gapRef} aria-hidden className="h-[60vh] sm:h-[75vh]" />
+        {/* 2. Interstice d'un plein écran : la vague 1 est entièrement sortie
+            du champ quand la vague 2 entre. */}
+        <div ref={gapRef} aria-hidden className="h-[100svh]" />
 
-        {/* ---------- 2. Les trois autres, en diagonale ---------- */}
-        <div className="relative flex flex-col gap-4 px-5 pb-24 sm:px-8 sm:pb-32 lg:h-[52rem] lg:block lg:overflow-hidden lg:px-10 lg:pb-0">
+        {/* 3. Les trois autres : même grille que la première vague. */}
+        <ul className="grid border-y border-white/15 sm:grid-cols-3">
           {bottom.map((service, index) => (
             <Reveal
+              as="li"
               key={service.slug}
-              delay={index * 90}
-              className={`lg:absolute lg:w-[26rem] ${DIAGONAL[index % DIAGONAL.length]}`}
+              delay={index * 70}
+              className={`border-white/15 px-1.5 py-5 sm:px-2.5 ${index > 0 ? "border-t sm:border-t-0 sm:border-l" : ""}`}
             >
-              <ServiceCard
-                service={service}
-                href={href(service.slug)}
-                label={ui.viewDetails}
-                listings
-              />
+              <ServiceCard service={service} href={href(service.slug)} label={ui.viewDetails} />
             </Reveal>
           ))}
-        </div>
+        </ul>
 
         {/* La course : une demi-page de vidéo nue pour conclure la traversée. */}
         <div aria-hidden className="h-[45vh]" />
@@ -197,62 +190,36 @@ export default function ServicesGlass({ eyebrow, title, body }: ServicesGlassPro
   );
 }
 
-/**
- * Carte de verre. `listings` reprend la variante basse de la référence : un titre,
- * puis quelques pastilles translucides — ici les prestations du service.
- */
+/** Carte de verre. `listings` ajoute les prestations sous le titre. */
 function ServiceCard({
   service,
   href,
   label,
-  listings = false,
 }: {
   service: Service;
   href: string;
   label: string;
-  listings?: boolean;
 }) {
+  const Icon = serviceIcons[service.slug as keyof typeof serviceIcons];
+
   return (
     <Link
       href={href}
       aria-label={`${service.title} — ${label}`}
-      className="group relative flex h-full flex-col rounded-2xl border border-white/15 bg-white/[0.06] p-5 backdrop-blur-xl transition-colors duration-300 hover:border-white/35 hover:bg-white/[0.11] sm:p-6"
+      className="group relative flex h-full flex-col rounded-2xl border border-white/15 bg-white/[0.06] p-5 backdrop-blur-sm transition-colors duration-300 hover:border-white/35 hover:bg-white/[0.11] sm:p-6"
     >
       <ArrowUpRight className="absolute right-5 top-5 h-4 w-4 text-white/45 transition-all duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-white" />
 
-      {listings ? (
-        <>
-          <h3 className="max-w-[85%] pr-6 text-2xl font-normal leading-snug [text-shadow:0_2px_12px_rgb(0_0_0_/_0.4)]">
-            {service.heroSubtitle}
-          </h3>
-          <ul className="mt-8 flex flex-col gap-2">
-            {service.offerings.slice(0, 4).map((item) => (
-              <li
-                key={item}
-                className="rounded-lg bg-white/[0.07] px-4 py-3 text-sm text-white/80 transition-colors duration-300 group-hover:bg-white/[0.12]"
-              >
-                {item}
-              </li>
-            ))}
-          </ul>
-        </>
-      ) : (
-        <>
-          <span className="relative block h-20 w-32 shrink-0 overflow-hidden rounded-xl bg-white/10">
-            <Image
-              src={service.image}
-              alt=""
-              fill
-              sizes="128px"
-              className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-            />
-          </span>
-          <h3 className="mt-6 text-xl font-normal leading-snug [text-shadow:0_2px_12px_rgb(0_0_0_/_0.4)]">
-            {service.heroSubtitle}
-          </h3>
-          <p className="mt-3 line-clamp-4 text-sm leading-relaxed text-white/60">{service.short}</p>
-        </>
+      {Icon && (
+        <span className="flex h-11 w-11 items-center justify-center rounded-xl border border-white/15 bg-white/[0.06] text-white transition-colors duration-300 group-hover:border-white/30">
+          <Icon className="h-5 w-5" />
+        </span>
       )}
+
+      <h3 className="mt-6 text-xl font-normal leading-snug [text-shadow:0_2px_12px_rgb(0_0_0_/_0.4)]">
+        {service.title}
+      </h3>
+      <p className="mt-3 line-clamp-4 text-sm leading-relaxed text-white/60">{service.short}</p>
     </Link>
   );
 }

@@ -44,7 +44,7 @@ export default function HomeHero() {
           {allowVideo && (
             <video
               className="absolute inset-0 h-full w-full object-cover object-center"
-              src="/img/video3.mp4"
+              src="/img/video.mp4"
               autoPlay
               muted
               loop
