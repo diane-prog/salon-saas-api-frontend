@@ -7,7 +7,7 @@ export default function NotFound() {
         <div className="absolute left-1/2 top-1/3 h-96 w-96 -translate-x-1/2 rounded-full bg-brand/25 blur-[120px]" />
       </div>
       <div className="container-x relative flex flex-col items-center gap-6 text-center">
-        <span className="text-7xl font-extrabold text-white/10 sm:text-9xl">404</span>
+        <span className="text-7xl font-light text-white/10 sm:text-9xl">404</span>
         <h1 className="text-3xl text-white sm:text-4xl">Page introuvable</h1>
         <p className="max-w-md text-base text-slate-300">
           Cette page n&apos;existe pas ou a été déplacée.

@@ -32,7 +32,7 @@ export default function HomeHero() {
         {/* Cadre plus haut que le hero : le média peut glisser sans découvrir les bords. */}
         <Parallax className="absolute -inset-y-[9%] inset-x-0" amount={5} scale={1.06}>
           <Image
-            src="/img/hero3.png"
+            src="/img/hero-o.png"
             alt=""
             fill
             priority
@@ -44,7 +44,7 @@ export default function HomeHero() {
           {allowVideo && (
             <video
               className="absolute inset-0 h-full w-full object-cover object-center"
-              src="/img/video-d.mp4"
+              src="/img/hero-deo.mp4"
               autoPlay
               muted
               loop
@@ -76,12 +76,16 @@ export default function HomeHero() {
               {ui.agency}
             </span>
 
+            {/* `breakAfter={2}` : le titre tient sur DEUX lignes, coupé après le deuxième
+                mot, quelle que soit la largeur de l'écran — « Faites briller / votre
+                marque. » en français, « Make your / brand shine. » en anglais. */}
             <SplitText
               as="h1"
               text={hero.lead}
+              breakAfter={2}
               delay={0.12}
               stagger={0.06}
-              className="max-w-3xl font-normal text-4xl leading-[1.06] text-white [text-shadow:0_1px_2px_rgb(0_9_42_/_0.45),0_6px_24px_rgb(0_9_42_/_0.35)] sm:text-5xl lg:text-[4.25rem] lg:leading-[1.02]"
+              className="max-w-3xl font-light text-4xl leading-[1.06] text-white [text-shadow:0_1px_2px_rgb(0_9_42_/_0.45),0_6px_24px_rgb(0_9_42_/_0.35)] sm:text-5xl lg:text-[3.25rem] lg:leading-[1.02]"
             />
 
             <p className="max-w-xl text-base leading-relaxed text-white [text-shadow:0_1px_2px_rgb(0_9_42_/_0.45),0_6px_24px_rgb(0_9_42_/_0.35)] sm:text-lg">
@@ -89,10 +93,10 @@ export default function HomeHero() {
             </p>
 
             <div className="mt-1 flex flex-wrap items-center gap-3">
-              {/* Pastille blanche (comme le CTA de la référence) : le variant `outline`
-                  est le seul qui n'a PAS de `bg-gradient-*` — un simple `bg-white` posé
-                  sur `primary` serait masqué par l'image de fond du dégradé. */}
-              <ButtonLink href={href("/devis")} variant="outline">
+              {/* Pastille TRANSPARENTE sur le média : le variant `glass` n'a PAS de
+                  `bg-gradient-*` (un `bg-*` posé sur `primary` serait masqué par
+                  l'image de fond du dégradé) — le fond n'apparaît qu'au survol. */}
+              <ButtonLink href={href("/devis")} variant="glass">
                 {ui.freeQuote}
               </ButtonLink>
               <Link

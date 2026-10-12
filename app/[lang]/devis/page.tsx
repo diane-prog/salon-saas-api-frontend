@@ -32,7 +32,7 @@ export default async function DevisPage({ params }: PageProps<"/[lang]/devis">) 
         <div className="container-x grid gap-10 lg:grid-cols-[1.35fr_1fr] lg:gap-14">
           <Reveal>
             <div className="rounded-card border border-navy/8 bg-white p-7 shadow-soft sm:p-10">
-              <h2 className="text-2xl font-semibold text-navy sm:text-3xl">{devisPage.formTitle}</h2>
+              <h2 className="text-2xl font-light text-navy sm:text-3xl">{devisPage.formTitle}</h2>
               <p className="mt-2 text-sm text-muted">{devisPage.formBody}</p>
 
               <div className="mt-8">

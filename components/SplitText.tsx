@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type CSSProperties, type ElementType } from "react";
+import { Fragment, useEffect, useRef, useState, type CSSProperties, type ElementType } from "react";
 import { observeReveal } from "@/lib/reveal";
 
 type SplitTextProps = {
@@ -19,6 +19,12 @@ type SplitTextProps = {
    * `on-mount` : révèle dès le montage (panneau de transition, toujours visible).
    */
   mode?: "in-view" | "on-mount";
+  /**
+   * Saut de ligne forcé après ce nombre de mots : `2` met les deux premiers mots sur
+   * la première ligne. Indépendant de la largeur du conteneur, donc le titre se coupe
+   * au même endroit sur tous les écrans (et dans les deux langues, un `<br>` par ligne).
+   */
+  breakAfter?: number;
 };
 
 /**
@@ -39,6 +45,7 @@ export default function SplitText({
   stagger = 0.05,
   duration = 0.9,
   mode = "in-view",
+  breakAfter,
 }: SplitTextProps) {
   const ref = useRef<HTMLElement>(null);
   const [shown, setShown] = useState(false);
@@ -66,21 +73,27 @@ export default function SplitText({
     >
       <span className="sr-only">{full}</span>
       <span aria-hidden="true">
+        {/* L'espace va ENTRE les masques, jamais dedans : un `inline-block` en
+            `overflow: hidden` rogne l'espace en fin de ligne, ce qui collait les mots
+            (« Faitesbriller… »). En dehors, c'est le parent qui le rend, et la coupure
+            de ligne reste possible entre deux mots. */}
         {words.map((word, index) => (
-          <span key={`${word.value}-${index}`} className="split-mask">
-            <span
-              className={`split-word ${word.accent ? accentClassName : ""}`}
-              style={
-                {
-                  "--w-delay": `${Math.round((delay + index * stagger) * 1000)}ms`,
-                  "--w-duration": `${duration}s`,
-                } as CSSProperties
-              }
-            >
-              {word.value}
+          <Fragment key={`${word.value}-${index}`}>
+            <span className="split-mask">
+              <span
+                className={`split-word ${word.accent ? accentClassName : ""}`}
+                style={
+                  {
+                    "--w-delay": `${Math.round((delay + index * stagger) * 1000)}ms`,
+                    "--w-duration": `${duration}s`,
+                  } as CSSProperties
+                }
+              >
+                {word.value}
+              </span>
             </span>
-            {index < words.length - 1 ? " " : null}
-          </span>
+            {index < words.length - 1 ? (breakAfter === index + 1 ? <br /> : " ") : null}
+          </Fragment>
         ))}
       </span>
     </Tag>

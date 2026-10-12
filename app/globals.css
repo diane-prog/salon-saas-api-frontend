@@ -9,6 +9,9 @@
   --color-orange: #ff622a;
   --color-muted: #718096;
   --color-line: #edf2f7;
+  /* Sable chaud : fond du rideau de transition (page blanche + hero navy, il fallait
+     un ton neutre qui n'appartienne à aucune des deux pages). */
+  --color-beige: #e9e2d4;
 
   --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
 
@@ -108,15 +111,15 @@
     color: var(--color-navy-deep);
   }
 
-h1 {
-    font-weight: 700;
+  h1 {
+    font-weight: 300;
     letter-spacing: -0.03em;
   }
 
   h2,
   h3,
   h4 {
-    font-weight: 600;
+    font-weight: 300;
     letter-spacing: -0.02em;
   }
 
@@ -279,42 +282,54 @@ html[data-js] .split-anim .split-word {
   animation: split-word-in var(--w-duration, 0.9s) cubic-bezier(0.22, 1, 0.36, 1) var(--w-delay, 0ms) both;
 }
 
-/* Rideau de transition : le grand panneau est animé en CSS (et non en JS) pour que le
-   navigateur compose la rotation hors du thread principal — mesuré ~55 fps contre ~20 fps
-   quand la même rotation est pilotée image par image par JavaScript. */
+/* Rideau de transition : un panneau uni qui GLISSE (plus de bascule 3D), animé en CSS
+   (et non en JS) pour rester fluide. Il descend du haut pour couvrir, puis redescend
+   en s'effaçant — un seul axe, aucune décoration, aucun dégradé. */
 .curtain-panel {
   position: absolute;
   inset: 0;
-  background: var(--color-navy-deep);
-  backface-visibility: hidden;
+  background: var(--color-beige);
   will-change: transform;
 }
 
+/* Le rideau d'ouverture est dans le premier rendu : pour les personnes qui demandent
+   moins d'animations, on le masque ici plutôt que de le retirer du HTML (la séquence
+   JS continue de tourner, la phase retombe sur « idle » et rien ne bloque). */
+@media (prefers-reduced-motion: reduce) {
+  .curtain-panel {
+    display: none;
+  }
+}
+
+/* Rideau d'ouverture : couvrant dès la première frame, sans animation d'entrée.
+   Le retrait (`curtain-reveal`) part de `translateY(0)`, donc l'enchaînement est continu. */
+.curtain-still {
+  transform: translateY(0);
+}
+
 .curtain-cover {
-  transform-origin: 50% 0%;
   animation: curtain-cover var(--curtain-cover, 0.52s) cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .curtain-reveal {
-  transform-origin: 50% 100%;
   animation: curtain-reveal var(--curtain-reveal, 0.62s) cubic-bezier(0.64, 0, 0.78, 0) both;
 }
 
 @keyframes curtain-cover {
   from {
-    transform: rotateX(-92deg);
+    transform: translateY(-100%);
   }
   to {
-    transform: rotateX(0deg);
+    transform: translateY(0);
   }
 }
 
 @keyframes curtain-reveal {
   from {
-    transform: rotateX(0deg);
+    transform: translateY(0);
   }
   to {
-    transform: rotateX(92deg);
+    transform: translateY(100%);
   }
 }
 

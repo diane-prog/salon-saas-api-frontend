@@ -116,7 +116,7 @@ export default function WhyStatements() {
       <div className="mx-auto grid w-full max-w-[95rem] gap-10 px-5 py-20 sm:px-8 sm:py-24 lg:grid-cols-[0.55fr_1.5fr_1.25fr] lg:gap-16">
         {/* Colonne 1 : sur-titre discret, comme « WHY WORK WITH US ». */}
         <Reveal>
-          <p className="text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-navy/70">
+          <p className="text-[0.7rem] font-light uppercase tracking-[0.22em] text-navy/70">
             {why.whyEyebrow}
           </p>
         </Reveal>

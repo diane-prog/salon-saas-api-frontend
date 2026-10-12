@@ -61,7 +61,7 @@ export default function Header() {
               width={180}
               height={80}
               priority
-              className={`w-auto transition-all duration-300 ${scrolled ? "h-8" : "h-14"}`}
+              className={`w-auto transition-all duration-300 ${scrolled ? "h-16" : "h-16"}`}
             />
           </Link>
 
@@ -91,7 +91,7 @@ export default function Header() {
                               href={href(`/services/${s.slug}`)}
                               className="group/item rounded-xl px-4 py-3 transition-colors text-lg font-normal hover:bg-brand/[0.06]"
                             >
-                              <span className="flex items-center justify-between gap-2 text-sm font-semibold text-navy">
+                              <span className="flex items-center justify-between gap-2 text-sm font-light text-navy">
                                 {s.title}
                                 <ArrowRight className="h-3.5 w-3.5 -translate-x-1 text-brand opacity-0 transition-all group-hover/item:translate-x-0 group-hover/item:opacity-100" />
                               </span>
@@ -115,10 +115,10 @@ export default function Header() {
                             <span className="text-[0.68rem] font-medium uppercase tracking-[0.16em] text-turquoise">
                               {dict.ui.expertise}
                             </span>
-                            <p className="text-lg font-semibold leading-snug text-white">{dict.ui.talkToUs}</p>
+                            <p className="text-lg font-light leading-snug text-white">{dict.ui.talkToUs}</p>
                             <Link
                               href={href("/devis")}
-                              className="inline-flex w-fit items-center gap-2 rounded-full bg-white px-4 py-2 text-xs font-semibold text-navy transition-transform duration-300 hover:-translate-y-0.5"
+                              className="inline-flex w-fit items-center gap-2 rounded-full bg-white px-4 py-2 text-xs font-light text-navy transition-transform duration-300 hover:-translate-y-0.5"
                             >
                               {dict.ui.freeQuote}
                               <ArrowRight className="h-3.5 w-3.5" />
@@ -190,7 +190,7 @@ export default function Header() {
                     <Link
                       href={href(item.href)}
                       onClick={() => setOpen(false)}
-                      className="block py-3 text-2xl font-semibold text-white/90"
+                      className="block py-3 text-2xl font-light text-white/90"
                     >
                       {item.label}
                     </Link>
@@ -202,7 +202,7 @@ export default function Header() {
               type="button"
               onClick={() => setServicesOpen((v) => !v)}
               aria-expanded={servicesOpen}
-              className="mt-2 flex w-full items-center justify-between py-3 text-2xl font-semibold text-turquoise"
+              className="mt-2 flex w-full items-center justify-between py-3 text-2xl font-light text-turquoise"
             >
               {dict.nav.find((n) => n.href === "/services")?.label}
               <ChevronDown className={`h-6 w-6 transition-transform duration-300 ${servicesOpen ? "rotate-180" : ""}`} />
@@ -234,7 +234,7 @@ export default function Header() {
               <Link
                 href={href("/devis")}
                 onClick={() => setOpen(false)}
-                className="inline-flex flex-1 items-center justify-center rounded-full bg-gradient-to-r from-brand to-turquoise px-6 py-4 text-sm font-semibold text-white"
+                className="inline-flex flex-1 items-center justify-center rounded-full bg-gradient-to-r from-brand to-turquoise px-6 py-4 text-sm font-light text-white"
               >
                 {locale === "fr" ? "Demander un devis" : "Get a quote"}
               </Link>
@@ -261,7 +261,7 @@ function LocaleSwitch({
 }) {
   const labels = switchLabels[locale];
   const base =
-    "inline-flex items-center rounded-full p-0.5 text-[0.68rem] font-semibold transition-colors";
+    "inline-flex items-center rounded-full p-0.5 text-[0.68rem] font-light transition-colors";
   const tone = scrolled ? "bg-navy/[0.06] text-muted" : "bg-white/10 text-white/70";
   const active = scrolled ? "bg-white text-navy shadow-soft" : "bg-white text-navy";
   const pad = size === "lg" ? "py-2 px-1" : "py-1";

@@ -116,7 +116,7 @@ export function FormShell({
             <path d="m5 13 4 4L19 7" />
           </svg>
         </span>
-        <h3 className="text-xl font-semibold text-navy">Message envoyé</h3>
+        <h3 className="text-xl font-light text-navy">Message envoyé</h3>
         <p className="max-w-sm text-sm leading-relaxed text-muted">
           Merci pour votre message. Notre équipe vous répondra dans les meilleurs délais.
         </p>
@@ -139,7 +139,7 @@ export function FormShell({
       {children}
       <button
         type="submit"
-        className="group mt-2 inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-brand to-turquoise px-7 py-4 text-sm font-semibold text-white shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lift focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-turquoise"
+        className="group mt-2 inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-brand to-turquoise px-7 py-4 text-sm font-light text-white shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lift focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-turquoise"
       >
         {submitLabel}
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" aria-hidden>

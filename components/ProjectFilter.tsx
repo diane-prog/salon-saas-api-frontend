@@ -34,7 +34,7 @@ export default function ProjectFilter({ projects }: { projects: Project[] }) {
             type="button"
             onClick={() => setActive(f)}
             aria-pressed={active === f}
-            className={`rounded-full px-5 py-2.5 text-sm font-semibold transition-all duration-300 ${
+            className={`rounded-full px-5 py-2.5 text-sm font-light transition-all duration-300 ${
               active === f
                 ? "bg-gradient-to-r from-brand to-turquoise text-white shadow-soft"
                 : "bg-white text-navy ring-1 ring-navy/10 hover:ring-brand hover:text-brand"
@@ -62,7 +62,7 @@ export default function ProjectFilter({ projects }: { projects: Project[] }) {
                 </span>
               </div>
               <div className="flex flex-1 flex-col gap-2 p-6">
-                <h3 className="text-base font-semibold leading-snug text-navy">{p.title}</h3>
+                <h3 className="text-base font-light leading-snug text-navy">{p.title}</h3>
                 <p className="flex-1 text-sm leading-relaxed text-muted">{p.body}</p>
               </div>
             </article>

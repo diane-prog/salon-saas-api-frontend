@@ -8,14 +8,14 @@ import SmoothScroll from "@/components/SmoothScroll";
 import { getDictionary, isLocale, localePath, locales, localeTags } from "@/lib/dictionaries";
 import { SITE_URL } from "@/lib/seo";
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans, Space_Grotesk } from "next/font/google";
+import { Plus_Jakarta_Sans, Sora, Space_Grotesk, Unbounded } from "next/font/google";
 import { notFound } from "next/navigation";
 import "../globals.css";
 
 /* Police du site : Plus Jakarta Sans, servie en self-hosted par Next (aucune requête vers
    Google depuis le navigateur). Variable 200 → 800, donc un seul fichier qui couvre toutes
-   les graisses du site, `font-light` jusqu'à `font-extrabold` compris. */
-const jakarta = Space_Grotesk({
+   les graisses du site, `font-light` jusqu'à `font-light` compris. */
+const jakarta = Sora({
   variable: "--font-jakarta",
   subsets: ["latin"],
   weight: "variable",

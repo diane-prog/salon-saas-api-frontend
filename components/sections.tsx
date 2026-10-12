@@ -82,7 +82,7 @@ export function StatsSection({ stats }: { stats: { value: number; suffix: string
               delay={i * 80}
               className="flex flex-col items-center gap-2 px-4 py-10 text-center"
             >
-              <span className="text-3xl font-bold tracking-tight text-navy sm:text-4xl">
+              <span className="text-3xl font-light tracking-tight text-navy sm:text-4xl">
                 <Counter value={s.value} suffix={s.suffix} />
               </span>
               <span className="text-xs font-medium uppercase tracking-[0.1em] text-muted">{s.label}</span>
@@ -111,9 +111,9 @@ export function ServiceGrid() {
               <span className="grid h-12 w-12 place-items-center rounded-xl bg-gradient-to-br from-brand to-turquoise text-white shadow-soft transition-transform duration-300 group-hover:scale-105">
                 {Icon && <Icon />}
               </span>
-              <h3 className="text-lg font-semibold text-navy">{s.title}</h3>
+              <h3 className="text-lg font-light text-navy">{s.title}</h3>
               <p className="flex-1 text-sm leading-relaxed text-muted">{s.short}</p>
-              <span className="inline-flex items-center gap-2 text-sm font-semibold text-brand">
+              <span className="inline-flex items-center gap-2 text-sm font-light text-brand">
                 {dict.ui.viewDetails}
                 <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
               </span>
@@ -131,7 +131,7 @@ export function ServiceGrid() {
  * - fonds noir, en-tête à gauche + deux flèches rondes à droite ;
  * - cartes dark avec DOUBLE COUCHE : une ombre plein-cadre décalée sous chaque carte
  *   (les captures montrent la carte répétée en dessous, plus foncée) ;
- * - fleur orange au centre-bas avec « CLIENT STORIES » ; au scroll elle S'AGRANDIT
+ * - fleur à la couleur brand au centre-bas avec « CLIENT STORIES » ; au scroll elle S'AGRANDIT
  *   jusqu'à couvrir le bas de la section (le libellé grossit avec elle) — l'échelle
  *   dérive de la position de la section dans le viewport, pas d'un timer ;
  *   à la remontée la progression redescend, donc la fleur RÉTRÉCIT et retrouve sa
@@ -231,7 +231,7 @@ export function TestimonialsSection() {
         {/* En-tête : titre + sous-titre à gauche, flèches rondes à droite. */}
         <div className="flex items-end justify-between gap-6">
           <div className="max-w-xl">
-            <h2 className="text-4xl font-bold tracking-tight text-white sm:text-5xl">
+            <h2 className="text-4xl font-light tracking-tight text-white sm:text-5xl">
               {dict.ui.testimonialTitle}
             </h2>
             <p className="mt-3 text-sm text-white/50">{dict.ui.testimonialBody}</p>
@@ -259,7 +259,7 @@ export function TestimonialsSection() {
                     height={52}
                     className="h-13 w-13 rounded-lg object-cover"
                   />
-                  <span className="mt-1 text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-white/70">
+                  <span className="mt-1 text-[0.7rem] font-light uppercase tracking-[0.14em] text-white/70">
                     {dict.clients[i % dict.clients.length]}
                   </span>
                 </div>
@@ -279,7 +279,7 @@ export function TestimonialsSection() {
 
                 <div aria-hidden className="mt-2 h-px w-8 bg-white/25" />
                 <figcaption>
-                  <p className="text-base font-semibold text-white">{t.name}</p>
+                  <p className="text-base font-light text-white">{t.name}</p>
                   <p className="mt-1 text-xs leading-relaxed text-white/45">
                     {t.role}
                     <br />
@@ -295,14 +295,14 @@ export function TestimonialsSection() {
       {/* Le badge : fleur + texte, comme Orisa. EN FLUX NORMAL après les cartes — le
           petit cercle est VISIBLE au repos (le bug signalé : il était caché sous les
           cartes via une marge négative, retirée). Deux points-clés d'Orisa conservés :
-          1) badge à z-index inférieur — quand il grossit, l'orange passe derrière les
+          1) badge à z-index inférieur — quand il grossit, le fond brand passe derrière les
           cartes déjà scrollées hors champ, jamais devant ;
-          2) la section clippe : à fin de course l'orange couvre le bas, le noir avalé. */}
+          2) la section clippe : à fin de course le brand couvre le bas, le noir avalé. */}
       <div data-stories-anchor className="relative z-0 mt-14 flex justify-center pb-24">
         <div data-stories-blob className="flex items-center justify-center">
           <svg
             viewBox="0 0 200 200"
-            className="h-36 w-36 fill-orange"
+            className="h-36 w-36 fill-brand"
             style={{ willChange: "transform" }}
             aria-hidden
           >
@@ -311,7 +311,7 @@ export function TestimonialsSection() {
         </div>
         <span
           data-stories-label
-          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-center font-extrabold uppercase leading-[1.02] tracking-tight text-white"
+          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-center font-light uppercase leading-[1.02] tracking-tight text-white"
           style={{ fontSize: "1.4rem", willChange: "transform" }}
         >
           Client
@@ -333,7 +333,7 @@ export function ClientsMarquee({ items }: { items: string[] }) {
         {row.map((name, i) => (
           <span
             key={`${name}-${i}`}
-            className="text-2xl font-bold uppercase tracking-tight text-navy/25 transition-colors hover:text-navy/50"
+            className="text-2xl font-light uppercase tracking-tight text-navy/25 transition-colors hover:text-navy/50"
           >
             {name}
           </span>
@@ -415,7 +415,7 @@ export function ArrowLink({ href, children }: { href: string; children: ReactNod
   return (
     <Link
       href={href}
-      className="group inline-flex items-center gap-2 text-sm font-semibold text-brand transition-colors hover:text-turquoise"
+      className="group inline-flex items-center gap-2 text-sm font-light text-brand transition-colors hover:text-turquoise"
     >
       {children}
       <ArrowUpRight className="h-4 w-4 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />

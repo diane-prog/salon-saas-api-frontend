@@ -12,13 +12,12 @@ import {
   type ReactNode,
 } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { motion } from "framer-motion";
 import SplitText from "@/components/SplitText";
 import { useDictionary } from "@/components/DictionaryProvider";
-import { CURTAIN, EASE_OUT, prefersReducedMotion } from "@/lib/motion";
+import { CURTAIN, prefersReducedMotion } from "@/lib/motion";
 import { scrollToTop } from "@/lib/scroll";
 
-type Phase = "idle" | "cover" | "reveal";
+type Phase = "idle" | "intro" | "cover" | "reveal";
 type TransitionApi = { navigate: (href: string, label?: string) => void };
 
 // Repli sûr si le fournisseur n'est pas monté : navigation classique plutôt qu'un clic sans effet.
@@ -34,9 +33,10 @@ export function usePageTransition() {
 }
 
 /**
- * Transition de page « rideau flip » :
- * un panneau plein écran se déploie depuis le haut (rotation 3D), affiche le libellé
- * du lien cliqué pendant que la navigation se fait, puis se retire en pivotant.
+ * Transition de page « rideau qui glisse » :
+ * un panneau beige plein écran descend du haut pour couvrir la page, affiche le libellé
+ * du lien cliqué pendant que la navigation se fait, puis redescend en s'effaçant.
+ * Un seul axe, fond uni, aucun dégradé.
  *
  * Tous les liens internes sont interceptés en phase de capture : `event.preventDefault()`
  * empêche Next.js de naviguer immédiatement (next/link abandonne quand l'événement est
@@ -47,7 +47,25 @@ export default function PageTransition({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const { dict, locale } = useDictionary();
 
-  const [phase, setPhase] = useState<Phase>("idle");
+  /*
+   * Rideau d'OUVERTURE dans le PREMIER rendu : au chargement direct de l'accueil, le
+   * panneau est déjà dans le HTML servi, en pleine couverture (phase « intro », sans
+   * animation d'entrée) — la page n'est donc jamais visible avant lui. Le monter après
+   * coup (dans un effet), ou le faire descendre depuis `-100%`, laissait voir la page
+   * une à deux frames avant que le rideau n'arrive. `usePathname()` est résolu aussi côté serveur : le HTML
+   * rendu et le premier rendu client sont identiques, donc pas de décalage.
+   * Mouvement réduit : le panneau est masqué en CSS (globals.css), la séquence se
+   * déroule quand même pour que la phase retombe sur « idle ».
+   */
+  const route = pathname.replace(/\/+$/, "") || pathname;
+  const isHomeRoute = route === `/${locale}`;
+  /*
+   * « intro » : panneau DÉJÀ couvrant au premier rendu (aucune animation d'entrée), puis
+   * simple retrait. C'est ce qui garantit que la page d'accueil n'est jamais visible avant
+   * le rideau : avec « cover », le panneau part de `translateY(-100%)`, donc la page
+   * restait affichée le temps qu'il descende.
+   */
+  const [phase, setPhase] = useState<Phase>(isHomeRoute ? "intro" : "idle");
   const [label, setLabel] = useState("");
 
   const phaseRef = useRef<Phase>("idle");
@@ -85,8 +103,10 @@ export default function PageTransition({ children }: { children: ReactNode }) {
       const heading = anchor.querySelector("h1, h2, h3, h4")?.textContent?.replace(/\s+/g, " ").trim();
       if (heading) return heading;
 
+      /* Texte « titre » du lien : depuis le passage des graisses grasses à `font-light`,
+         c'est cette classe qui marque le libellé principal dans une carte ou une tuile. */
       const strong = anchor
-        .querySelector("[class*='font-semibold']")
+        .querySelector("[class*='font-light']")
         ?.textContent?.replace(/\s+/g, " ")
         .trim();
       if (strong && strong.length <= 40) return strong;
@@ -172,7 +192,10 @@ export default function PageTransition({ children }: { children: ReactNode }) {
       if (url.pathname === window.location.pathname && url.search === window.location.search) return;
 
       // Un rideau est déjà en vol : on bloque la navigation pour ne pas la court-circuiter.
+      // Sauf si aucune navigation n'est en attente (ouverture du site : le rideau couvre
+      // déjà le départ) — sinon un clic pendant l'ouverture serait purement avalé.
       if (phaseRef.current !== "idle") {
+        if (pending.current === null) return;
         event.preventDefault();
         return;
       }
@@ -214,6 +237,52 @@ export default function PageTransition({ children }: { children: ReactNode }) {
     }
   }, [pathname, routeLabels]);
 
+  /**
+   * Rideau d'OUVERTURE : au premier chargement du document sur l'accueil, le rideau est
+   * posé couvrant (premier rendu, cf. plus haut), reste le temps d'une couverture + pause
+   * puis se retire. Les autres pages gardent l'arrivée directe : un lien partagé vers
+   * /services/… ne doit pas être retardé par une couverture.
+   * Mouvement réduit : rien, comme partout ailleurs.
+   */
+  const introPlayed = useRef(false);
+  useEffect(() => {
+    /* Les pages intérieures gardent une arrivée directe : pas de couverture au chargement. */
+    if (!isHomeRoute) return;
+    /* Rien à faire si l'ouverture est déjà jouée, ni si la phase a déjà bougé : un second
+       passage de l'effet (StrictMode en dev, fast refresh) ne doit pas relancer le rideau. */
+    if (introPlayed.current || phaseRef.current !== "intro") return;
+
+    /* Le panneau est déjà couvrant (premier rendu) : on ne pose ici que son retrait,
+       depuis une frame pour ne pas poser d'état dans le corps de l'effet. */
+    let raf = 0;
+    let timer = 0;
+    raf = window.requestAnimationFrame(() => {
+      coverStartedAt.current = performance.now();
+      setLabel(routeLabels[route] ?? "");
+
+      /* Chronologie ancrée au début du DOCUMENT et non à l'hydratation : sinon une
+         hydratation lente (dev, mobile) prolonge d'autant le temps pendant lequel la page
+         reste cachée. On garde un minimum de pause pour que le libellé soit lisible. */
+      const wait = Math.max(
+        CURTAIN.holdMs,
+        CURTAIN.coverMs + CURTAIN.holdMs - performance.now(),
+      );
+      timer = window.setTimeout(() => {
+        /* Marqué seulement quand le retrait est réellement programmé (et non à l'entrée de
+           l'effet) : en développement StrictMode monte l'effet deux fois. Marquer avant
+           faisait annuler la frame par le nettoyage du premier passage, tandis que le
+           second sortait aussitôt — le panneau ne se retirait jamais et l'accueil restait
+           bloqué dessus. Ici le second passage retrouve la phase « intro » et reprogramme le retrait. */
+        introPlayed.current = true;
+        if (phaseRef.current === "intro") setPhase("reveal");
+      }, wait);
+    });
+    return () => {
+      window.cancelAnimationFrame(raf);
+      window.clearTimeout(timer);
+    };
+  }, [isHomeRoute, route, routeLabels]);
+
   // Le rideau se retire : la nouvelle page repart du haut, révélée par le panneau.
   useEffect(() => {
     if (phase !== "reveal") return;
@@ -231,7 +300,7 @@ export default function PageTransition({ children }: { children: ReactNode }) {
   // aucun ancêtre transformé ne pourrait donc casser le position: fixed.
   const curtain =
     phase !== "idle" ? (
-      <div className="pointer-events-none fixed inset-0 z-90 [perspective:1600px]">
+      <div className="pointer-events-none fixed inset-0 z-90">
         <CurtainPanel phase={phase} label={label} />
       </div>
     ) : null;
@@ -249,19 +318,19 @@ export default function PageTransition({ children }: { children: ReactNode }) {
 }
 
 /**
- * Panneau 3D du rideau. Un seul panneau est monté à la fois : couverture puis retrait.
+ * Panneau du rideau. Un seul panneau est monté à la fois : couverture puis retrait.
  *
- * La rotation est une animation CSS (`curtain-cover` / `curtain-reveal`) : le navigateur
- * la compose hors du thread principal, là où la même rotation pilotée par JavaScript
- * tombait à ~20 fps. Le fond reste uni, car un grain ou un dégradé plein écran est
- * rastérisé à chaque image dans un plan en rotation.
+ * L'animation est purement CSS (`curtain-cover` / `curtain-reveal`) : translation
+ * verticale seule, fond beige uni. Aucun dégradé ni aucune lueur — un dégradé plein
+ * écran se rastériserait image par image, et le rendu demandé est volontairement sobre.
  */
 function CurtainPanel({ phase, label }: { phase: Exclude<Phase, "idle">; label: string }) {
-  const covering = phase === "cover";
+  const className =
+    phase === "intro" ? "curtain-still" : phase === "cover" ? "curtain-cover" : "curtain-reveal";
 
   return (
     <div
-      className={`curtain-panel ${covering ? "curtain-cover" : "curtain-reveal"}`}
+      className={`curtain-panel ${className}`}
       style={
         {
           "--curtain-cover": `${CURTAIN.cover}s`,
@@ -269,15 +338,8 @@ function CurtainPanel({ phase, label }: { phase: Exclude<Phase, "idle">; label: 
         } as CSSProperties
       }
     >
-      {/* Lueur locale sans `filter: blur()` : un flou de 90 px est recalculé à chaque image
-          dans un plan en rotation (mesuré : ~30 fps → ~50 fps une fois retiré). */}
-      <div
-        aria-hidden
-        className="absolute left-1/2 top-1/2 h-[30rem] w-[30rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle_at_center,rgba(36,151,190,0.3),transparent_68%)]"
-      />
-
-      <div className="relative flex h-full flex-col items-center justify-center gap-6 px-6 text-center">
-        <span className="text-[0.68rem] font-medium uppercase tracking-[0.3em] text-turquoise">
+      <div className="relative flex h-full flex-col items-center justify-center gap-5 px-6 text-center">
+        <span className="text-[0.68rem] font-medium uppercase tracking-[0.3em] text-navy/70">
           LEEGI GROUP
         </span>
 
@@ -288,19 +350,7 @@ function CurtainPanel({ phase, label }: { phase: Exclude<Phase, "idle">; label: 
           delay={CURTAIN.label}
           stagger={0.025}
           duration={0.46}
-          className="max-w-[16ch] text-[clamp(2rem,7vw,5rem)] font-semibold uppercase leading-[1.02] tracking-[-0.02em] text-white"
-        />
-
-        <motion.span
-          aria-hidden
-          className="block h-px w-40 origin-left bg-gradient-to-r from-brand to-turquoise"
-          initial={{ scaleX: 0, opacity: 0 }}
-          animate={{ scaleX: 1, opacity: 1 }}
-          transition={{
-            duration: covering ? 0.46 : 0.2,
-            delay: covering ? CURTAIN.label : 0,
-            ease: EASE_OUT,
-          }}
+          className="max-w-[16ch] text-[clamp(2rem,7vw,5rem)] font-light uppercase leading-[1.02] tracking-[-0.02em] text-navy"
         />
       </div>
     </div>

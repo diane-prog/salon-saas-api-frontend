@@ -55,16 +55,20 @@ export function ButtonLink({
 }: {
   href: string;
   children: ReactNode;
-  variant?: "primary" | "ghost" | "outline";
+  variant?: "primary" | "ghost" | "outline" | "glass";
   className?: string;
 }) {
   const base =
-    "group inline-flex items-center justify-center gap-2 rounded-full px-6 py-3.5 text-sm font-semibold transition-all duration-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-turquoise";
+    "group inline-flex items-center justify-center gap-2 rounded-full px-6 py-3.5 text-sm font-light transition-all duration-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-turquoise";
   const styles = {
     primary:
       "bg-gradient-to-r from-brand to-turquoise text-white shadow-soft hover:shadow-lift hover:-translate-y-0.5",
     ghost: "bg-white/10 text-white ring-1 ring-white/25 backdrop-blur hover:bg-white/20",
     outline: "bg-white text-navy ring-1 ring-navy/12 hover:ring-brand hover:text-brand",
+    /* Sur média sombre (hero) : TRANSPARENT au repos, le fond n'apparaît qu'au
+       survol. Le filet blanc garde la pastille lisible sur la vidéo sans rien
+       peindre derrière le texte. */
+    glass: "bg-transparent text-white ring-1 ring-white/30 hover:bg-white/15 backdrop-blur-sm",
   }[variant];
 
   return (

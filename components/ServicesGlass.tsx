@@ -103,7 +103,7 @@ export default function ServicesGlass({ eyebrow, title, body }: ServicesGlassPro
       {/* 1. La vidéo : figée, elle ne fait pas partie du flux. */}
       <div className="sticky top-0 -z-10 -mb-[100svh] h-[100svh] bg-black">
         <Image
-          src="/img/hero.jpeg"
+          src="/img/hero4.png"
           alt=""
           fill
           sizes="100vw"
@@ -113,7 +113,7 @@ export default function ServicesGlass({ eyebrow, title, body }: ServicesGlassPro
           <video
             ref={video}
             className="absolute inset-0 h-full w-full object-cover object-center"
-            src="/img/video2.mp4"
+            src="/img/videoo.mp4"
             muted
             loop
             playsInline

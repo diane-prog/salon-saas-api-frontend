@@ -98,7 +98,7 @@ export default function ProjectStack() {
                 </span>
 
                 <div className="absolute inset-x-5 bottom-5">
-                  <h3 className="text-lg font-semibold leading-snug text-white">{project.title}</h3>
+                  <h3 className="text-lg font-light leading-snug text-white">{project.title}</h3>
                   <p className="mt-1 text-xs uppercase tracking-[0.14em] text-white/60">
                     {project.category}
                   </p>

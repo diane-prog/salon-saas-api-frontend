@@ -26,7 +26,7 @@ export default function Footer() {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={s.label}
-                  className="grid h-10 w-10 place-items-center rounded-full bg-white/[0.06] text-xs font-semibold text-slate-300 transition-all duration-300 hover:-translate-y-0.5 hover:bg-gradient-to-br hover:from-brand hover:to-turquoise hover:text-white"
+                  className="grid h-10 w-10 place-items-center rounded-full bg-white/[0.06] text-xs font-light text-slate-300 transition-all duration-300 hover:-translate-y-0.5 hover:bg-gradient-to-br hover:from-brand hover:to-turquoise hover:text-white"
                 >
                   {s.label.slice(0, 2)}
                 </a>
@@ -86,7 +86,7 @@ export default function Footer() {
             </ul>
             <Link
               href={href("/devis")}
-              className="group mt-6 inline-flex items-center gap-2 text-sm font-semibold text-turquoise transition-colors hover:text-white"
+              className="group mt-6 inline-flex items-center gap-2 text-sm font-light text-turquoise transition-colors hover:text-white"
             >
               {locale === "fr" ? "Demander un devis" : "Get a quote"}
               <ArrowUpRight className="h-4 w-4 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />

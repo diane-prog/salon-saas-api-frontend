@@ -43,7 +43,7 @@ export default async function ContactPage({ params }: PageProps<"/[lang]/contact
                   <h3 className="mt-5 text-xs font-medium uppercase tracking-[0.14em] text-muted">
                     {item.label}
                   </h3>
-                  <p className="mt-1 text-base font-semibold text-navy">{item.value}</p>
+                  <p className="mt-1 text-base font-light text-navy">{item.value}</p>
                 </>
               );
 
@@ -106,19 +106,19 @@ export default async function ContactPage({ params }: PageProps<"/[lang]/contact
                 <span className="grid h-12 w-12 place-items-center rounded-full bg-white text-brand shadow-soft">
                   <Pin className="h-6 w-6" />
                 </span>
-                <h3 className="text-xl font-semibold text-navy">{contactPage.locationTitle}</h3>
+                <h3 className="text-xl font-light text-navy">{contactPage.locationTitle}</h3>
                 <p className="max-w-md text-sm leading-relaxed text-muted">{contactPage.locationBody}</p>
                 <div className="mt-4 flex flex-col gap-3 sm:flex-row">
                   <a
                     href={site.phoneRaw}
-                    className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-brand to-turquoise px-6 py-3 text-sm font-semibold text-white shadow-soft transition-all hover:-translate-y-0.5"
+                    className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-brand to-turquoise px-6 py-3 text-sm font-light text-white shadow-soft transition-all hover:-translate-y-0.5"
                   >
                     <Phone className="h-4 w-4" />
                     {site.phone}
                   </a>
                   <Link
                     href={href("/devis")}
-                    className="inline-flex items-center justify-center rounded-full bg-white px-6 py-3 text-sm font-semibold text-navy ring-1 ring-navy/12 transition-all hover:ring-brand hover:text-brand"
+                    className="inline-flex items-center justify-center rounded-full bg-white px-6 py-3 text-sm font-light text-navy ring-1 ring-navy/12 transition-all hover:ring-brand hover:text-brand"
                   >
                     {dict.finalCta.primary}
                   </Link>

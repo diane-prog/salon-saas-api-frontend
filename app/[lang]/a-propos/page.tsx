@@ -56,7 +56,7 @@ export default async function AboutPage({ params }: PageProps<"/[lang]/a-propos"
                     <span className="grid h-12 w-12 place-items-center rounded-xl bg-gradient-to-br from-brand to-turquoise text-white">
                       <Icon />
                     </span>
-                    <h3 className="mt-5 text-lg font-semibold text-navy">{p.title}</h3>
+                    <h3 className="mt-5 text-lg font-light text-navy">{p.title}</h3>
                     <p className="mt-2 text-sm leading-relaxed text-muted">{p.body}</p>
                   </div>
                 </Reveal>
@@ -74,7 +74,7 @@ export default async function AboutPage({ params }: PageProps<"/[lang]/a-propos"
           {[mission, vision].map((block, i) => (
             <Reveal key={block.title} delay={i * 100}>
               <div className="h-full rounded-card border border-white/10 bg-white/[0.04] p-9 backdrop-blur transition-colors duration-300 hover:border-turquoise/40">
-                <span className="text-5xl font-extrabold text-white/10">0{i + 1}</span>
+                <span className="text-5xl font-light text-white/10">0{i + 1}</span>
                 <h2 className="mt-3 text-2xl text-white">{block.title}</h2>
                 <p className="mt-3 text-base leading-relaxed text-slate-300">{block.body}</p>
               </div>
@@ -117,7 +117,7 @@ export default async function AboutPage({ params }: PageProps<"/[lang]/a-propos"
                     <span className="grid h-11 w-11 place-items-center rounded-lg bg-brand/10 text-brand">
                       <Icon />
                     </span>
-                    <h3 className="mt-5 text-base font-semibold text-navy">{v.title}</h3>
+                    <h3 className="mt-5 text-base font-light text-navy">{v.title}</h3>
                     <p className="mt-2 text-sm leading-relaxed text-muted">{v.body}</p>
                   </div>
                 </Reveal>
@@ -159,7 +159,7 @@ export default async function AboutPage({ params }: PageProps<"/[lang]/a-propos"
                       <Image src={m.image} alt={m.name} fill sizes="80px" className="object-cover" />
                     </div>
                     <div>
-                      <h3 className="text-base font-semibold text-navy">{m.name}</h3>
+                      <h3 className="text-base font-light text-navy">{m.name}</h3>
                       <p className="mt-1 text-sm text-muted">{m.role}</p>
                     </div>
                   </div>
@@ -181,7 +181,7 @@ export default async function AboutPage({ params }: PageProps<"/[lang]/a-propos"
               <Reveal as="li" key={item.title} delay={i * 80}>
                 <div className="h-full rounded-card border border-white/10 bg-white/[0.04] p-7 backdrop-blur transition-colors duration-300 hover:border-turquoise/40">
                   <span className="text-xs font-medium tracking-[0.18em] text-turquoise">0{i + 1}</span>
-                  <h3 className="mt-3 text-lg font-semibold text-white">{item.title}</h3>
+                  <h3 className="mt-3 text-lg font-light text-white">{item.title}</h3>
                   <p className="mt-2 text-sm leading-relaxed text-slate-400">{item.body}</p>
                 </div>
               </Reveal>
