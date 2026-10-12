@@ -8,14 +8,19 @@ import SmoothScroll from "@/components/SmoothScroll";
 import { getDictionary, isLocale, localePath, locales, localeTags } from "@/lib/dictionaries";
 import { SITE_URL } from "@/lib/seo";
 import type { Metadata } from "next";
-import { Inter, Plus_Jakarta_Sans, Raleway } from "next/font/google";
+import { Arimo } from "next/font/google";
 import { notFound } from "next/navigation";
 import "../globals.css";
 
-const poppins = Plus_Jakarta_Sans({
-  variable: "--font-poppins",
+/* PP Neue Montreal (Pangram Pangram) est une police commerciale, non disponible sur Google
+   Fonts. On s'appuie donc sur son modèle revendiqué — Helvetica — via Arimo, un clone libre
+   aux chasses et à l'interlignage identiques, servi en self-hosted par Next pour un rendu
+   identique sur tous les appareils (Windows et Android n'ont pas de vrai Helvetica).
+   Variable 400 → 700 : couvre les graisses réellement utilisées par le site. */
+const arimo = Arimo({
+  variable: "--font-arimo",
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700", "800"],
+  weight: "variable",
   display: "swap",
 });
 
@@ -119,7 +124,7 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[la
   };
 
   return (
-    <html lang={localeTags[lang]} className={`${poppins.variable} h-full antialiased`} suppressHydrationWarning>
+    <html lang={localeTags[lang]} className={`${arimo.variable} h-full antialiased`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: jsFlag }} />
         <link rel="alternate" hrefLang="x-default" href={`${SITE_URL}${localePath(defaultLang)}`} />

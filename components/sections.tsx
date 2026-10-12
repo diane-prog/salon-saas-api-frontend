@@ -139,6 +139,8 @@ export function ServiceGrid() {
 export function TestimonialsSection() {
   const { dict } = useDictionary();
   const root = useRef<HTMLElement>(null);
+  /* Valeur lissée de la progression, persistée entre les frames (lerp). */
+  const smoothed = useRef(0);
 
   useEffect(() => {
     const section = root.current;
@@ -147,24 +149,32 @@ export function TestimonialsSection() {
     const label = section.querySelector<HTMLElement>("[data-stories-label]");
     if (!blob || !label) return;
 
+    /* Échelle finale ciblée : la fleur doit couvrir LE BAS DE LA SECTION — pas
+       l'écran entier. La hauteur de la zone basse ≈ 16rem (badge + paddings) ; la
+       fleur de 9rem doit faire ~160rem de large pour couvrir tous les angles de
+       cette bande : scale final 18 suffit, on reste sobre. */
     const update = () => {
       const badge = blob.getBoundingClientRect();
       const view = window.innerHeight;
-      /* Cours d'Orisa : la course démarre quand le HAUT du badge dépasse la ligne
-         60 % du viewport (le badge reste petit et visible au repos) et s'ACHÈVE quand
-         le badge atteint le haut du viewport — point que le scroll atteint forcément
-         (avant, la course butait sur la fin de page : la fleur restait à ~70 % et
-         des coins noirs subsistaient). Échelle finale 28 : les pétales débordent de
-         tous les angles du viewport, l'orange couvre tout le bas de la section. */
       const startLine = view * 0.6;
-      const endLine = view * 0.2;
+      const endLine = view * 0.05;
+      /* Parcours du badge entre les deux lignes — ET lissage : le progress brut est
+         adouci par une courbe easeOut (démarrage doux, fin douce), puis lissé à
+         nouveau par un amorti temporel (lerp) : le mouvement est CONTINU, plus de
+         sauts brutal quand on scrolle vite. À la remontée, la valeur suit et
+         redéscend progressivement — le retour est symétrique. */
       const travelled = startLine - badge.top;
       const total = startLine - endLine;
-      const progress = Math.min(1, Math.max(0, travelled / total));
-      const scale = 1 + progress * 27;
+      const raw = Math.min(1, Math.max(0, travelled / total));
+      const eased = raw < 0.5 ? 2 * raw * raw : 1 - Math.pow(2 - 2 * raw, 2) / 2;
+      /* Lerp : on ne saute jamais à la nouvelle valeur, on glisse vers elle. */
+      smoothed.current += (eased - smoothed.current) * 0.16;
+      if (Math.abs(eased - smoothed.current) < 0.001) smoothed.current = eased;
+      const progress = smoothed.current;
+      const scale = 1 + progress * 17;
       blob.style.transform = `scale(${scale}) rotate(${progress * 180}deg)`;
       label.style.transform = `scale(${1 + progress * 7})`;
-      return progress > 0 && progress < 1;
+      return progress > 0.001 && progress < 0.999;
     };
     /* Lenis pilote la page via des transforms : l'événement `scroll` natif n'est pas
        fiable ici. On rafraîchit en boucle rAF tant que la fleur est « en course »

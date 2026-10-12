@@ -10,7 +10,8 @@
   --color-muted: #718096;
   --color-line: #edf2f7;
 
-  --font-sans: var(--font-poppins), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-arimo), "Helvetica Neue", Helvetica, Arial, ui-sans-serif,
+    system-ui, sans-serif;
 
   --radius-card: 12px;
 
