@@ -56,13 +56,17 @@ export default function HomeHero() {
           )}
         </Parallax>
 
-        {/* <div className="absolute inset-0 bg-black/30" /> */}
+        {/* Léger voile noir sur la vidéo : le titre tient mieux sur n'importe quel plan,
+            l'image reste lisible. Il se place SOUS l'ensemble blanc du bas (le fondu
+            vers la section suivante est un frère plus loin dans le DOM) donc celui-ci
+            reste intact. */}
+        <div className="absolute inset-0 bg-black/30" />
       </div>
 
       {/* Overlay blanc en bas du hero : la photo se fond dans la section blanche suivante. */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-x-0 bottom-0 h-36 bg-gradient-to-t from-white to-transparent sm:h-44"
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-white to-transparent sm:h-20"
       />
 
       <div className="relative mx-auto flex w-full max-w-[90rem] flex-1 flex-col px-5 md:px-8 xl:px-10">
@@ -85,7 +89,12 @@ export default function HomeHero() {
             </p>
 
             <div className="mt-1 flex flex-wrap items-center gap-3">
-              <ButtonLink href={href("/devis")}>{ui.freeQuote}</ButtonLink>
+              {/* Pastille blanche (comme le CTA de la référence) : le variant `outline`
+                  est le seul qui n'a PAS de `bg-gradient-*` — un simple `bg-white` posé
+                  sur `primary` serait masqué par l'image de fond du dégradé. */}
+              <ButtonLink href={href("/devis")} variant="outline">
+                {ui.freeQuote}
+              </ButtonLink>
               <Link
                 href={href("/realisations")}
                 aria-label={ui.viewAllProjects}

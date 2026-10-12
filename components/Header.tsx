@@ -68,15 +68,15 @@ export default function Header() {
           <nav className="hidden items-center gap-1 lg:flex" aria-label="Navigation principale">
             {dict.nav.map((item) =>
               item.href === "/services" ? (
-                <div key={item.href} className="group">
+                <div key={item.href} className="group text-lg font-normal">
                   <Link
                     href={href(item.href)}
                     aria-haspopup="true"
-                    className={`flex items-center gap-1 rounded-full px-4 py-2 text-sm font-medium transition-colors ${
-                      scrolled ? "text-navy hover:text-brand" : "text-white/85 hover:text-white"
+                    className={`flex items-center gap-1 rounded-full px-4 py-2 text-sm font-medium transition-colors text-lg font-normal ${
+                      scrolled ? "text-navy hover:text-brand text-lg font-normal" : "text-white/85 hover:text-white text-lg font-normal"
                     }`}
                   >
-                    {item.label}
+                    <span className="text-lg font-normal">{item.label}</span>
                     <ChevronDown className="h-3.5 w-3.5 transition-transform duration-300 group-hover:rotate-180" />
                   </Link>
 
@@ -89,7 +89,7 @@ export default function Header() {
                             <Link
                               key={s.slug}
                               href={href(`/services/${s.slug}`)}
-                              className="group/item rounded-xl px-4 py-3 transition-colors hover:bg-brand/[0.06]"
+                              className="group/item rounded-xl px-4 py-3 transition-colors text-lg font-normal hover:bg-brand/[0.06]"
                             >
                               <span className="flex items-center justify-between gap-2 text-sm font-semibold text-navy">
                                 {s.title}
@@ -133,7 +133,7 @@ export default function Header() {
                 <Link
                   key={item.href}
                   href={href(item.href)}
-                  className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+                  className={`rounded-full px-4 py-2 text-lg font-normal transition-colors ${
                     scrolled ? "text-navy hover:text-brand" : "text-white/85 hover:text-white"
                   }`}
                 >
