@@ -124,35 +124,6 @@ export function ServiceGrid() {
   );
 }
 
-export function ProjectGrid({ projects }: { projects: { title: string; body: string; category: string; image: string }[] }) {
-  return (
-    <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-      {projects.map((p, i) => (
-        <Reveal as="li" key={p.title} delay={i * 70} className="h-full">
-          <article className="glow-card group flex h-full flex-col overflow-hidden bg-white shadow-soft">
-            <div className="relative aspect-[4/3] overflow-hidden bg-navy/5">
-              <Image
-                src={p.image}
-                alt={p.title}
-                fill
-                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-              />
-              <span className="absolute left-4 top-4 rounded-full bg-white/90 px-3 py-1 text-[0.68rem] font-medium uppercase tracking-wider text-navy backdrop-blur">
-                {p.category}
-              </span>
-            </div>
-            <div className="flex flex-1 flex-col gap-2 p-6">
-              <h3 className="text-base font-semibold leading-snug text-navy">{p.title}</h3>
-              <p className="flex-1 text-sm leading-relaxed text-muted">{p.body}</p>
-            </div>
-          </article>
-        </Reveal>
-      ))}
-    </ul>
-  );
-}
-
 export function TestimonialsSection() {
   const { dict } = useDictionary();
 

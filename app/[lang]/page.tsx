@@ -2,10 +2,10 @@ import Link from "next/link";
 import Reveal from "@/components/Reveal";
 import CtaBand from "@/components/CtaBand";
 import HomeHero from "@/components/HomeHero";
-import ServiceScroll from "@/components/ServiceScroll";
+import ServicesGlass from "@/components/ServicesGlass";
+import ProjectStack from "@/components/ProjectStack";
 import {
   ClientsMarquee,
-  ProjectGrid,
   SplitShowcase,
   StatsSection,
   TestimonialsSection,
@@ -20,7 +20,7 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
 
   const dict = await getDictionary(lang);
   const href = (p: string) => `/${lang}${p === "/" ? "" : p}`;
-  const { stats, about, projects, clients, ui } = dict;
+  const { stats, about, clients, ui } = dict;
 
   return (
     <>
@@ -43,7 +43,7 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
         </div>
       </section>
 
-      <ServiceScroll
+      <ServicesGlass
         eyebrow={ui.expertise}
         title={lang === "fr" ? "Nos Services" : "Our Services"}
         body={
@@ -65,7 +65,7 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
             }
           />
           <div className="mt-14">
-            <ProjectGrid projects={projects} />
+            <ProjectStack />
           </div>
           <Reveal className="mt-12 flex justify-center">
             <ButtonLink href={href("/realisations")} variant="outline">

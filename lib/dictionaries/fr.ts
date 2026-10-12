@@ -488,6 +488,7 @@ export const ui = {
   discover: "Découvrir",
   learnMore: "En savoir plus sur nous",
   viewAllProjects: "Voir toutes nos réalisations",
+  viewAllServices: "Voir tous les services",
   discussProject: "Discutons de votre projet",
   presentation: "Présentation",
   ourOffer: "Notre offre",
