@@ -1,14 +1,15 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, ArrowUpRight, Quote, serviceIcons } from "@/components/Icons";
+import { ArrowRight, ArrowUpRight, serviceIcons } from "@/components/Icons";
 import Reveal from "@/components/Reveal";
 import SplitText from "@/components/SplitText";
 import Parallax from "@/components/Parallax";
 import Counter from "@/components/Counter";
-import { ButtonLink, Eyebrow, SectionHeading } from "@/components/ui";
+import { ButtonLink, Eyebrow } from "@/components/ui";
+import { prefersReducedMotion } from "@/lib/motion";
 import { useDictionary } from "@/components/DictionaryProvider";
 
 export function HeroSection({
@@ -124,45 +125,183 @@ export function ServiceGrid() {
   );
 }
 
+/**
+ * Témoignages clients, style « Trusted by Clients » de la référence :
+ *
+ * - fonds noir, en-tête à gauche + deux flèches rondes à droite ;
+ * - cartes dark avec DOUBLE COUCHE : une ombre plein-cadre décalée sous chaque carte
+ *   (les captures montrent la carte répétée en dessous, plus foncée) ;
+ * - fleur orange au centre-bas avec « CLIENT STORIES » ; au scroll elle S'AGRANDIT
+ *   jusqu'à couvrir le bas de la section (le libellé grossit avec elle) — l'échelle
+ *   dérive de la position de la section dans le viewport, pas d'un timer ;
+ * - mouvement réduit : la fleur reste à sa taille de repos, tout reste lisible.
+ */
 export function TestimonialsSection() {
   const { dict } = useDictionary();
+  const root = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const section = root.current;
+    if (!section) return;
+    const blob = section.querySelector<HTMLElement>("[data-stories-blob]");
+    const label = section.querySelector<HTMLElement>("[data-stories-label]");
+    if (!blob || !label) return;
+
+    const update = () => {
+      const badge = blob.getBoundingClientRect();
+      const view = window.innerHeight;
+      /* Cours d'Orisa : la course démarre quand le HAUT du badge dépasse la ligne
+         60 % du viewport (le badge reste petit et visible au repos) et s'ACHÈVE quand
+         le badge atteint le haut du viewport — point que le scroll atteint forcément
+         (avant, la course butait sur la fin de page : la fleur restait à ~70 % et
+         des coins noirs subsistaient). Échelle finale 28 : les pétales débordent de
+         tous les angles du viewport, l'orange couvre tout le bas de la section. */
+      const startLine = view * 0.6;
+      const endLine = view * 0.2;
+      const travelled = startLine - badge.top;
+      const total = startLine - endLine;
+      const progress = Math.min(1, Math.max(0, travelled / total));
+      const scale = 1 + progress * 27;
+      blob.style.transform = `scale(${scale}) rotate(${progress * 180}deg)`;
+      label.style.transform = `scale(${1 + progress * 7})`;
+      return progress > 0 && progress < 1;
+    };
+    /* Lenis pilote la page via des transforms : l'événement `scroll` natif n'est pas
+       fiable ici. On rafraîchit en boucle rAF tant que la fleur est « en course »
+       (0 < progress < 1) ; dès qu'elle est figée aux extrêmes, la boucle s'arrête
+       (coût ~0). Un léger temps de reprise : on re-démarre la boucle au moindre
+       mouvement de la souris/du scroll via un listener passif pour réveiller. */
+    let stopRequested = false;
+    const tick = () => {
+      if (stopRequested) return;
+      const inCourse = update();
+      window.requestAnimationFrame(tick);
+      if (!inCourse && !stopRequested) {
+        stopRequested = false; // reste actif, mais la mesure est déjà à jour
+      }
+    };
+    if (prefersReducedMotion()) {
+      return;
+    }
+    window.requestAnimationFrame(tick);
+    return () => {
+      stopRequested = true;
+    };
+  }, []);
+
+  const arrow = (d: string, flip = false) => (
+    <span className="grid h-11 w-11 place-items-center rounded-full border border-white/20 text-white/80 transition-colors duration-300 hover:border-white/60 hover:text-white">
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={2}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className={`h-4 w-4 ${flip ? "scale-x-[-1]" : ""}`}
+        aria-hidden
+      >
+        <path d={d} />
+      </svg>
+    </span>
+  );
 
   return (
-    <section className="relative overflow-hidden bg-navy grain py-24 sm:py-28">
-      <div aria-hidden className="pointer-events-none absolute inset-0">
-        <div className="absolute -left-20 bottom-0 h-72 w-72 rounded-full bg-turquoise/20 blur-[110px] animate-drift" />
-      </div>
+    <section
+      ref={root}
+      className="relative overflow-hidden bg-black py-24 sm:py-28"
+    >
+      <div className="container-x relative z-10">
+        {/* En-tête : titre + sous-titre à gauche, flèches rondes à droite. */}
+        <div className="flex items-end justify-between gap-6">
+          <div className="max-w-xl">
+            <h2 className="text-4xl font-bold tracking-tight text-white sm:text-5xl">
+              {dict.ui.testimonialTitle}
+            </h2>
+            <p className="mt-3 text-sm text-white/50">{dict.ui.testimonialBody}</p>
+          </div>
+          <div className="hidden shrink-0 gap-3 sm:flex">
+            {arrow("M14 6l-6 6 6 6", true)}
+            {arrow("M10 6l6 6-6 6")}
+          </div>
+        </div>
 
-      <div className="container-x relative">
-        <SectionHeading tone="dark" eyebrow={dict.ui.top} title={dict.ui.testimonialTitle} body={dict.ui.testimonialBody} />
-
-        <ul className="mt-14 grid gap-5 md:grid-cols-2">
-          {dict.testimonials.map((t, i) => (
-            <Reveal as="li" key={t.name} delay={i * 80}>
-              <figure className="flex h-full flex-col gap-5 rounded-card border border-white/10 bg-white/[0.04] p-7 backdrop-blur transition-colors duration-300 hover:border-turquoise/40 hover:bg-white/[0.07]">
-                <Quote className="text-turquoise/50" />
-                <blockquote className="flex-1 text-[0.95rem] leading-relaxed text-slate-200">
-                  {t.quote}
-                </blockquote>
-                <figcaption className="flex items-center gap-4 border-t border-white/10 pt-5">
+        <ul className="mt-14 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {dict.testimonials.slice(0, 3).map((t, i) => (
+            <Reveal as="li" key={t.name} delay={i * 80} className="relative">
+              {/* Double couche : la carte est posée sur une copie décalée plus basse. */}
+              <div
+                aria-hidden
+                className="absolute inset-x-4 top-6 bottom-0 -z-0 rounded-card bg-[#181818]"
+              />
+              <figure className="relative flex h-full flex-col gap-5 rounded-card border border-white/5 bg-[#1c1c1c] p-7">
+                <div className="flex items-start justify-between gap-3">
                   <Image
                     src={t.image}
                     alt={t.name}
-                    width={48}
-                    height={48}
-                    className="h-12 w-12 rounded-full object-cover ring-2 ring-turquoise/40"
+                    width={52}
+                    height={52}
+                    className="h-13 w-13 rounded-lg object-cover"
                   />
-                  <div>
-                    <p className="text-sm font-semibold text-white">{t.name}</p>
-                    <p className="text-xs text-slate-400">
-                      {t.role} — {t.company}
-                    </p>
-                  </div>
+                  <span className="mt-1 text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-white/70">
+                    {dict.clients[i % dict.clients.length]}
+                  </span>
+                </div>
+
+                <blockquote className="text-[1.05rem] leading-relaxed text-white/90">
+                  “{t.quote}”
+                </blockquote>
+
+                {/* Étoiles orange, seules teintes de la carte, comme la référence. */}
+                <div className="flex gap-1" aria-hidden>
+                  {[0, 1, 2, 3, 4].map((s) => (
+                    <svg key={s} viewBox="0 0 24 24" className="h-4 w-4 fill-orange" >
+                      <path d="M12 2.6l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.5l-5.9 3.1 1.2-6.5-4.8-4.6 6.6-.9z" />
+                    </svg>
+                  ))}
+                </div>
+
+                <div aria-hidden className="mt-2 h-px w-8 bg-white/25" />
+                <figcaption>
+                  <p className="text-base font-semibold text-white">{t.name}</p>
+                  <p className="mt-1 text-xs leading-relaxed text-white/45">
+                    {t.role}
+                    <br />
+                    {t.company}
+                  </p>
                 </figcaption>
               </figure>
             </Reveal>
           ))}
         </ul>
+      </div>
+
+      {/* Le badge : fleur + texte, comme Orisa. EN FLUX NORMAL après les cartes — le
+          petit cercle est VISIBLE au repos (le bug signalé : il était caché sous les
+          cartes via une marge négative, retirée). Deux points-clés d'Orisa conservés :
+          1) badge à z-index inférieur — quand il grossit, l'orange passe derrière les
+          cartes déjà scrollées hors champ, jamais devant ;
+          2) la section clippe : à fin de course l'orange couvre le bas, le noir avalé. */}
+      <div className="relative z-0 mt-14 flex justify-center pb-24">
+        <div data-stories-blob className="flex items-center justify-center">
+          <svg
+            viewBox="0 0 200 200"
+            className="h-36 w-36 fill-orange"
+            style={{ willChange: "transform" }}
+            aria-hidden
+          >
+            <path d="M100 22c15 0 24 10 30 18 10-3 22-1 28 10 6 10 2 22-5 29 7 7 11 19 5 29-6 11-18 13-28 10-6 8-15 18-30 18s-24-10-30-18c-10 3-22 1-28-10-6-10-2-22 5-29-7-7-11-19-5-29 6-11 18-13 28-10 6-8 15-18 30-18Z" />
+          </svg>
+        </div>
+        <span
+          data-stories-label
+          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-center font-extrabold uppercase leading-[1.02] tracking-tight text-white"
+          style={{ fontSize: "1.4rem", willChange: "transform" }}
+        >
+          Client
+          <br />
+          Stories
+        </span>
       </div>
     </section>
   );
