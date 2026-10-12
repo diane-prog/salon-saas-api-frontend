@@ -44,7 +44,7 @@ export default function HomeHero() {
           {allowVideo && (
             <video
               className="absolute inset-0 h-full w-full object-cover object-center"
-              src="/img/video.mp4"
+              src="/img/video-d.mp4"
               autoPlay
               muted
               loop
@@ -77,7 +77,7 @@ export default function HomeHero() {
               text={hero.lead}
               delay={0.12}
               stagger={0.06}
-              className="max-w-3xl font-medium text-4xl leading-[1.06] text-white [text-shadow:0_1px_2px_rgb(0_9_42_/_0.45),0_6px_24px_rgb(0_9_42_/_0.35)] sm:text-5xl lg:text-[4.25rem] lg:leading-[1.02]"
+              className="max-w-3xl font-normal text-4xl leading-[1.06] text-white [text-shadow:0_1px_2px_rgb(0_9_42_/_0.45),0_6px_24px_rgb(0_9_42_/_0.35)] sm:text-5xl lg:text-[4.25rem] lg:leading-[1.02]"
             />
 
             <p className="max-w-xl text-base leading-relaxed text-white [text-shadow:0_1px_2px_rgb(0_9_42_/_0.45),0_6px_24px_rgb(0_9_42_/_0.35)] sm:text-lg">

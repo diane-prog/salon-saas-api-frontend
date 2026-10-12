@@ -8,17 +8,15 @@ import SmoothScroll from "@/components/SmoothScroll";
 import { getDictionary, isLocale, localePath, locales, localeTags } from "@/lib/dictionaries";
 import { SITE_URL } from "@/lib/seo";
 import type { Metadata } from "next";
-import { Arimo } from "next/font/google";
+import { Plus_Jakarta_Sans, Space_Grotesk } from "next/font/google";
 import { notFound } from "next/navigation";
 import "../globals.css";
 
-/* PP Neue Montreal (Pangram Pangram) est une police commerciale, non disponible sur Google
-   Fonts. On s'appuie donc sur son modèle revendiqué — Helvetica — via Arimo, un clone libre
-   aux chasses et à l'interlignage identiques, servi en self-hosted par Next pour un rendu
-   identique sur tous les appareils (Windows et Android n'ont pas de vrai Helvetica).
-   Variable 400 → 700 : couvre les graisses réellement utilisées par le site. */
-const arimo = Arimo({
-  variable: "--font-arimo",
+/* Police du site : Plus Jakarta Sans, servie en self-hosted par Next (aucune requête vers
+   Google depuis le navigateur). Variable 200 → 800, donc un seul fichier qui couvre toutes
+   les graisses du site, `font-light` jusqu'à `font-extrabold` compris. */
+const jakarta = Space_Grotesk({
+  variable: "--font-jakarta",
   subsets: ["latin"],
   weight: "variable",
   display: "swap",
@@ -124,7 +122,7 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[la
   };
 
   return (
-    <html lang={localeTags[lang]} className={`${arimo.variable} h-full antialiased`} suppressHydrationWarning>
+    <html lang={localeTags[lang]} className={`${jakarta.variable} h-full antialiased`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: jsFlag }} />
         <link rel="alternate" hrefLang="x-default" href={`${SITE_URL}${localePath(defaultLang)}`} />

@@ -134,6 +134,8 @@ export function ServiceGrid() {
  * - fleur orange au centre-bas avec « CLIENT STORIES » ; au scroll elle S'AGRANDIT
  *   jusqu'à couvrir le bas de la section (le libellé grossit avec elle) — l'échelle
  *   dérive de la position de la section dans le viewport, pas d'un timer ;
+ *   à la remontée la progression redescend, donc la fleur RÉTRÉCIT et retrouve sa
+ *   taille de repos une fois la section revenue en bas du viewport ;
  * - mouvement réduit : la fleur reste à sa taille de repos, tout reste lisible.
  */
 export function TestimonialsSection() {
@@ -147,14 +149,20 @@ export function TestimonialsSection() {
     if (!section) return;
     const blob = section.querySelector<HTMLElement>("[data-stories-blob]");
     const label = section.querySelector<HTMLElement>("[data-stories-label]");
-    if (!blob || !label) return;
+    /* La MESURE se fait sur le conteneur, jamais sur la fleur : le rect d'un
+       élément transformé est renvoyé DÉJÀ transformé. En lisant `blob`, un
+       scale(18) remontait son `top` de ~1200 px et la progression restait
+       bloquée à 1 à la remontée (la fleur ne rétrécissait plus). Le conteneur,
+       lui, n'est jamais transformé : sa position reflète le layout réel. */
+    const anchor = section.querySelector<HTMLElement>("[data-stories-anchor]");
+    if (!blob || !label || !anchor) return;
 
     /* Échelle finale ciblée : la fleur doit couvrir LE BAS DE LA SECTION — pas
        l'écran entier. La hauteur de la zone basse ≈ 16rem (badge + paddings) ; la
        fleur de 9rem doit faire ~160rem de large pour couvrir tous les angles de
        cette bande : scale final 18 suffit, on reste sobre. */
     const update = () => {
-      const badge = blob.getBoundingClientRect();
+      const badge = anchor.getBoundingClientRect();
       const view = window.innerHeight;
       const startLine = view * 0.6;
       const endLine = view * 0.05;
@@ -173,22 +181,20 @@ export function TestimonialsSection() {
       const progress = smoothed.current;
       const scale = 1 + progress * 17;
       blob.style.transform = `scale(${scale}) rotate(${progress * 180}deg)`;
+      /* Pas de translate ici : en Tailwind v4, `-translate-x-1/2 -translate-y-1/2`
+         s'applique via la propriété `translate` (indépendante de `transform`),
+         donc le centrage du libellé survit à ce transform — le dupliquer ici
+         décalait le texte de ~41 px. */
       label.style.transform = `scale(${1 + progress * 7})`;
-      return progress > 0.001 && progress < 0.999;
     };
     /* Lenis pilote la page via des transforms : l'événement `scroll` natif n'est pas
-       fiable ici. On rafraîchit en boucle rAF tant que la fleur est « en course »
-       (0 < progress < 1) ; dès qu'elle est figée aux extrêmes, la boucle s'arrête
-       (coût ~0). Un léger temps de reprise : on re-démarre la boucle au moindre
-       mouvement de la souris/du scroll via un listener passif pour réveiller. */
+       fiable ici. On rafraîchit donc en boucle rAF — la mesure est ainsi toujours à
+       jour, dans les deux sens (descente ET remontée). */
     let stopRequested = false;
     const tick = () => {
       if (stopRequested) return;
-      const inCourse = update();
+      update();
       window.requestAnimationFrame(tick);
-      if (!inCourse && !stopRequested) {
-        stopRequested = false; // reste actif, mais la mesure est déjà à jour
-      }
     };
     if (prefersReducedMotion()) {
       return;
@@ -292,7 +298,7 @@ export function TestimonialsSection() {
           1) badge à z-index inférieur — quand il grossit, l'orange passe derrière les
           cartes déjà scrollées hors champ, jamais devant ;
           2) la section clippe : à fin de course l'orange couvre le bas, le noir avalé. */}
-      <div className="relative z-0 mt-14 flex justify-center pb-24">
+      <div data-stories-anchor className="relative z-0 mt-14 flex justify-center pb-24">
         <div data-stories-blob className="flex items-center justify-center">
           <svg
             viewBox="0 0 200 200"
