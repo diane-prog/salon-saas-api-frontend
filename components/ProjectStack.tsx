@@ -1,74 +1,115 @@
 "use client";
 
 import Image from "next/image";
-import Parallax from "@/components/Parallax";
+import Link from "next/link";
 import Reveal from "@/components/Reveal";
 import { useDictionary } from "@/components/DictionaryProvider";
 
 /**
- * Réalisations en cartes empilées « overlapping ».
+ * Réalisations : une galerie en colonnes décalées, façon masonry editorial.
  *
- * Chaque carte est un grand visuel qui se chevauche avec la précédente (marge négative :
- * la carte suivante passe par-dessus le bas de l'ancienne, coins arrondis qui s'emboîtent)
- * et se décale alternativement d'un côté puis de l'autre. La catégorie se pose en pastille
- * de verre, le titre et le résumé en bas à gauche sur un voile navy.
+ * Chaque projet est une carte de hauteur variable — la hauteur est fixée dans
+ * `HEIGHTS` plutôt que laissée à `aspect-ratio`, c'est ce qui produit l'irrégularité
+ * de la référence. Les colonnes montent en décalé : chaque bloc est poussé vers le
+ * bas d'une hauteur croissante, d'où l'effet de Cascade.
  *
- * Le décalage et le chevauchement n'existent qu'à partir de `lg` : sur mobile les cartes
- * s'enchaînent simplement, pleine largeur.
+ * Les citations de clients sont mêlées aux projets : elles occupent une carte de la
+ * grille, ce qui casse la régularité des images et donne le rythme de la maquette.
  */
+
+/** Hauteurs des cartes de projet, en multiples de 30rem, dans l'ordre du flux. */
+const HEIGHTS = [1.15, 0.78, 0.95, 1.28, 0.85, 1.05, 0.72, 1.2];
+
+/** Poussée verticale de chaque bloc, en rem : c'est le décalage en cascade. */
+const DROP_CLASSES = ["", "mt-12", "mt-6", "mt-20", "mt-10", "mt-16", "mt-4"];
+
 export default function ProjectStack() {
-  const { dict } = useDictionary();
-  const { projects } = dict;
-  const count = projects.length;
+  const { dict, locale } = useDictionary();
+  const { projects, testimonials, ui } = dict;
+
+  /* On alterne projet et citation pour obtenir une grille irrégulière. */
+  const items: ({ kind: "project" | "quote"; index: number })[] = [];
+  projects.forEach((_, index) => {
+    items.push({ kind: "project", index });
+    if (index === 2 || index === 4) items.push({ kind: "quote", index: index - 2 });
+  });
 
   return (
-    <ul className="mx-auto flex max-w-[64rem] flex-col gap-6 sm:gap-8 lg:gap-0">
-      {projects.map((project, index) => (
-        <Reveal
-          as="li"
-          key={`${project.title}-${index}`}
-          delay={index * 60}
-          className={`relative ${index > 0 ? "lg:-mt-8" : ""}`}
-        >
-          <article
-            className={`group relative h-[clamp(16rem,46vh,26rem)] overflow-hidden rounded-[1.5rem] bg-navy shadow-lift ${
-              index % 2 === 0 ? "lg:ml-[7%]" : "lg:mr-[7%]"
-            }`}
-          >
-            <Parallax className="absolute inset-0" amount={5} scale={1.12}>
-              <Image
-                src={project.image}
-                alt={project.title}
-                fill
-                sizes="(max-width: 1024px) 100vw, 72vw"
-                className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
-              />
-            </Parallax>
+    <div className="container-x">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-5">
+        {items.map((item, position) => {
+          const drop = DROP_CLASSES[position % DROP_CLASSES.length];
 
-            <div
-              aria-hidden
-              className="absolute inset-0 bg-gradient-to-t from-navy/85 via-navy/25 to-navy/5"
-            />
+          if (item.kind === "quote") {
+            const quote = testimonials[item.index % testimonials.length];
+            return (
+              <Reveal
+                key={`quote-${position}`}
+                delay={position * 50}
+                className={`flex ${drop}`}
+              >
+                <figure className="flex h-full w-full flex-col justify-end rounded-2xl bg-navy p-6 shadow-soft">
+                  <blockquote className="text-base leading-relaxed text-white/85">
+                    “{quote.quote}”
+                  </blockquote>
+                  <figcaption className="mt-5 text-xs font-medium uppercase tracking-[0.16em] text-white/50">
+                    {quote.name} — {quote.company}
+                  </figcaption>
+                </figure>
+              </Reveal>
+            );
+          }
 
-            <span className="absolute left-5 top-5 text-[0.68rem] font-medium tabular-nums tracking-[0.22em] text-white/60 sm:left-7 sm:top-7">
-              {String(index + 1).padStart(2, "0")} / {String(count).padStart(2, "0")}
-            </span>
+          const project = projects[item.index];
+          const height = HEIGHTS[item.index % HEIGHTS.length];
 
-            <span className="absolute right-5 top-5 rounded-full bg-white/10 px-3.5 py-1.5 text-[0.68rem] font-medium uppercase tracking-[0.16em] text-white ring-1 ring-white/30 backdrop-blur sm:right-7 sm:top-7">
-              {project.category}
-            </span>
+          return (
+            <Reveal
+              key={project.title}
+              delay={position * 50}
+              className={`flex ${drop}`}
+            >
+              <Link
+                href={`/${locale}/realisations`}
+                className="group relative block w-full overflow-hidden rounded-2xl bg-navy shadow-soft"
+                style={{ height: `calc(${height} * 30rem)` }}
+              >
+                <Image
+                  src={project.image}
+                  alt={project.title}
+                  fill
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                  className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.05]"
+                />
 
-            {/* Le texte remonte à `lg` : la carte suivante recouvre le bas de celle-ci. */}
-            <div className="absolute inset-x-5 bottom-5 sm:inset-x-7 sm:bottom-7 lg:bottom-14">
-              <span aria-hidden className="mb-4 block h-px w-8 bg-white/50" />
-              <h3 className="max-w-lg text-lg font-semibold leading-snug text-white sm:text-xl">
-                {project.title}
-              </h3>
-              <p className="mt-2 max-w-md text-sm leading-relaxed text-white/70">{project.body}</p>
-            </div>
-          </article>
-        </Reveal>
-      ))}
-    </ul>
+                <div
+                  aria-hidden
+                  className="absolute inset-0 bg-gradient-to-t from-navy/90 via-navy/15 to-transparent"
+                />
+
+                {/* Bouton play, comme sur la maquette. */}
+                <span
+                  aria-hidden
+                  className="absolute left-1/2 top-1/2 grid h-14 w-14 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-navy/45 text-white ring-1 ring-white/40 backdrop-blur-sm transition-colors duration-300 group-hover:bg-navy/70"
+                >
+                  <svg viewBox="0 0 24 24" className="ml-0.5 h-5 w-5" fill="currentColor">
+                    <path d="M8 5.5v13l11-6.5-11-6.5Z" />
+                  </svg>
+                </span>
+
+                <div className="absolute inset-x-5 bottom-5">
+                  <h3 className="text-lg font-semibold leading-snug text-white">{project.title}</h3>
+                  <p className="mt-1 text-xs uppercase tracking-[0.14em] text-white/60">
+                    {project.category}
+                  </p>
+                </div>
+              </Link>
+            </Reveal>
+          );
+        })}
+      </div>
+
+      <p className="mt-12 text-center text-sm text-muted">{ui.viewAllProjects}</p>
+    </div>
   );
 }

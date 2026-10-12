@@ -3,14 +3,14 @@ import Reveal from "@/components/Reveal";
 import CtaBand from "@/components/CtaBand";
 import HomeHero from "@/components/HomeHero";
 import ServicesGlass from "@/components/ServicesGlass";
-import ProjectStack from "@/components/ProjectStack";
+import ProjectCommunity from "@/components/ProjectCommunity";
 import {
   ClientsMarquee,
   SplitShowcase,
   StatsSection,
   TestimonialsSection,
 } from "@/components/sections";
-import { ButtonLink, SectionHeading } from "@/components/ui";
+import { SectionHeading } from "@/components/ui";
 import { notFound } from "next/navigation";
 import { isLocale, getDictionary } from "@/lib/dictionaries";
 
@@ -53,27 +53,7 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
         }
       />
 
-      <section className="py-24 sm:py-28">
-        <div className="container-x">
-          <SectionHeading
-            eyebrow={ui.portfolio}
-            title={lang === "fr" ? "Nos réalisations" : "Our work"}
-            body={
-              lang === "fr"
-                ? "Découvrez quelques-uns de nos projets qui ont transformé la présence digitale de nos clients."
-                : "Discover some of the projects that have transformed our clients' digital presence."
-            }
-          />
-          <div className="mt-14">
-            <ProjectStack />
-          </div>
-          <Reveal className="mt-12 flex justify-center">
-            <ButtonLink href={href("/realisations")} variant="outline">
-              {ui.viewAllProjects}
-            </ButtonLink>
-          </Reveal>
-        </div>
-      </section>
+      <ProjectCommunity />
 
       <section className="py-20">
         <div className="container-x">

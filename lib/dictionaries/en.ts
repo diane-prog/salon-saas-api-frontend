@@ -493,6 +493,9 @@ export const ui = {
   presentation: "Overview",
   ourOffer: "Our offer",
   portfolio: "Portfolio",
+  projectsHeading: "Projects that transformed our clients' presence",
+  projectsBody:
+    "From brand identity to websites, every project is a tailor-made answer to a precise goal.",
   references: "References",
   testimonialTitle: "Testimonials",
   testimonialBody: "See what our clients say about working with LEEGI Group.",

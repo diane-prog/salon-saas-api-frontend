@@ -492,6 +492,9 @@ export const ui = {
   presentation: "Présentation",
   ourOffer: "Notre offre",
   portfolio: "Portfolio",
+  projectsHeading: "Des projets qui ont transformé la présence de nos clients",
+  projectsBody:
+    "De l'identité de marque au site web, chaque projet est une réponse sur-mesure à un objectif précis.",
   references: "Références",
   testimonialTitle: "Nos Témoignage",
   testimonialBody: "Découvrez ce que nos clients disent de leur collaboration avec LEGI Groupe.",

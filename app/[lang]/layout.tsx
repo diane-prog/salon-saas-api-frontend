@@ -8,7 +8,7 @@ import SmoothScroll from "@/components/SmoothScroll";
 import { getDictionary, isLocale, localePath, locales, localeTags } from "@/lib/dictionaries";
 import { SITE_URL } from "@/lib/seo";
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans, Raleway } from "next/font/google";
+import { Inter, Plus_Jakarta_Sans, Raleway } from "next/font/google";
 import { notFound } from "next/navigation";
 import "../globals.css";
 

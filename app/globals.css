@@ -32,6 +32,44 @@
   }
 }
 
+/* Mur « communauté » : colonnes masonry qui défilent en boucle fermée. Chaque bande
+   contient ses colonnes en double et translate de -50 %, la largeur d'une pile : le
+   rebouclage est invisible. Pause au survol et au clavier-focus. */
+.community-track {
+  animation: marquee var(--marquee-duration, 40s) linear infinite;
+}
+
+.community-row:hover .community-track,
+.community-row:focus-within .community-track {
+  animation-play-state: paused;
+}
+
+/* Fondus latéraux, teintés de la couleur du fond clair de la section. */
+.community-fades {
+  position: relative;
+}
+
+.community-fades::before,
+.community-fades::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 8rem;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.community-fades::before {
+  left: 0;
+  background: linear-gradient(to right, #d3dfe8, transparent);
+}
+
+.community-fades::after {
+  right: 0;
+  background: linear-gradient(to left, #d3dfe8, transparent);
+}
+
 @keyframes float {
   0%,
   100% {
