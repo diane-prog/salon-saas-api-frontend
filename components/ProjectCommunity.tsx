@@ -65,7 +65,7 @@ function MediaCard({ card }: { card: Extract<Card, { kind: "project" }> }) {
   return (
     <a
       href={`/${locale}/realisations`}
-      className="group relative block h-full w-full overflow-hidden rounded-[0.9rem] shadow-lift transition-transform duration-300 ease-out group-hover:scale-[1.03]"
+      className="group relative block h-full w-full overflow-hidden rounded-[0.9rem] transition-transform duration-300 ease-out group-hover:scale-[1.03]"
     >
       <Image
         src={project.image}
@@ -112,13 +112,17 @@ function MediaCard({ card }: { card: Extract<Card, { kind: "project" }> }) {
  * Carte citation : verre LÉGER — le fond ne fait que teinter ce qui passe derrière,
  * le texte est court et borné (aucun débordement), étoile en bas à droite.
  */
+/**
+ * Carte citation : léger flou seulement — la carte se contente de brouiller ce qui
+ * passe derrière, quasi sans teinte (mêmes valeurs que le voile des cartes services).
+ */
 function QuoteCardView({ card }: { card: Extract<Card, { kind: "quote" }> }) {
   const { dict } = useDictionary();
   const quote = dict.testimonials[card.index % dict.testimonials.length];
 
   return (
-    <figure className="flex h-full w-full flex-col justify-between overflow-hidden rounded-[0.9rem] border border-white/20 bg-navy/30 p-5 backdrop-blur-md transition-transform duration-300 ease-out group-hover:scale-[1.03]">
-      <blockquote className="line-clamp-3 text-[0.9rem] leading-snug text-white/90">
+    <figure className="flex h-full w-full flex-col justify-between overflow-hidden rounded-[0.9rem] border border-navy/10 bg-navy/25 p-5 backdrop-blur-xl transition-all duration-300 hover:border-navy/20 hover:bg-navy/35 group-hover:scale-[1.03]">
+      <blockquote className="line-clamp-3 text-[0.9rem] leading-snug text-white ">
         “{quote.quote}”
       </blockquote>
       <div className="mt-3 flex items-end justify-between gap-3">
@@ -153,7 +157,7 @@ function PortraitCard({ card }: { card: Extract<Card, { kind: "video" }> }) {
   return (
     <a
       href={`/${locale}/realisations`}
-      className="group relative block h-full w-full overflow-hidden rounded-[0.9rem] shadow-lift transition-transform duration-300 ease-out group-hover:scale-[1.03]"
+      className="group relative block h-full w-full overflow-hidden rounded-[0.9rem] transition-transform duration-300 ease-out group-hover:scale-[1.03]"
     >
       <Image
         src={quote.image}
@@ -255,33 +259,47 @@ export default function ProjectCommunity() {
         } as React.CSSProperties
       }
     >
-      {/* Bande grise derrière l'en-tête, comme la zone plus grise du haut de la réf. */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 h-72 bg-gradient-to-b from-[#9db2c0]/45 to-transparent"
-      />
+      {/* Fond : l'image floutée COUVRE TOUTE la section (pas de boîte centrée — c'est
+          le carré qui apparaissait au milieu) + un voile clair qui unifie. */}
+      <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="absolute inset-0">
+          <Image
+            src="/img/hero3.png"
+            alt=""
+            fill
+            sizes="100vw"
+            className="object-cover"
+            style={{
+              transform: "scale(1.2)",
+              filter: "blur(80px)",
+            }}
+          />
+        </div>
+        <div className="absolute inset-0 bg-[#e8eef4]/65" />
+      </div>
 
-      {/* En-tête : titre NU sur deux lignes, 1re claire / 2e atténuée, comme la réf. */}
-      <div className="relative mx-auto max-w-[58rem] px-6">
-        <h2 className="text-4xl leading-[1.14] text-white [text-shadow:0_1px_14px_rgb(15_23_42_/_0.18)] sm:text-5xl">
+      {/* En-tête : titre NU sur deux lignes, 1re claire / 2e atténuée, dans le cadre
+          latéral à filets discrets (comme la section services). */}
+      <div className="relative mx-auto max-w-[80rem] border-x border-navy/10 px-6 pt-2">
+        <h2 className="text-4xl leading-[1.14] text-navy sm:text-5xl">
           <span className="block">{words.slice(0, splitAt).join(" ")}</span>
-          <span className="block text-white/50 [text-shadow:none]">
-            {words.slice(splitAt).join(" ")}
-          </span>
+          <span className="block text-navy/50">{words.slice(splitAt).join(" ")}</span>
         </h2>
       </div>
 
-      {/* Filet horizontal sous l'en-tête, sur toute la largeur. */}
-      <div aria-hidden className="mt-8 h-px w-full bg-white/45" />
+      {/* Filet horizontal sous l'en-tête + filets verticaux du cadre : discrets,
+          comme la section services. Le carré signalé n'était pas ce cadre mais la
+          boîte d'image floutée centrée — remplacée par un flou pleine section. */}
+      <div aria-hidden className="mx-auto mt-8 h-px w-full max-w-[80rem] bg-navy/10" />
 
-      {/* Filets verticaux : ils bornent la zone centrale, les cartes passent au-delà. */}
+      {/* Filets verticaux bornant la zone centrale. */}
       <div
         aria-hidden
-        className="pointer-events-none absolute bottom-0 top-[10.5rem] left-[calc(50%-29rem)] hidden w-px bg-white/40 lg:block"
+        className="pointer-events-none absolute bottom-0 top-[9.5rem] left-[calc(50%-40rem)] hidden w-px bg-navy/10 lg:block"
       />
       <div
         aria-hidden
-        className="pointer-events-none absolute bottom-0 top-[10.5rem] right-[calc(50%-29rem)] hidden w-px bg-white/40 lg:block"
+        className="pointer-events-none absolute bottom-0 top-[9.5rem] right-[calc(50%-40rem)] hidden w-px bg-navy/10 lg:block"
       />
 
       {/* Mur défilant : UNE seule rangée droite → gauche, fondus latéraux clairs. */}

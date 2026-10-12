@@ -333,6 +333,20 @@ export const aboutPage = {
     { title: "Créativité percutante", body: "Contenus qui attirent et marquent les esprits." },
     { title: "Résultats concrets", body: "Visibilité accrue et crédibilité renforcée." },
   ],
+  whyEyebrow: "Pourquoi travailler avec nous",
+  whyStatements: [
+    "Votre stratégie est pensée sur mesure",
+    "Vos contenus captent et marquent les esprits",
+    "Vous collaborez avec une équipe dédiée",
+    "Vos résultats sont mesurables, pas promis",
+    "Vous gagnez en visibilité, durables",
+  ],
+  whyImage: "/img/partenaires.jpg",
+  whyBadge: "éequipe disponible",
+  whyOpenings: [
+    { label: "Stratégie de marque", detail: "Positionnement, plateforme et messages" },
+    { label: "Campagne digitale", detail: "Contenus, reels et spots publicitaires" },
+  ],
   mission: {
     title: "Notre mission",
     body: "Aider les entreprises à devenir visibles, crédibles et impactantes. Nous croyons que chaque marque mérite une stratégie à la hauteur de ses ambitions.",

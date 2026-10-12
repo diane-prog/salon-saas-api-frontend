@@ -334,6 +334,20 @@ export const aboutPage = {
     { title: "Impactful creativity", body: "Content that attracts and stays in people's minds." },
     { title: "Concrete results", body: "Increased visibility and stronger credibility." },
   ],
+  whyEyebrow: "Why work with us",
+  whyStatements: [
+    "Your strategy is designed around you",
+    "Your content captures and stays in minds",
+    "You work with a dedicated team",
+    "Your results are measured, not promised",
+    "You gain visibility that lasts",
+  ],
+  whyImage: "/img/partenaires.jpg",
+  whyBadge: "Team available",
+  whyOpenings: [
+    { label: "Brand strategy", detail: "Positioning, platform and messaging" },
+    { label: "Digital campaign", detail: "Content, reels and ad spots" },
+  ],
   mission: {
     title: "Our mission",
     body: "To help businesses become visible, credible and impactful. We believe every brand deserves a strategy that matches its ambitions.",

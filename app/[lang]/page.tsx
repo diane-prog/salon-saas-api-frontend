@@ -3,10 +3,10 @@ import Reveal from "@/components/Reveal";
 import CtaBand from "@/components/CtaBand";
 import HomeHero from "@/components/HomeHero";
 import ServicesGlass from "@/components/ServicesGlass";
+import WhyStatements from "@/components/WhyStatements";
 import ProjectCommunity from "@/components/ProjectCommunity";
 import {
   ClientsMarquee,
-  SplitShowcase,
   StatsSection,
   TestimonialsSection,
 } from "@/components/sections";
@@ -20,7 +20,7 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
 
   const dict = await getDictionary(lang);
   const href = (p: string) => `/${lang}${p === "/" ? "" : p}`;
-  const { stats, about, clients, ui } = dict;
+  const { stats, clients, ui } = dict;
 
   return (
     <>
@@ -28,20 +28,10 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
 
       <StatsSection stats={stats} />
 
-      <section className="py-24 sm:py-28">
-        <div className="container-x">
-          <SplitShowcase
-            eyebrow={about.title}
-            title={about.heading}
-            body={about.body}
-            points={about.points}
-            image="/img/partenaires.jpg"
-            imageAlt="Leegi Group"
-            href={href("/a-propos")}
-            ctaLabel={ui.learnMore}
-          />
-        </div>
-      </section>
+      {/* Section « À propos » style Careers : eyebrow à gauche, phrases animées au
+          centre, photo + carte de verre à droite. Pas de gros titre : l'eyebrow du
+          composant occupe la zone de gauche, comme « WHY WORK WITH US » dans la réf. */}
+      <WhyStatements />
 
       <ServicesGlass
         eyebrow={ui.expertise}
