@@ -2,14 +2,15 @@
  * Clients du site (murs de logos de l'accueil).
  *
  * La liste vient du site de référence `leegigroup.com` : les douze logos de son carrousel
- * « Nos Clients ». Les fichiers d'origine sont des images à fond clair ; ils ont été
- * détourés et passés en blanc pour tenir dans les pastilles sombres (même traitement que
- * la référence visuelle) — d'où les noms des fichiers ici, indépendants des originaux.
+ * « Nos Clients ». Les fichiers d'origine sont des visuels à fond clair ; chacun a été
+ * recadré sur son contenu et détouré (fond retiré) pour tenir sur une tuile blanche, sauf
+ * l'emblème circulaire du dernier, à fond sombre, gardé tel quel — il fait une tuile
+ * foncée, comme la pastille noire de la référence. D'où des fichiers ici nommés d'après
+ * le client et non d'après les originaux (« 1.png », « 2.png »…).
  *
  * `width` / `height` sont les dimensions des fichiers livrés : Next les utilise pour
  * réserver la place de l'image (aucun décalage à l'affichage) et le rapport largeur /
- * hauteur donne à chaque pastille sa largeur naturelle — c'est ce qui rend le mur
- * irrégulier, comme sur la référence.
+ * hauteur est celui du logotype — les tuiles le respectent, elles ne déforment rien.
  *
  * Les noms ont été relevés sur les logos eux-mêmes (les fichiers du carrousel d'origine
  * sont nommés « 1.png », « 2.png »… et leurs `alt` sont vides). Un emblème circulaire n'a

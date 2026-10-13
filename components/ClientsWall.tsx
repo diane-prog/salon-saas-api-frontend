@@ -25,20 +25,28 @@ import { observeReveal } from "@/lib/reveal";
  * ainsi avec la révélation (qui, elle, écrit `transform`) sans que l'une écrase l'autre.
  */
 
-/** Une entrée par tuile : où elle se pose (en % du champ) et comment elle penche. */
+/**
+ * Une entrée par tuile : où elle se pose (en % du champ) et comment elle penche.
+ *
+ * `logo` est une BOÎTE (largeur et hauteur fixes, `object-contain` dessus) et non une
+ * hauteur : les logotypes livrés vont du bandeau très large (256 × 105) au carré (196 ×
+ * 196), et les caler sur une même hauteur donnerait des cartes de 65 px pour les uns et
+ * de 100 px pour les autres, avec un logo minuscule dedans. Dans une boîte, chacun occupe
+ * la même place optique et les cartes restent de tailles voisines.
+ */
 const PLACEMENT: { left?: string; right?: string; top: string; rotate: number; logo: string }[] = [
-  { left: "13%", top: "2%", rotate: -6, logo: "h-6" },
-  { left: "41%", top: "6%", rotate: 4, logo: "h-5" },
-  { right: "12%", top: "3%", rotate: 7, logo: "h-6" },
-  { left: "1%", top: "27%", rotate: -3, logo: "h-6" },
-  { left: "3%", top: "50%", rotate: 5, logo: "h-5" },
-  { left: "0%", top: "72%", rotate: -5, logo: "h-6" },
-  { right: "3%", top: "24%", rotate: 3, logo: "h-6" },
-  { right: "1%", top: "49%", rotate: -4, logo: "h-5" },
-  { right: "6%", top: "72%", rotate: 8, logo: "h-7" },
-  { left: "23%", top: "86%", rotate: -2, logo: "h-6" },
-  { left: "49%", top: "90%", rotate: 5, logo: "h-6" },
-  { right: "21%", top: "85%", rotate: -6, logo: "h-6" },
+  { left: "12%", top: "2%", rotate: -6, logo: "h-9 w-[4.75rem]" },
+  { left: "41%", top: "7%", rotate: 4, logo: "h-9 w-[4.75rem]" },
+  { right: "11%", top: "2%", rotate: 7, logo: "h-11 w-24" },
+  { left: "1%", top: "27%", rotate: -3, logo: "h-11 w-24" },
+  { left: "3%", top: "51%", rotate: 5, logo: "h-8 w-16" },
+  { left: "0%", top: "73%", rotate: -5, logo: "h-9 w-[4.75rem]" },
+  { right: "3%", top: "24%", rotate: 3, logo: "h-9 w-[4.75rem]" },
+  { right: "0%", top: "49%", rotate: -4, logo: "h-8 w-16" },
+  { right: "5%", top: "72%", rotate: 8, logo: "h-11 w-24" },
+  { left: "22%", top: "85%", rotate: -2, logo: "h-9 w-[4.75rem]" },
+  { left: "48%", top: "89%", rotate: 5, logo: "h-9 w-[4.75rem]" },
+  { right: "20%", top: "84%", rotate: -6, logo: "h-9 w-[4.75rem]" },
 ];
 
 /** Pastilles de contexte : ce que nous avons fait pour ce client (d'après nos réalisations). */
@@ -130,14 +138,14 @@ export default function ClientsWall({
                 >
                   <div
                     title={client.name}
-                    className="relative flex items-center justify-center rounded-2xl bg-white px-5 py-4 shadow-soft ring-1 ring-navy/5 lg:shadow-lift"
+                    className="relative flex items-center justify-center rounded-2xl bg-white px-4 py-3.5 shadow-soft ring-1 ring-navy/5 lg:shadow-lift"
                   >
                     <Image
                       src={client.src}
                       alt={client.name}
                       width={client.width}
                       height={client.height}
-                      className={`w-auto ${spot.logo}`}
+                      className={`object-contain ${spot.logo}`}
                     />
                     {tag ? (
                       <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-navy px-2.5 py-1 text-[0.6rem] font-medium uppercase tracking-[0.12em] text-white">
