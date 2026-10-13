@@ -22,29 +22,75 @@ export function HeroSection({
   eyebrow: string;
   title: string;
   highlight?: string;
-  body: string;
+  /** Chapô sous le titre. Optionnel : la page À propos porte son texte d'ouverture dans
+      le premier bloc de contenu, comme sur le site de référence. */
+  body?: string;
   children?: ReactNode;
 }) {
+  /* Hero clair des pages internes : fond photo `other-hero` (fond gris, portrait à
+     droite), grand titre foncé, paragraphe révélé mot à mot par la couleur.
+
+     Trois couches posées sous le texte, dans cet ordre :
+     1. la photo — bande en bas sur mobile (le texte reste sur le fond uni), plein
+        cadre dès `sm` ;
+     2. un voile clair de gauche à droite : les titres longs ne tombent jamais sur
+        les cheveux foncés ;
+     3. un léger dégradé noir depuis le haut, sur TOUT le hero : le header, toujours
+        blanc au repos sur tout le site, reste lisible sur ce fond clair, et le bas
+        du dégradé s'efface au fur et à mesure que le texte apparaît. */
   return (
-    <section className="relative overflow-hidden bg-navy grain pt-32 pb-20 sm:pt-40 sm:pb-28">
-      <div aria-hidden className="pointer-events-none absolute inset-0">
-        <div className="absolute -left-32 -top-24 h-[26rem] w-[26rem] rounded-full bg-brand/35 blur-[120px] animate-drift" />
-        <div className="absolute -right-24 top-10 h-[22rem] w-[22rem] rounded-full bg-turquoise/25 blur-[120px] animate-drift" style={{ animationDelay: "-9s" }} />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(36,151,190,0.18),transparent_65%)]" />
+    <section className="relative overflow-hidden bg-[#f1f2f2] pt-36 pb-64 sm:pt-72 sm:pb-32">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-56 sm:inset-0 sm:h-auto"
+      >
+        <Image
+          src="/img/other-hero.png"
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover object-[78%_center] sm:object-center"
+        />
       </div>
 
+      <div
+        aria-hidden
+        className="pointer-events-none absolute left-0 top-0 h-[58%] w-full bg-gradient-to-r from-[#f1f2f2] via-[#f1f2f2]/70 to-transparent sm:h-full sm:w-[62%] sm:via-[#f1f2f2]/85"
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/70 via-black/45 to-transparent"
+      />
+
       <div className="container-x relative">
-        <div className="flex max-w-4xl flex-col items-start gap-7">
-          <Eyebrow tone="dark">{eyebrow}</Eyebrow>
+        <div className="flex max-w-3xl flex-col items-start gap-6">
+          <span className="inline-flex items-center gap-1.5 text-[0.7rem] font-medium uppercase tracking-[0.18em] text-navy">
+            {eyebrow}
+            <ArrowUpRight className="h-3.5 w-3.5" />
+          </span>
+          {/* Même graisse et mêmes tailles que le titre de l'accueil (`HomeHero`) : le
+              hero clair des pages internes suit la même échelle typographique, seul le
+              fond change. */}
           <SplitText
             as="h1"
             text={title}
             accent={highlight}
             accentClassName="text-gradient"
             delay={0.08}
-            className="text-4xl leading-[1.08] text-white sm:text-5xl lg:text-[4.25rem] lg:leading-[1.04]"
+            className="font-light text-4xl leading-[1.06] text-navy sm:text-5xl lg:text-[3.25rem] lg:leading-[1.02]"
           />
-          <p className="max-w-2xl text-base leading-relaxed text-slate-300 sm:text-lg">{body}</p>
+          {body && (
+            <SplitText
+              as="p"
+              text={body}
+              reveal="color"
+              delay={0.25}
+              stagger={0.025}
+              duration={0.5}
+              className="max-w-xl text-base leading-relaxed text-navy sm:text-lg"
+            />
+          )}
           {children}
         </div>
       </div>

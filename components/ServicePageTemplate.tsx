@@ -1,69 +1,28 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import Reveal from "@/components/Reveal";
-import Parallax from "@/components/Parallax";
 import SplitText from "@/components/SplitText";
-import { ButtonLink, CheckList, Eyebrow, SectionHeading } from "@/components/ui";
-import { ArrowRight, serviceIcons } from "@/components/Icons";
+import { HeroSection } from "@/components/sections";
+import { ButtonLink, CheckList, SectionHeading } from "@/components/ui";
+import { ArrowRight } from "@/components/Icons";
 import { useDictionary } from "@/components/DictionaryProvider";
 import type { Service } from "@/lib/dictionaries/fr";
 
 export default function ServicePageTemplate({ service }: { service: Service }) {
   const { dict, locale } = useDictionary();
   const href = (p: string) => `/${locale}${p === "/" ? "" : p}`;
-  const Icon = serviceIcons[service.slug as keyof typeof serviceIcons];
   const others = dict.services.filter((s) => s.slug !== service.slug);
   const ui = dict.ui;
 
   return (
     <>
-      <section className="relative overflow-hidden bg-navy grain pt-32 pb-20 sm:pt-40 sm:pb-28">
-        <div aria-hidden className="pointer-events-none absolute inset-0">
-          <div className="absolute -left-28 -top-24 h-96 w-96 rounded-full bg-brand/35 blur-[120px] animate-drift" />
-          <div className="absolute -right-20 bottom-0 h-72 w-72 rounded-full bg-turquoise/22 blur-[110px] animate-drift" style={{ animationDelay: "-7s" }} />
-        </div>
-
-        <div className="container-x relative grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
-          <div className="flex flex-col items-start gap-7">
-            <Eyebrow tone="dark">{locale === "fr" ? "Service" : "Service"}</Eyebrow>
-            <div className="flex items-center gap-4">
-              {Icon && (
-                <span className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-brand to-turquoise text-white shadow-soft">
-                  <Icon className="h-6 w-6" />
-                </span>
-              )}
-              <SplitText
-                as="h1"
-                text={service.heroTitle}
-                delay={0.08}
-                className="text-4xl leading-[1.08] text-white sm:text-5xl lg:text-[3.5rem] lg:leading-[1.05]"
-              />
-            </div>
-            <p className="max-w-xl text-lg font-medium text-turquoise sm:text-xl">{service.heroSubtitle}</p>
-            <ButtonLink href={href("/devis")}>{ui.freeQuote === "Devis gratuit" ? "Demander un devis" : "Get a quote"}</ButtonLink>
-          </div>
-
-          <Reveal delay={140}>
-            <div className="relative">
-              <div aria-hidden className="absolute -inset-3 rounded-[1.75rem] bg-gradient-to-br from-brand/25 to-turquoise/25 blur-2xl" />
-              <div className="relative aspect-[4/3] overflow-hidden rounded-[1.25rem] shadow-lift ring-1 ring-white/10">
-                <Parallax className="absolute inset-0" amount={5} scale={1.08}>
-                  <Image
-                    src={service.image}
-                    alt={service.heroTitle}
-                    fill
-                    priority
-                    sizes="(max-width: 1024px) 100vw, 50vw"
-                    className="object-cover"
-                  />
-                </Parallax>
-              </div>
-            </div>
-          </Reveal>
-        </div>
-      </section>
+      {/* Hero clair commun à toutes les pages internes (photo `other-hero` en fond). */}
+      <HeroSection eyebrow="Service" title={service.heroTitle} body={service.heroSubtitle}>
+        <ButtonLink href={href("/devis")} className="mt-2">
+          {ui.freeQuote === "Devis gratuit" ? "Demander un devis" : "Get a quote"}
+        </ButtonLink>
+      </HeroSection>
 
       <section className="py-24 sm:py-28">
         <div className="container-x grid gap-12 lg:grid-cols-[1fr_1.15fr] lg:gap-16">

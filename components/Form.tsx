@@ -101,10 +101,15 @@ export function FormShell({
   children,
   note,
   submitLabel,
+  successTitle = "Message envoyé",
+  successBody = "Merci pour votre message. Notre équipe vous répondra dans les meilleurs délais.",
 }: {
   children: ReactNode;
   note?: string;
   submitLabel: string;
+  /** Confirmation affichée après l'envoi (une page anglaise doit pouvoir la traduire). */
+  successTitle?: string;
+  successBody?: string;
 }) {
   const [sent, setSent] = useState(false);
 
@@ -116,10 +121,8 @@ export function FormShell({
             <path d="m5 13 4 4L19 7" />
           </svg>
         </span>
-        <h3 className="text-xl font-light text-navy">Message envoyé</h3>
-        <p className="max-w-sm text-sm leading-relaxed text-muted">
-          Merci pour votre message. Notre équipe vous répondra dans les meilleurs délais.
-        </p>
+        <h3 className="text-xl font-light text-navy">{successTitle}</h3>
+        <p className="max-w-sm text-sm leading-relaxed text-muted">{successBody}</p>
       </div>
     );
   }

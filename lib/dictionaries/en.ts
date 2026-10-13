@@ -326,9 +326,14 @@ export const testimonials = [
 ];
 
 export const aboutPage = {
+  /* Hero headline, taken word for word from the reference site; “Who are we?” (`title`)
+     stays the heading of the first content block, as it does there. */
+  heroHeadline: "The agency that makes your brand unmissable.",
   title: "Who are we?",
   lead: "LEEGI Group boosts your visibility through targeted strategy and impactful creativity.",
   body: "We support brands to capture attention, win over their audience and grow their influence.",
+  pillarsTitle: "Our foundations",
+  readBio: "Read the bio",
   pillars: [
     { title: "Targeted strategy", body: "Precise actions for maximum impact." },
     { title: "Impactful creativity", body: "Content that attracts and stays in people's minds." },
@@ -373,6 +378,8 @@ export const aboutPage = {
     body: "To build strong, lasting brands. We aim to be the go-to partner for any company that wants to stand out.",
   },
   initiatives: {
+    /* Proper noun: identical in both languages. */
+    name: "Étincelles des Marques",
     title: "Our initiatives",
     body: "Among our actions, we lead Étincelles des Marques, a Leegi Group initiative dedicated to revealing, celebrating and amplifying the voice of African talent, brands and businesses.",
     body2:
@@ -453,23 +460,34 @@ export const servicesPage = {
 export const contactPage = {
   title: "Contact",
   lead: "A question? A project in mind? Get in touch and we'll reply fast.",
+  /* Right-hand column blocks: a discreet label above, the value in bold (email and
+     phone are clickable). */
   info: [
     { label: "Email", value: "contact@leegigroup.com", href: "mailto:contact@leegigroup.com" },
     { label: "Phone", value: "221 78 122 93 05", href: "tel:+221781229305" },
     { label: "Address", value: "Dakar, Senegal", href: null },
     { label: "Opening hours", value: "Mon–Fri, 9am–6pm", href: null },
   ],
-  jsNote: "Please enable JavaScript in your browser to fill in this form.",
-  submit: "Send message",
-  formTitle: "Write to us",
-  formBody: "Fill in the form below and we'll get back to you as soon as possible.",
-  formPoints: [
-    "Fast response within 48h",
-    "A dedicated point of contact",
-    "Free quote, no commitment",
-  ],
-  locationTitle: "Find us in Dakar, Senegal",
-  locationBody: "Come and visit us from Monday to Friday, 9am–6pm.",
+  /* Bottom of the left-hand column: the button opens the form in a side sheet, and the
+     site's social profiles (dictionary `site.socials`) follow it. */
+  /* Heading of the left-hand column. Deliberately different from the page title
+     ("Contact"), which the hero already displays. */
+  heading: "Let's talk about your project",
+  cta: "Get in touch",
+  /* Contents of the side sheet. */
+  form: {
+    title: "Write to us",
+    body: "Fill in the form below and we'll get back to you as soon as possible.",
+    firstName: "First name",
+    lastName: "Last name",
+    email: "Email",
+    subject: "Subject",
+    message: "Message",
+    jsNote: "Please enable JavaScript in your browser to fill in this form.",
+    submit: "Send message",
+    successTitle: "Message sent",
+    successBody: "Thanks for your message. Our team will get back to you as soon as possible.",
+  },
 };
 
 export const devisPage = {

@@ -325,9 +325,14 @@ export const testimonials = [
 ];
 
 export const aboutPage = {
-  title: "Qui sommes -nous ?",
+  /* Titre du hero, repris mot pour mot du site de référence ; « Qui sommes-nous ? »
+     (`title`) reste le titre du premier bloc de contenu, comme là-bas. */
+  heroHeadline: "L'agence qui rend votre marque incontournable.",
+  title: "Qui sommes-nous ?",
   lead: "LEEGI Groupe booste votre visibilité grâce à une stratégie ciblée et une créativité impactante.",
-  body: "Nous accompagnons les marques pour capter l'attention, seductive leur audience et développer leur influence.",
+  body: "Nous accompagnons les marques pour capter l'attention, séduire leur audience et développer leur influence.",
+  pillarsTitle: "Nos fondations",
+  readBio: "Lire la biographie",
   pillars: [
     { title: "Stratégie ciblée", body: "Actions précises pour un impact maximal." },
     { title: "Créativité percutante", body: "Contenus qui attirent et marquent les esprits." },
@@ -372,12 +377,14 @@ export const aboutPage = {
     body: "Construire des marques fortes et durables. Nous aspirons à être le partenaire de référence pour toute entreprise souhaitant se démarquer.",
   },
   initiatives: {
+    /* Nom propre : identique dans les deux langues. */
+    name: "Étincelles des Marques",
     title: "Nos initiatives",
     body: "Parmi nos actions, nous portons Étincelles des Marques, une initiative de Leegi Group dédiée à révéler, valoriser et amplifier la voix des talents, marques et entreprises africaines.",
     body2:
       "À travers des portraits authentiques, des interviews approfondies et des podcasts immersifs, nous racontons des histoires vraies et inspirantes, mettant en lumière des parcours porteurs d'innovation et d'impact sur le continent africain.",
   },
-  valuesTitle: "Nos valeur",
+  valuesTitle: "Nos valeurs",
   values: [
     {
       title: "Innovation",
@@ -452,23 +459,34 @@ export const servicesPage = {
 export const contactPage = {
   title: "Contact",
   lead: "Une question ? Un projet en tête ? Contactez-nous et recevez une réponse rapide.",
+  /* Blocs de coordonnées de la colonne de droite : un libellé discret au-dessus, la
+     valeur en gras (e-mail et téléphone cliquables). */
   info: [
     { label: "Email", value: "contact@leegigroup.com", href: "mailto:contact@leegigroup.com" },
     { label: "Téléphone", value: "221 78 122 93 05", href: "tel:+221781229305" },
     { label: "Adresse", value: "Dakar, Sénégal", href: null },
     { label: "Horaires", value: "Lun-Ven, 9h-18h", href: null },
   ],
-  jsNote: "Veuillez activer JavaScript dans votre navigateur pour remplir ce formulaire.",
-  submit: "Envoyer le message",
-  formTitle: "Écrivez-nous",
-  formBody: "Remplissez le formulaire ci-dessous et nous vous répondrons dans les meilleurs délais.",
-  formPoints: [
-    "Réponse rapide sous 48h",
-    "Un interlocuteur à votre écoute",
-    "Devis gratuit et sans engagement",
-  ],
-  locationTitle: "Nous trouver à Dakar, Sénégal",
-  locationBody: "Venez nous rendre visite du lundi au vendredi, 9h-18h.",
+  /* Bas de la colonne de gauche : le bouton ouvre le panneau latéral du formulaire, et
+     les réseaux du site (dictionnaire `site.socials`) le suivent. */
+  /* Titre de la colonne de gauche. Volontairement différent du titre de la page
+     (« Contact »), qui est déjà celui du hero, pour ne pas le répéter sur l'écran. */
+  heading: "Parlons de votre projet",
+  cta: "Nous contacter",
+  /* Contenu du panneau latéral (Sheet). */
+  form: {
+    title: "Écrivez-nous",
+    body: "Remplissez le formulaire ci-dessous et nous vous répondrons dans les meilleurs délais.",
+    firstName: "Prénom",
+    lastName: "Nom",
+    email: "E-mail",
+    subject: "Sujet",
+    message: "Message",
+    jsNote: "Veuillez activer JavaScript dans votre navigateur pour remplir ce formulaire.",
+    submit: "Envoyer le message",
+    successTitle: "Message envoyé",
+    successBody: "Merci pour votre message. Notre équipe vous répondra dans les meilleurs délais.",
+  },
 };
 
 export const devisPage = {

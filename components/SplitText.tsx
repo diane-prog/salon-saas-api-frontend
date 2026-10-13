@@ -20,6 +20,12 @@ type SplitTextProps = {
    */
   mode?: "in-view" | "on-mount";
   /**
+   * `mask` (défaut) : chaque mot est masqué puis remonte dans son cadre.
+   * `color` : pas de masque — le mot passe du gris au navy, mot après mot
+   * (paragraphe des hero clairs : la queue grise est le texte pas encore révélé).
+   */
+  reveal?: "mask" | "color";
+  /**
    * Saut de ligne forcé après ce nombre de mots : `2` met les deux premiers mots sur
    * la première ligne. Indépendant de la largeur du conteneur, donc le titre se coupe
    * au même endroit sur tous les écrans (et dans les deux langues, un `<br>` par ligne).
@@ -45,8 +51,10 @@ export default function SplitText({
   stagger = 0.05,
   duration = 0.9,
   mode = "in-view",
+  reveal = "mask",
   breakAfter,
 }: SplitTextProps) {
+  const fade = reveal === "color";
   const ref = useRef<HTMLElement>(null);
   const [shown, setShown] = useState(false);
   const onMount = mode === "on-mount";
@@ -69,7 +77,7 @@ export default function SplitText({
   return (
     <Tag
       ref={ref as never}
-      className={`split ${onMount ? "split-anim" : shown ? "split-in" : ""} ${className}`}
+      className={`split ${fade ? "split-fade" : ""} ${onMount ? "split-anim" : shown ? "split-in" : ""} ${className}`}
     >
       <span className="sr-only">{full}</span>
       <span aria-hidden="true">
@@ -77,24 +85,27 @@ export default function SplitText({
             `overflow: hidden` rogne l'espace en fin de ligne, ce qui collait les mots
             (« Faitesbriller… »). En dehors, c'est le parent qui le rend, et la coupure
             de ligne reste possible entre deux mots. */}
-        {words.map((word, index) => (
-          <Fragment key={`${word.value}-${index}`}>
-            <span className="split-mask">
-              <span
-                className={`split-word ${word.accent ? accentClassName : ""}`}
-                style={
-                  {
-                    "--w-delay": `${Math.round((delay + index * stagger) * 1000)}ms`,
-                    "--w-duration": `${duration}s`,
-                  } as CSSProperties
-                }
-              >
-                {word.value}
-              </span>
+        {words.map((word, index) => {
+          const style = {
+            "--w-delay": `${Math.round((delay + index * stagger) * 1000)}ms`,
+            "--w-duration": `${duration}s`,
+          } as CSSProperties;
+          const node = (
+            <span className={`split-word ${word.accent ? accentClassName : ""}`} style={style}>
+              {word.value}
             </span>
-            {index < words.length - 1 ? (breakAfter === index + 1 ? <br /> : " ") : null}
-          </Fragment>
-        ))}
+          );
+          return (
+            <Fragment key={`${word.value}-${index}`}>
+              {/* L'espace va ENTRE les masques, jamais dedans : un `inline-block` en
+                  `overflow: hidden` rogne l'espace en fin de ligne, ce qui collait les
+                  mots (« Faitesbriller… »). En dehors, c'est le parent qui le rend, et la
+                  coupure de ligne reste possible entre deux mots. */}
+              {fade ? node : <span className="split-mask">{node}</span>}
+              {index < words.length - 1 ? (breakAfter === index + 1 ? <br /> : " ") : null}
+            </Fragment>
+          );
+        })}
       </span>
     </Tag>
   );

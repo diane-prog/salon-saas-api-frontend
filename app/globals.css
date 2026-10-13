@@ -12,6 +12,11 @@
   /* Sable chaud : fond du rideau de transition (page blanche + hero navy, il fallait
      un ton neutre qui n'appartienne à aucune des deux pages). */
   --color-beige: #e9e2d4;
+  /* Thème éditorial « galerie » de la page À propos : papier chaud et encre franche.
+     Deux jetons seulement, pour ne pas redéfinir `navy` / `muted`, qui restent le
+     langage du reste du site ; l'accent est le bleu de marque, employé au compte-gouttes. */
+  --color-paper: #faf9f7;
+  --color-ink: #111111;
 
   --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
 
@@ -294,9 +299,23 @@ html[data-js] .reveal.reveal-visible {
     opacity calc(var(--w-duration, 0.9s) * 0.5) ease var(--w-delay, 0ms);
 }
 
-html[data-js] .split:not(.split-in) .split-word {
+/* Le masquage ne concerne que la révélation par le cadre : les mots d'une révélation
+   par la couleur (`.split-fade`) ne sont jamais cachés. */
+html[data-js] .split:not(.split-in) .split-mask .split-word {
   opacity: 0;
   transform: translateY(115%);
+}
+
+/* Révélation par la couleur : le mot passe du gris au couleur du texte, mot après mot.
+   La queue grise d'un paragraphe est donc le texte pas encore révélé.
+   Sans JavaScript, aucun mot n'est grisé : le texte est lisible au premier rendu. */
+.split-fade .split-word {
+  transition:
+    color var(--w-duration, 0.5s) cubic-bezier(0.22, 1, 0.36, 1) var(--w-delay, 0ms);
+}
+
+html[data-js] .split-fade:not(.split-in) .split-word {
+  color: var(--color-muted);
 }
 
 /* Variante jouée dès le montage (rideau de transition) : l'animation porte le délai,
@@ -426,6 +445,85 @@ html[data-js] .client-arc {
 
 html[data-js] .client-arc-in .client-arc {
   stroke-dashoffset: 0;
+}
+
+/* Sheet (panneau latéral des formulaires) — voir components/ui/sheet.tsx.
+
+   L'animation vit ici et non dans le composant : Radix monte le panneau avec
+   `data-state="open"` dès la première frame, donc une transition ne se déclencherait
+   jamais ; des `@keyframes` jouent, elles, même sur un élément qui vient d'apparaître.
+   Le sens de sortie passe par deux variables choisies selon le `data-side`, ce qui évite
+   huit keyframes (un côté × un sens). Radix retire le panneau à la fin de l'animation. */
+@keyframes sheet-panel-in {
+  from {
+    opacity: 0;
+    transform: translate(var(--sheet-x, 0), var(--sheet-y, 0));
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes sheet-panel-out {
+  from {
+    opacity: 1;
+    transform: none;
+  }
+  to {
+    opacity: 0;
+    transform: translate(var(--sheet-x, 0), var(--sheet-y, 0));
+  }
+}
+
+@keyframes sheet-overlay-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes sheet-overlay-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.sheet-panel[data-side="right"] {
+  --sheet-x: 100%;
+}
+
+.sheet-panel[data-side="left"] {
+  --sheet-x: -100%;
+}
+
+.sheet-panel[data-side="top"] {
+  --sheet-y: -100%;
+}
+
+.sheet-panel[data-side="bottom"] {
+  --sheet-y: 100%;
+}
+
+.sheet-panel[data-state="open"] {
+  animation: sheet-panel-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.sheet-panel[data-state="closed"] {
+  animation: sheet-panel-out 0.3s cubic-bezier(0.64, 0, 0.78, 0) both;
+}
+
+.sheet-overlay[data-state="open"] {
+  animation: sheet-overlay-in 0.35s ease both;
+}
+
+.sheet-overlay[data-state="closed"] {
+  animation: sheet-overlay-out 0.25s ease both;
 }
 
 .counter-live {
