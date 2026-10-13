@@ -332,7 +332,6 @@ export const aboutPage = {
   lead: "LEEGI Groupe booste votre visibilité grâce à une stratégie ciblée et une créativité impactante.",
   body: "Nous accompagnons les marques pour capter l'attention, séduire leur audience et développer leur influence.",
   pillarsTitle: "Nos fondations",
-  readBio: "Lire la biographie",
   pillars: [
     { title: "Stratégie ciblée", body: "Actions précises pour un impact maximal." },
     { title: "Créativité percutante", body: "Contenus qui attirent et marquent les esprits." },

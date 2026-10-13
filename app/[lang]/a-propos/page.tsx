@@ -223,8 +223,8 @@ export default async function AboutPage({ params }: PageProps<"/[lang]/a-propos"
 
       {/* ——— Équipe ———
           Trois portraits, décalés verticalement, l'un d'eux portant une biographie longue :
-          repliée dans un `<details>` (sans JavaScript) pour que la page reste courte, et
-          composée en colonnes de journal une fois ouverte. */}
+          la biographie est TOUJOURS entièrement affichée — aucun bouton, aucun repli à
+          ouvrir — et composée en colonnes de journal pour rester compacte. */}
       <section className={`border-t py-20 sm:py-28 ${RULE}`}>
         <div className="container-x">
           <div className="grid gap-6 lg:grid-cols-12">
@@ -249,27 +249,13 @@ export default async function AboutPage({ params }: PageProps<"/[lang]/a-propos"
               <h3 className={TITLE}>{director.name}</h3>
               <p className={`mt-3 ${LABEL} text-ink/45`}>{director.role}</p>
               {director.bio.length > 0 && (
-                <>
-                  <p className={`mt-6 ${LEAD} text-ink/75`}>{director.bio[0]}</p>
-                  <details className={`group mt-7 border-t pt-5 ${RULE}`}>
-                    <summary
-                      className={`flex cursor-pointer list-none items-center justify-between gap-4 ${LABEL} text-ink/55 [&::-webkit-details-marker]:hidden`}
-                    >
-                      {aboutPage.readBio}
-                      {/* Un glyphe, pas du texte : il garde la taille du corps de référence. */}
-                      <span aria-hidden className={`text-base leading-none transition-transform duration-300 group-open:rotate-45`}>
-                        +
-                      </span>
-                    </summary>
-                    <div className="mt-6 sm:columns-2 sm:gap-10">
-                      {director.bio.slice(1).map((paragraph) => (
-                        <p key={paragraph.slice(0, 40)} className={`mb-4 break-inside-avoid ${BODY} text-ink/60`}>
-                          {paragraph}
-                        </p>
-                      ))}
-                    </div>
-                  </details>
-                </>
+                <div className={`mt-7 border-t pt-6 sm:columns-2 sm:gap-10 ${RULE}`}>
+                  {director.bio.map((paragraph) => (
+                    <p key={paragraph.slice(0, 40)} className={`mb-4 break-inside-avoid ${BODY} text-ink/60`}>
+                      {paragraph}
+                    </p>
+                  ))}
+                </div>
               )}
             </Reveal>
           </div>

@@ -333,7 +333,6 @@ export const aboutPage = {
   lead: "LEEGI Group boosts your visibility through targeted strategy and impactful creativity.",
   body: "We support brands to capture attention, win over their audience and grow their influence.",
   pillarsTitle: "Our foundations",
-  readBio: "Read the bio",
   pillars: [
     { title: "Targeted strategy", body: "Precise actions for maximum impact." },
     { title: "Impactful creativity", body: "Content that attracts and stays in people's minds." },

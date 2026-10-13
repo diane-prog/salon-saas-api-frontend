@@ -146,9 +146,13 @@ export function StatsSection({ stats }: { stats: { value: number; suffix: string
 /**
  * Témoignages clients, style « Trusted by Clients » de la référence :
  *
- * - fonds noir, en-tête à gauche + deux flèches rondes à droite ;
- * - cartes dark avec DOUBLE COUCHE : une ombre plein-cadre décalée sous chaque carte
- *   (les captures montrent la carte répétée en dessous, plus foncée) ;
+ * - fonds `ink` (le noir neutre du projet, celui du pied de page) et cartes papier :
+ *   en-tête à gauche + deux flèches rondes à droite ;
+ * - UN SEUL accent dans toute la section, le bleu de marque — les étoiles et la fleur.
+ *   Plus de noir pur, plus de gris en dur (`#1c1c1c` / `#181818`), plus d'orange, plus de
+ *   double couche sous les cartes : tout vient des jetons du thème (`navy`, `paper`, `ink`,
+ *   `brand`), comme le reste du site — un noir pur et un orange sans rapport avec la marque
+ *   se lisaient comme une autre identité collée dans la page ;
  * - fleur à la couleur brand au centre-bas avec « CLIENT STORIES » ; au scroll elle S'AGRANDIT
  *   jusqu'à couvrir le bas de la section (le libellé grossit avec elle) — l'échelle
  *   dérive de la position de la section dans le viewport, pas d'un timer ;
@@ -224,7 +228,7 @@ export function TestimonialsSection() {
   }, []);
 
   const arrow = (d: string, flip = false) => (
-    <span className="grid h-11 w-11 place-items-center rounded-full border border-white/20 text-white/80 transition-colors duration-300 hover:border-white/60 hover:text-white">
+    <span className="grid h-11 w-11 place-items-center rounded-full border border-paper/25 text-paper/75 transition-colors duration-300 hover:border-paper/70 hover:text-paper">
       <svg
         viewBox="0 0 24 24"
         fill="none"
@@ -243,16 +247,16 @@ export function TestimonialsSection() {
   return (
     <section
       ref={root}
-      className="relative overflow-hidden bg-black py-24 sm:py-28"
+      className="relative overflow-hidden bg-ink py-24 sm:py-28"
     >
       <div className="container-x relative z-10">
         {/* En-tête : titre + sous-titre à gauche, flèches rondes à droite. */}
         <div className="flex items-end justify-between gap-6">
           <div className="max-w-xl">
-            <h2 className="text-4xl font-light tracking-tight text-white sm:text-5xl">
+            <h2 className="text-4xl font-light tracking-tight text-paper sm:text-5xl">
               {dict.ui.testimonialTitle}
             </h2>
-            <p className="mt-3 text-sm text-white/50">{dict.ui.testimonialBody}</p>
+            <p className="mt-3 text-sm text-paper/50">{dict.ui.testimonialBody}</p>
           </div>
           <div className="hidden shrink-0 gap-3 sm:flex">
             {arrow("M14 6l-6 6 6 6", true)}
@@ -263,12 +267,9 @@ export function TestimonialsSection() {
         <ul className="mt-14 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {dict.testimonials.slice(0, 3).map((t, i) => (
             <Reveal as="li" key={t.name} delay={i * 80} className="relative">
-              {/* Double couche : la carte est posée sur une copie décalée plus basse. */}
-              <div
-                aria-hidden
-                className="absolute inset-x-4 top-6 bottom-0 -z-0 rounded-card bg-[#181818]"
-              />
-              <figure className="relative flex h-full flex-col gap-5 rounded-card border border-white/5 bg-[#1c1c1c] p-7">
+              {/* Une seule carte, opaque : c'est le papier du site posé sur le navy, avec
+                  un filet — ni relief ni doublure décalée. */}
+              <figure className="relative flex h-full flex-col gap-5 rounded-card bg-paper p-7 ring-1 ring-navy/10">
                 <div className="flex items-start justify-between gap-3">
                   <Image
                     src={t.image}
@@ -277,28 +278,30 @@ export function TestimonialsSection() {
                     height={52}
                     className="h-13 w-13 rounded-lg object-cover"
                   />
-                  <span className="mt-1 text-[0.7rem] font-light uppercase tracking-[0.14em] text-white/70">
+                  <span className="mt-1 text-[0.7rem] font-light uppercase tracking-[0.14em] text-ink/45">
                     {dict.clients[i % dict.clients.length]}
                   </span>
                 </div>
 
-                <blockquote className="text-[1.05rem] leading-relaxed text-white/90">
+                <blockquote className="text-[1.05rem] leading-relaxed text-ink">
                   “{t.quote}”
                 </blockquote>
 
-                {/* Étoiles orange, seules teintes de la carte, comme la référence. */}
+                {/* Étoiles au bleu de marque : c'est l'accent de la section (la fleur du
+                    bas l'utilise aussi) — plus l'orange, qui n'appartenait qu'à cette
+                    section et jurait avec le reste du site. */}
                 <div className="flex gap-1" aria-hidden>
                   {[0, 1, 2, 3, 4].map((s) => (
-                    <svg key={s} viewBox="0 0 24 24" className="h-4 w-4 fill-orange" >
+                    <svg key={s} viewBox="0 0 24 24" className="h-4 w-4 fill-brand">
                       <path d="M12 2.6l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.5l-5.9 3.1 1.2-6.5-4.8-4.6 6.6-.9z" />
                     </svg>
                   ))}
                 </div>
 
-                <div aria-hidden className="mt-2 h-px w-8 bg-white/25" />
+                <div aria-hidden className="mt-2 h-px w-8 bg-ink/20" />
                 <figcaption>
-                  <p className="text-base font-light text-white">{t.name}</p>
-                  <p className="mt-1 text-xs leading-relaxed text-white/45">
+                  <p className="text-base font-light text-ink">{t.name}</p>
+                  <p className="mt-1 text-xs leading-relaxed text-ink/45">
                     {t.role}
                     <br />
                     {t.company}

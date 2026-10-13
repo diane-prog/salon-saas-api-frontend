@@ -16,6 +16,21 @@ const switchLabels: Record<Locale, { fr: string; en: string }> = {
   en: { fr: "FR", en: "EN" },
 };
 
+/**
+ * Retire le focus de tout élément du header.
+ *
+ * Le mega menu Services n'a AUCUN état React : il s'ouvre et se ferme en CSS, par
+ * `group-hover` et `group-focus-within` (voir le `div.group` de la navigation). Un clic sur
+ * une entrée laissait donc le focus sur le lien cliqué : `focus-within` restait vrai, et le
+ * panneau restait affiché par-dessus la page d'arrivée. On relâche le focus quand la route
+ * change — et aussi au clic dans le panneau, pour le lien qui mène à la page où l'on est
+ * déjà : là, la route ne change pas, donc l'effet de navigation ne se déclenche pas.
+ */
+function blurHeaderFocus() {
+  const active = document.activeElement;
+  if (active instanceof HTMLElement && active.closest("header")) active.blur();
+}
+
 export default function Header() {
   const { dict, locale } = useDictionary();
   const [open, setOpen] = useState(false);
@@ -36,6 +51,10 @@ export default function Header() {
     lockScroll(open);
     return () => lockScroll(false);
   }, [open]);
+
+  useEffect(() => {
+    blurHeaderFocus();
+  }, [pathname]);
 
   const href = (path: string) => `/${locale}${path === "/" ? "" : path}`;
 
@@ -76,12 +95,15 @@ export default function Header() {
                       scrolled ? "text-navy hover:text-brand text-lg font-normal" : "text-white/85 hover:text-white text-lg font-normal"
                     }`}
                   >
-                    <span className="text-lg font-normal">{item.label}</span>
+                    <span className="text-lg font-light">{item.label}</span>
                     <ChevronDown className="h-3.5 w-3.5 transition-transform duration-300 group-hover:rotate-180" />
                   </Link>
 
                   {/* Mega menu Services : bandeau pleine largeur sous le header. */}
-                  <div className="invisible absolute inset-x-0 top-full translate-y-2 pt-4 opacity-0 transition-all duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100">
+                  <div
+                    onClick={blurHeaderFocus}
+                    className="invisible absolute inset-x-0 top-full translate-y-2 pt-4 opacity-0 transition-all duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100"
+                  >
                     <div className="container-x">
                       <div className="grid gap-6 rounded-2xl border border-navy/8 bg-white p-6 shadow-lift lg:grid-cols-[1.6fr_1fr]">
                         <div className="grid content-start gap-1 sm:grid-cols-2">
@@ -133,7 +155,7 @@ export default function Header() {
                 <Link
                   key={item.href}
                   href={href(item.href)}
-                  className={`rounded-full px-4 py-2 text-lg font-normal transition-colors ${
+                  className={`rounded-full px-4 py-2 text-lg font-light transition-colors ${
                     scrolled ? "text-navy hover:text-brand" : "text-white/85 hover:text-white"
                   }`}
                 >
