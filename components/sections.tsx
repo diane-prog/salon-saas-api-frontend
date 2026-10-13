@@ -3,7 +3,7 @@
 import { useEffect, useRef, type ReactNode } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, ArrowUpRight, serviceIcons } from "@/components/Icons";
+import { ArrowUpRight } from "@/components/Icons";
 import Reveal from "@/components/Reveal";
 import SplitText from "@/components/SplitText";
 import Parallax from "@/components/Parallax";
@@ -39,7 +39,7 @@ export function HeroSection({
         blanc au repos sur tout le site, reste lisible sur ce fond clair, et le bas
         du dégradé s'efface au fur et à mesure que le texte apparaît. */
   return (
-    <section className="relative overflow-hidden bg-[#f1f2f2] pt-36 pb-64 sm:pt-72 sm:pb-32">
+    <section className="relative overflow-hidden bg-[#f1f2f2] pt-36 pb-64 sm:pt-92 sm:pb-32">
       <div
         aria-hidden
         className="pointer-events-none absolute inset-x-0 bottom-0 h-56 sm:inset-0 sm:h-auto"
@@ -140,36 +140,8 @@ export function StatsSection({ stats }: { stats: { value: number; suffix: string
   );
 }
 
-export function ServiceGrid() {
-  const { dict, locale } = useDictionary();
-  const href = (p: string) => `/${locale}${p === "/" ? "" : p}`;
-
-  return (
-    <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-      {dict.services.map((s, i) => {
-        const Icon = serviceIcons[s.slug as keyof typeof serviceIcons];
-        return (
-          <Reveal as="li" key={s.slug} delay={i * 70} className="h-full">
-            <Link
-              href={href(`/services/${s.slug}`)}
-              className="group flex h-full flex-col gap-4 rounded-lg border border-line bg-white p-7 shadow-soft transition-shadow duration-300 hover:shadow-lift"
-            >
-              <span className="grid h-12 w-12 place-items-center rounded-xl bg-gradient-to-br from-brand to-turquoise text-white shadow-soft transition-transform duration-300 group-hover:scale-105">
-                {Icon && <Icon />}
-              </span>
-              <h3 className="text-lg font-light text-navy">{s.title}</h3>
-              <p className="flex-1 text-sm leading-relaxed text-muted">{s.short}</p>
-              <span className="inline-flex items-center gap-2 text-sm font-light text-brand">
-                {dict.ui.viewDetails}
-                <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
-              </span>
-            </Link>
-          </Reveal>
-        );
-      })}
-    </ul>
-  );
-}
+/* La grille de cartes de services (`ServiceGrid`) a été remplacée par la table éditoriale
+   de `components/ServicesTable`, seule utilisée par la page Services. */
 
 /**
  * Témoignages clients, style « Trusted by Clients » de la référence :

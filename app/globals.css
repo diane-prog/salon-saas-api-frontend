@@ -73,6 +73,81 @@
   transform-origin: top center;
 }
 
+/* Pile de sections (page À propos) : les blocs de texte se recouvrent l'un après l'autre.
+
+   La mécanique est ici et non dans le composant, contrairement à la vue « Fil » des
+   réalisations : les panneaux sont rendus par le serveur, donc aucun composant client ne
+   peut leur poser de styles (les enfants d'un composant client lui sont donnés déjà
+   construits). Chaque panneau est `sticky` avec son propre `top`, un cran plus bas que le
+   précédent : le panneau atteint reste collé, le suivant monte dessus, et chaque panneau
+   recouvert laisse dépasser la bande de son bord haut — la pile se voit.
+
+   Les panneaux sont opaques : c'est ce qui fait disparaître ce qu'ils recouvrent. Sous
+   `lg`, tout repasse en flux normal : un panneau plus haut que la fenêtre (les quatre
+   valeurs empilées sur un téléphone) garderait son bas caché pour toujours.
+
+   Ici ; seul le mécanisme. Les quatre réglages (`--stack-pin`, `--stack-step`,
+   `--stack-height`, `--stack-gap`) sont posés en style inline par la page
+   (`app/[lang]/a-propos/page.tsx`, constante `STACK`) : c'est ce qui permet de les ajuster
+   sans redémarrer le serveur de dev, et ça garde une seule source pour ces valeurs.
+
+   LA contrainte, celle qui décide si un panneau se recouvre entièrement ou pas :
+   un panneau recouvert ne reste collé que tant que le conteneur descend plus bas que lui,
+   et le panneau suivant doit monter du bas de la fenêtre jusqu'à son propre collage. La
+   distance à parcourir vaut donc `height + gap − step`, et elle doit rester sous
+   `100 − pin − 4 × step` (le collage du dernier panneau). Avec 50 + 6 − 2 = 54 svh contre
+   80 disponibles, il y a de la marge : même un panneau haut de 70 svh se recouvre en
+   entier. Avec les valeurs précédentes (58 + 14 − 2 = 70 pour 77 disponibles), le panneau
+   « valeurs », plus haut que les autres, n'arrivait plus à se faire recouvrir.
+
+   Les filets, eux, ne sont pas ici : chaque panneau porte déjà `border-t border-navy/10`
+   dans la page, ce qui évite d'écrire deux fois la même couleur. */
+.stack-sections {
+  position: relative;
+}
+
+@media (min-width: 1024px) {
+  .stack-sections > * {
+    position: sticky;
+    min-height: var(--stack-height);
+    background: var(--color-paper);
+  }
+
+  .stack-sections > *:not(:last-child) {
+    margin-bottom: var(--stack-gap);
+  }
+
+  .stack-sections > *:nth-child(1) {
+    top: var(--stack-pin);
+    z-index: 1;
+  }
+
+  .stack-sections > *:nth-child(2) {
+    top: calc(var(--stack-pin) + var(--stack-step));
+    z-index: 2;
+  }
+
+  .stack-sections > *:nth-child(3) {
+    top: calc(var(--stack-pin) + var(--stack-step) * 2);
+    z-index: 3;
+  }
+
+  .stack-sections > *:nth-child(4) {
+    top: calc(var(--stack-pin) + var(--stack-step) * 3);
+    z-index: 4;
+  }
+
+  .stack-sections > *:nth-child(5) {
+    top: calc(var(--stack-pin) + var(--stack-step) * 4);
+    z-index: 5;
+  }
+
+  .stack-sections > *:nth-child(6) {
+    top: calc(var(--stack-pin) + var(--stack-step) * 5);
+    z-index: 6;
+  }
+}
+
 @layer base {
   html {
     scroll-behavior: smooth;

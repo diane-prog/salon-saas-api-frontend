@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import CtaBand from "@/components/CtaBand";
-import { HeroSection, ServiceGrid } from "@/components/sections";
+import ServicesTable from "@/components/ServicesTable";
+import { HeroSection } from "@/components/sections";
+import { LABEL } from "@/lib/editorial";
 import { isLocale, getDictionary, localePath } from "@/lib/dictionaries";
 
 export async function generateMetadata({ params }: PageProps<"/[lang]/services">): Promise<Metadata> {
@@ -23,13 +25,23 @@ export default async function ServicesPage({ params }: PageProps<"/[lang]/servic
 
   return (
     <>
+      {/* Hero clair commun aux pages internes, inchangé. */}
       <HeroSection eyebrow={ui.expertise} title={servicesPage.title} body={servicesPage.lead} />
-      <section className="py-24 sm:py-28">
-        <div className="container-x">
-          <ServiceGrid />
-        </div>
-      </section>
-      <CtaBand />
+
+      {/* Une table éditoriale plutôt qu'une grille de cartes : étiquette dans la marge,
+          six lignes de service à droite. */}
+      <div className="bg-paper text-ink">
+        <section className="container-x py-20 sm:py-28">
+          <div className="grid gap-8 lg:grid-cols-12">
+            <span className={`lg:col-span-3 ${LABEL} text-ink/45`}>{ui.ourOffer}</span>
+            <div className="lg:col-span-9">
+              <ServicesTable />
+            </div>
+          </div>
+        </section>
+
+        <CtaBand />
+      </div>
     </>
   );
 }

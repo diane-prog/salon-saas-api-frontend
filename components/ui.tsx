@@ -79,6 +79,44 @@ export function ButtonLink({
   );
 }
 
+/**
+ * Action en texte : c'est le seul bouton du vocabulaire « galerie » — un mot et un filet,
+ * aucun fond, aucune pastille. `strong` appuie le filet pour l'action principale.
+ */
+export function TextLink({
+  href,
+  children,
+  strong = false,
+  tone = "paper",
+  className = "",
+}: {
+  href: string;
+  children: ReactNode;
+  strong?: boolean;
+  /** `navy` pour un lien posé sur un fond sombre. */
+  tone?: "paper" | "navy";
+  className?: string;
+}) {
+  const styles =
+    tone === "navy"
+      ? strong
+        ? "border-white/60 text-white hover:border-white hover:text-turquoise"
+        : "border-white/30 text-white/80 hover:border-white/70 hover:text-turquoise"
+      : strong
+        ? "border-navy/45 text-navy hover:border-ink hover:text-brand"
+        : "border-navy/20 text-navy/80 hover:border-ink hover:text-brand";
+
+  return (
+    <Link
+      href={href as never}
+      className={`group inline-flex items-center gap-2 border-b pb-1 text-[0.95rem] leading-none transition-colors duration-300 ${styles} ${className}`}
+    >
+      {children}
+      <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+    </Link>
+  );
+}
+
 export function Eyebrow({ children, tone = "light" }: { children: ReactNode; tone?: "light" | "dark" }) {
   return (
     <span

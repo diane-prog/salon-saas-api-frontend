@@ -2,13 +2,27 @@
 
 import Link from "next/link";
 import Reveal from "@/components/Reveal";
-import SplitText from "@/components/SplitText";
 import { HeroSection } from "@/components/sections";
-import { ButtonLink, CheckList, SectionHeading } from "@/components/ui";
 import { ArrowRight } from "@/components/Icons";
+import { TextLink } from "@/components/ui";
 import { useDictionary } from "@/components/DictionaryProvider";
 import type { Service } from "@/lib/dictionaries/fr";
+import { BODY, CLOSING, LABEL, LEAD, ROW, RULE, TITLE } from "@/lib/editorial";
 
+/**
+ * Gabarit commun aux six pages de service.
+ *
+ * Version « galerie » : la présentation reste à gauche mais devient un bloc collant sans
+ * barre dégradée ; « ce que nous proposons » passe de la liste à puces rondes sur fond navy
+ * à une suite de lignes numérotées bord à bord ; la méthode abandonne ses pastilles
+ * dégradées numérotées pour de simples lignes à filets ; la conclusion du service devient
+ * une bande de papier avec deux actions en texte souligné ; et les autres services forment
+ * une liste de filets au lieu de cartes ombrées.
+ *
+ * Aucun contenu n'a été inventé : ce sont les champs du dictionnaire (`whyTitle`,
+ * `offerings`, `steps`, `ctaTitle`…) simplement remis en page. Les pages de service gardent
+ * leur propre conclusion et n'appellent donc pas le bandeau commun `CtaBand`.
+ */
 export default function ServicePageTemplate({ service }: { service: Service }) {
   const { dict, locale } = useDictionary();
   const href = (p: string) => `/${locale}${p === "/" ? "" : p}`;
@@ -18,115 +32,125 @@ export default function ServicePageTemplate({ service }: { service: Service }) {
   return (
     <>
       {/* Hero clair commun à toutes les pages internes (photo `other-hero` en fond). */}
-      <HeroSection eyebrow="Service" title={service.heroTitle} body={service.heroSubtitle}>
-        <ButtonLink href={href("/devis")} className="mt-2">
-          {ui.freeQuote === "Devis gratuit" ? "Demander un devis" : "Get a quote"}
-        </ButtonLink>
-      </HeroSection>
+      <HeroSection eyebrow={ui.expertise} title={service.heroTitle} body={service.heroSubtitle} />
 
-      <section className="py-24 sm:py-28">
-        <div className="container-x grid gap-12 lg:grid-cols-[1fr_1.15fr] lg:gap-16">
-          <Reveal>
-            <div className="flex flex-col items-start gap-4 lg:sticky lg:top-28">
-              <span className="text-xs font-medium uppercase tracking-[0.18em] text-brand">{ui.presentation}</span>
-              <SplitText
-                as="h2"
-                text={service.whyTitle}
-                className="text-3xl leading-[1.15] text-navy sm:text-4xl"
-              />
-              <div aria-hidden className="mt-2 h-1 w-16 rounded-full bg-gradient-to-r from-brand to-turquoise" />
+      <div className="bg-paper text-ink">
+        {/* ——— Présentation : étiquette et titre collants dans la marge, texte à droite. */}
+        <section className="container-x py-20 sm:py-28">
+          <div className="grid gap-10 lg:grid-cols-12 lg:gap-12">
+            <div className="lg:col-span-4">
+              <div className="lg:sticky lg:top-28">
+                <span className={`${LABEL} text-ink/45`}>{ui.presentation}</span>
+                <h2 className={`mt-4 max-w-sm ${TITLE}`}>{service.whyTitle}</h2>
+              </div>
             </div>
-          </Reveal>
 
-          <Reveal delay={120}>
-            <div className="flex flex-col gap-8">
-              <p className="text-base leading-[1.85] text-muted sm:text-lg">{service.whyBody}</p>
-              <ButtonLink href={href("/devis")} variant="outline">
-                {ui.freeQuote === "Devis gratuit" ? "Demander un devis" : "Get a quote"}
-              </ButtonLink>
-            </div>
-          </Reveal>
-        </div>
-      </section>
-
-      <section className="relative overflow-hidden bg-navy grain py-24 sm:py-28">
-        <div aria-hidden className="pointer-events-none absolute inset-0">
-          <div className="absolute -left-20 bottom-0 h-72 w-72 rounded-full bg-turquoise/20 blur-[110px] animate-drift" />
-        </div>
-        <div className="container-x relative">
-          <SectionHeading tone="dark" eyebrow={ui.ourOffer} title={locale === "fr" ? "Ce que nous proposons" : "What we offer"} />
-          <div className="mt-14">
-            <Reveal>
-              <CheckList items={service.offerings} tone="dark" />
+            <Reveal className="lg:col-span-8">
+              <p className={`max-w-3xl ${LEAD} text-ink/75`}>{service.whyBody}</p>
+              <div className="mt-9 flex flex-wrap items-center gap-x-10 gap-y-4">
+                <TextLink href={href("/devis")} strong>
+                  {ui.freeQuote}
+                </TextLink>
+                <TextLink href={href("/realisations")}>{ui.viewAllProjects}</TextLink>
+              </div>
             </Reveal>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <section className="py-24 sm:py-28">
-        <div className="container-x">
-          <SectionHeading eyebrow={ui.methodology} title={service.processLabel} body={service.processIntro} />
+        {/* ——— Ce que nous proposons : une ligne par prestation, numérotée. ——— */}
+        <section className={`border-t ${RULE}`}>
+          <div className="container-x py-20 sm:py-28">
+            <div className="grid gap-8 lg:grid-cols-12">
+              <span className={`lg:col-span-3 ${LABEL} text-ink/45`}>{ui.ourOffer}</span>
+              <ul className={`lg:col-span-9 border-t ${RULE}`}>
+                {service.offerings.map((item, i) => (
+                  <Reveal
+                    as="li"
+                    key={item}
+                    delay={i * 60}
+                    className={`group grid items-baseline gap-2 border-b py-5 sm:grid-cols-[3rem_minmax(0,1fr)] sm:gap-8 ${RULE}`}
+                  >
+                    <span className={`${LABEL} tabular-nums text-ink/35`}>
+                      {String(i + 1).padStart(2, "0")}
+                    </span>
+                    <span className={`${ROW} transition-transform duration-500 group-hover:translate-x-1`}>
+                      {item}
+                    </span>
+                  </Reveal>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </section>
 
-          <ol className="mt-16 grid gap-y-10 md:grid-cols-4 md:gap-x-6">
-            {service.steps.map((step, i) => (
-              <Reveal as="li" key={step.title} delay={i * 90} className="relative md:pr-6">
-                <div className="relative flex items-center md:block">
-                  <span className="relative z-10 grid h-11 w-11 shrink-0 place-items-center rounded-full bg-gradient-to-br from-brand to-turquoise text-sm font-light text-white shadow-soft">
-                    {i + 1}
-                  </span>
-                  <span
-                    aria-hidden
-                    className="hidden h-px w-full bg-gradient-to-r from-brand/40 to-transparent md:ml-3 md:block md:h-px"
-                  />
-                </div>
-                <h3 className="mt-4 text-lg font-light text-navy">{step.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-muted">{step.body}</p>
-              </Reveal>
-            ))}
-          </ol>
-        </div>
-      </section>
+        {/* ——— Comment ça marche : le titre porte la section, les étapes sont des lignes. */}
+        <section className={`border-t ${RULE}`}>
+          <div className="container-x py-20 sm:py-28">
+            <div className="grid gap-8 lg:grid-cols-12">
+              <div className="lg:col-span-3">
+                <span className={`${LABEL} text-ink/45`}>{ui.methodology}</span>
+                <h2 className={`mt-4 ${TITLE}`}>{service.processLabel}</h2>
+                <p className={`mt-4 max-w-xs ${BODY} text-ink/60`}>{service.processIntro}</p>
+              </div>
+              <ul className={`lg:col-span-9 border-t ${RULE}`}>
+                {service.steps.map((step, i) => (
+                  <Reveal
+                    as="li"
+                    key={step.title}
+                    delay={i * 60}
+                    className={`grid items-baseline gap-2 border-b py-6 sm:grid-cols-[3rem_minmax(0,1fr)_minmax(0,1.1fr)] sm:gap-8 ${RULE}`}
+                  >
+                    <span className={`${LABEL} tabular-nums text-ink/35`}>
+                      {String(i + 1).padStart(2, "0")}
+                    </span>
+                    <h3 className={ROW}>{step.title}</h3>
+                    <p className={`${BODY} text-ink/60`}>{step.body}</p>
+                  </Reveal>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </section>
 
-      <section className="relative overflow-hidden bg-navy/[0.03] py-24 sm:py-28">
-        <div aria-hidden className="pointer-events-none absolute inset-y-0 right-0 w-px bg-gradient-to-b from-transparent via-turquoise/30 to-transparent" />
-        <div className="container-x">
-          <Reveal className="mx-auto flex max-w-3xl flex-col items-center gap-6 text-center">
-            <SplitText
-              as="h2"
-              text={service.ctaTitle}
-              className="text-3xl leading-[1.12] text-navy sm:text-4xl"
-            />
-            <p className="max-w-xl text-base leading-relaxed text-muted sm:text-lg">{service.ctaBody}</p>
-            <ButtonLink href={href("/devis")} className="mt-2">
-              {ui.discussProject}
-            </ButtonLink>
-          </Reveal>
-        </div>
-      </section>
+        {/* ——— Conclusion du service : la seule affirmation en grand corps de la page. ——— */}
+        <section className={`border-t ${RULE}`}>
+          <div className="container-x py-20 sm:py-28">
+            <span className={`${LABEL} text-ink/45`}>{ui.talkToUs}</span>
+            <h2 className={`mt-6 max-w-3xl ${CLOSING}`}>{service.ctaTitle}</h2>
+            <p className={`mt-6 max-w-xl ${LEAD} text-ink/70`}>{service.ctaBody}</p>
+            <div className="mt-9 flex flex-wrap items-center gap-x-10 gap-y-4">
+              <TextLink href={href("/devis")} strong>
+                {ui.discussProject}
+              </TextLink>
+              <TextLink href={href("/contact")}>{dict.finalCta.secondary}</TextLink>
+            </div>
+          </div>
+        </section>
 
-      <section className="border-t border-navy/8 py-20">
-        <div className="container-x">
-          <h2 className="text-xs font-medium uppercase tracking-[0.18em] text-muted">
-            {locale === "fr" ? "Autres services" : "Other services"}
-          </h2>
-          <ul className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-            {others.map((s) => (
-              <li key={s.slug}>
-                <Link
-                  href={href(`/services/${s.slug}`)}
-                  className="group flex h-full flex-col gap-2 rounded-card border border-navy/8 bg-white p-5 shadow-soft transition-all duration-300 hover:-translate-y-1 hover:shadow-lift"
-                >
-                  <span className="text-sm font-light leading-snug text-navy">{s.title}</span>
-                  <span className="mt-auto inline-flex items-center gap-1.5 pt-3 text-xs font-light text-brand">
-                    {ui.discover}
-                    <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-1" />
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </section>
+        {/* ——— Autres services : des lignes de filets, pas des cartes. ——— */}
+        <section className={`border-t ${RULE}`}>
+          <div className="container-x py-20 sm:py-24">
+            <span className={`${LABEL} text-ink/45`}>
+              {locale === "fr" ? "Autres services" : "Other services"}
+            </span>
+            <ul className={`mt-8 border-t ${RULE}`}>
+              {others.map((other) => (
+                <li key={other.slug} className={`border-b ${RULE}`}>
+                  <Link
+                    href={href(`/services/${other.slug}`)}
+                    className="group flex items-baseline justify-between gap-6 py-5"
+                  >
+                    <span className={`${ROW} transition-transform duration-500 group-hover:translate-x-1`}>
+                      {other.title}
+                    </span>
+                    <ArrowRight className="h-4 w-4 shrink-0 text-ink/30 transition-all duration-300 group-hover:translate-x-1 group-hover:text-ink" />
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+      </div>
     </>
   );
 }
