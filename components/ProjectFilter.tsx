@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import ProjectsGallery, {
   ALL_VIEWS,
-  GalleryViewSwitcher,
+  GalleryViewSelect,
   type GalleryProject,
   type GalleryView,
 } from "@/components/ProjectsGallery";
@@ -13,12 +13,11 @@ import { LABEL, RULE } from "@/lib/editorial";
 /**
  * Réalisations (page dédiée) : la barre d'outils, puis la galerie.
  *
- * UNE SEULE LIGNE POUR TOUT PILOTER. Les catégories (à gauche) et le choix d'affichage (à
- * droite) forment une même barre, séparées par un filet vertical : « qu'est-ce que je
- * regarde » d'un côté, « comment je le regarde » de l'autre. Avant, c'étaient deux rangées
- * de petites capitales empilées à quelques dizaines de pixels l'une de l'autre, sans rien
- * pour dire ce qui distinguait l'une de l'autre — elles se lisaient comme une seule liste
- * interminable (« Tous 06 Branding 01 … Grille Liste Fil Plein cadre »).
+ * La barre tient sur UNE ligne : à gauche les catégories, à droite le choix d'affichage — et
+ * ce choix tient dans un seul contrôle (« Affichage — Grille ») qui ouvre un menu, au lieu de
+ * quatre onglets de plus. Avant, la barre portait deux séries de petites capitales côte à
+ * côte, sans rien pour dire laquelle était le filtre : on lisait tout d'un trait, comme une
+ * seule longue liste de mots.
  *
  * Le compteur, lui, est passé en exposant : un petit nombre à l'anglaise, aligné en haut du
  * libellé et non plus collé derrière (« Branding01 »). On sait ce qu'on va voir avant de
@@ -97,21 +96,16 @@ export default function ProjectFilter({ projects }: { projects: GalleryProject[]
 
         {/* ——— Colonne droite : comment on le regarde. Le filet vertical n'apparaît que
             lorsque les deux groupes tiennent sur la même ligne. ——— */}
-        <GalleryViewSwitcher
+        <GalleryViewSelect
           views={ALL_VIEWS}
           view={view}
           onSelect={setView}
-          className="flex items-baseline gap-x-8 lg:border-l lg:border-navy/10 lg:pl-10"
+          className="lg:border-l lg:border-navy/10 lg:pl-10"
         />
       </div>
 
       {visible.length > 0 ? (
-        <ProjectsGallery
-          projects={visible}
-          label={null}
-          view={view}
-          onViewChange={setView}
-        />
+        <ProjectsGallery projects={visible} view={view} />
       ) : (
         <p className={`mt-14 border-t pt-6 ${RULE} text-[0.95rem] text-ink/60`}>
           {dict.ui.searchNoResults}

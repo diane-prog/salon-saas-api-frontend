@@ -7,10 +7,10 @@ import { useDictionary } from "@/components/DictionaryProvider";
 /**
  * Réalisations (accueil) : le titre de section, puis les projets.
  *
- * L'accueil ne garde qu'UN affichage — la vue « Fil », les fiches collantes — d'où
- * `views={["feed"]}` : la barre de choix d'affichage n'est pas rendue du tout (elle
- * n'apparaît que lorsqu'il y a plusieurs affichages à proposer, comme sur la page
- * Réalisations). Le fond de la section est inchangé.
+ * L'accueil ne garde qu'UN affichage — la vue « Fil » — d'où `views={["feed"]}` : aucun
+ * choix à proposer. Et c'est ici, et seulement ici, que les fiches se collent (`stickyFeed`) :
+ * la pile est l'effet de l'accueil, pas celui de la page Réalisations, qui demande les mêmes
+ * cartes posées simplement l'une sous l'autre. Le fond de la section est inchangé.
  *
  * La galerie elle-même vit dans `ProjectsGallery`, partagée avec la page Réalisations :
  * la vue « Fil », ses réglages de pile et l'effet GSAP/ScrollTrigger y sont décrits.
@@ -65,7 +65,7 @@ export default function ProjectCommunity() {
       </div>
 
       <div className="relative mx-auto max-w-[80rem] px-6">
-        <ProjectsGallery projects={projects} views={["feed"]} />
+        <ProjectsGallery projects={projects} views={["feed"]} stickyFeed />
       </div>
     </section>
   );

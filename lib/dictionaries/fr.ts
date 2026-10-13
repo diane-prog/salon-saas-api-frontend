@@ -569,7 +569,8 @@ export const ui = {
   searchPlaceholder: "Rechercher un service, une réalisation…",
   searchNoResults: "Aucun résultat",
   /* Affichages de la galerie de réalisations (accueil). */
-  galleryViews: { grid: "Grille", list: "Liste", feed: "Fil", full: "Plein cadre" },
+  galleryViews: { grid: "Grille", list: "Liste", feed: "Fil" },
+  galleryDisplay: "Affichage",
   galleryViewLabel: "Mode d'affichage des réalisations",
 };
 

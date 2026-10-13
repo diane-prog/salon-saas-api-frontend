@@ -570,7 +570,8 @@ export const ui = {
   searchPlaceholder: "Search a service, a project…",
   searchNoResults: "No results",
   /* Gallery displays on the home page (projects). */
-  galleryViews: { grid: "Grid", list: "List", feed: "Feed", full: "Full" },
+  galleryViews: { grid: "Grid", list: "List", feed: "Feed" },
+  galleryDisplay: "Layout",
   galleryViewLabel: "Projects view mode",
 };
 const dictionary = {
