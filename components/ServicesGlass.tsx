@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowUpRight, serviceIcons } from "@/components/Icons";
@@ -14,6 +14,9 @@ type ServicesGlassProps = {
   eyebrow: string;
   title: string;
   body: string;
+  /** Contenu posé APRÈS le cadre, pleine largeur : c'est là que se glisse le bloc des
+      résultats (`StatsSection`), qui défile sur le média collé après le fondu des plans. */
+  children?: ReactNode;
 };
 
 const TOP_COUNT = 3;
@@ -29,8 +32,27 @@ const TOP_COUNT = 3;
  *   2. un interstice où la vidéo reste seule à l'écran ;
  *   3. les trois services restants, sur la même grille. Un voile flouté se pose
  *      sur la vidéo pendant l'interstice et se retire ensuite.
+ *
+ * `children` vient APRÈS le cadre (`max-w-[80rem]`), donc en pleine largeur, et reste dans
+ * la section : c'est le quatrième temps, le bloc des résultats. Monté DANS la section pour
+ * une raison de mécanique, pas de goût — la vidéo collée a pour repère la boîte de la
+ * section, donc tant que le bloc est dedans, le média reste immobile et c'est le bloc qui
+ * défile par-dessus. Placé en voisin, il aurait poussé la vidéo du bas.
+ *
+ * Le passage d'un plan à l'autre est un FONDU, jamais une coupe : une seconde couche de
+ * média (affiche `hero7.png` + `video1.mp4`) est posée sur la première, dans le même cadre
+ * collé, et son opacité suit la progression du défilement — 0 quand le bloc des résultats
+ * pointe au bas de l'écran, 1 quand son haut atteint le haut de l'écran, soit un écran de
+ * défilement. Affiche et vidéo forment un même plan : si la vidéo n'est pas encore lancée,
+ * on voit l'affiche, jamais un cadre noir.
+ *
+ * Les deux vidéos ne tournent pas ensemble pour rien : celle des services s'arrête quand le
+ * fondu l'a recouverte, celle des résultats ne démarre qu'une fois le fondu commencé (la
+ * règle est dans `syncVideo`, les deux booléens évitent d'appeler `play()` à chaque frame).
+ * Sous `prefers-reduced-motion`, aucun média ne tourne : la couche change de plan à
+ * mi-course, sans fondu continu.
  */
-export default function ServicesGlass({ eyebrow, title, body }: ServicesGlassProps) {
+export default function ServicesGlass({ eyebrow, title, body, children }: ServicesGlassProps) {
   const { dict, locale } = useDictionary();
   const { services, ui } = dict;
   const [allowVideo, setAllowVideo] = useState(false);
@@ -39,6 +61,15 @@ export default function ServicesGlass({ eyebrow, title, body }: ServicesGlassPro
   const video = useRef<HTMLVideoElement>(null);
   const gapRef = useRef<HTMLDivElement>(null);
   const blurRef = useRef<HTMLDivElement>(null);
+
+  /* Le bloc des résultats (`children`), la couche de plan qui le remplace au fondu, et sa
+     vidéo. Plus l'état de lecture des deux plans et la progression du fondu (0 → 1). */
+  const resultsBeat = useRef<HTMLDivElement>(null);
+  const resultsLayer = useRef<HTMLDivElement>(null);
+  const resultsVideo = useRef<HTMLVideoElement>(null);
+  const progress = useRef(0);
+  const inView = useRef(false);
+  const playing = useRef({ services: false, results: false });
 
   const top = services.slice(0, TOP_COUNT);
   const bottom = services.slice(TOP_COUNT);
@@ -52,37 +83,86 @@ export default function ServicesGlass({ eyebrow, title, body }: ServicesGlassPro
     return () => query.removeEventListener("change", update);
   }, []);
 
+  /* Qui tourne, et quand. Une seule règle pour les deux plans :
+
+     - celui des SERVICES tourne tant que la section est dans le champ et que le fondu ne
+       l'a pas recouvert (`p < 0.985`) ;
+     - celui des RÉSULTATS ne démarre qu'une fois le fondu engagé (`p > 0.015`).
+
+     Sans les deux booléens, on appellerait `play()`/`pause()` à chaque frame — inutile et
+     coûteux ; ils limitent les appels aux VRAIS changements d'état. */
+  const syncVideo = useCallback(() => {
+    const media = video.current;
+    const results = resultsVideo.current;
+    const p = progress.current;
+    const wantServices = inView.current && p < 0.985;
+    const wantResults = inView.current && p > 0.015;
+
+    if (media && wantServices !== playing.current.services) {
+      playing.current.services = wantServices;
+      if (wantServices) void media.play().catch(() => {});
+      else media.pause();
+    }
+
+    if (results && wantResults !== playing.current.results) {
+      playing.current.results = wantResults;
+      if (wantResults) void results.play().catch(() => {});
+      else results.pause();
+    }
+  }, []);
+
   useEffect(() => {
     const el = root.current;
-    const media = video.current;
-    if (!allowVideo || !el || !media) return;
+    if (!allowVideo || !el) return;
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) void media.play().catch(() => {});
-        else media.pause();
+        inView.current = entry.isIntersecting;
+        syncVideo();
       },
       { rootMargin: "200px" },
     );
     observer.observe(el);
     return () => observer.disconnect();
-  }, [allowVideo]);
+  }, [allowVideo, syncVideo]);
 
-  /* Le voile flouté se pose sur la vidéo pendant l'interstice, puis se retire. */
+  /* Deux choses sont pilotées par le défilement, dans le même écouteur :
+
+     1. le voile flouté, qui se pose sur la vidéo pendant l'interstice puis se retire ;
+     2. le FONDU des plans — quand le bloc des résultats monte, le plan des services cède
+        la place à celui des résultats progressivement (`opacity` de la couche), au lieu
+        d'un changement sec. La progression vaut 0 quand le bloc pointe au bas de l'écran
+        et 1 quand son haut atteint le haut de l'écran : un écran de défilement, pas plus.
+
+     Les deux mesures sont faites dans la même frame (`requestAnimationFrame`), jamais
+     dans deux écouteurs : elles lisent le même layout, une seule passe de recalcul. */
   useEffect(() => {
     const gap = gapRef.current;
     const veil = blurRef.current;
-    if (!gap || !veil) return;
+    const layer = resultsLayer.current;
+    const beat = resultsBeat.current;
+    if (!gap || !veil || !layer || !beat) return;
 
     let frame = 0;
     const update = () => {
       frame = 0;
+      const view = window.innerHeight;
+
       const rect = gap.getBoundingClientRect();
       /* 0 quand l'interstice arrive, 1 quand il est au centre, 0 une fois sorti. */
-      const centre = window.innerHeight / 2;
+      const centre = view / 2;
       const dist = Math.abs(rect.top + rect.height / 2 - centre);
-      const reach = window.innerHeight / 2 + rect.height / 2;
+      const reach = view / 2 + rect.height / 2;
       veil.style.opacity = String(Math.max(0, 1 - dist / reach));
+
+      /* Le fondu des plans. Sous `prefers-reduced-motion`, pas de fondu continu : on
+         bascule à mi-course — `allowVideo` est faux exactement dans ce cas. Le plan
+         change, mais rien ne glisse. */
+      const raw = Math.min(1, Math.max(0, 1 - beat.getBoundingClientRect().top / view));
+      const p = allowVideo ? raw : raw > 0.5 ? 1 : 0;
+      progress.current = p;
+      layer.style.opacity = String(p);
+      syncVideo();
     };
     const onScroll = () => {
       if (!frame) frame = requestAnimationFrame(update);
@@ -96,7 +176,7 @@ export default function ServicesGlass({ eyebrow, title, body }: ServicesGlassPro
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onScroll);
     };
-  }, []);
+  }, [allowVideo, syncVideo]);
 
   return (
     <section ref={root} className="relative isolate overflow-clip text-white">
@@ -138,6 +218,39 @@ export default function ServicesGlass({ eyebrow, title, body }: ServicesGlassPro
           aria-hidden
           className="absolute inset-0 bg-black/5 opacity-0 backdrop-blur-[1px]"
         />
+
+        {/* 2. Le plan des RÉSULTATS : posé par-dessus le plan des services, dans le même
+            cadre collé. Son opacité est celle du défilement (voir plus bas) — c'est le
+            fondu, pas un changement de plan.
+
+            Il est monté EN DERNIER dans le média, donc au-dessus des deux voiles des
+            services : une fois le fondu terminé, plus rien ne voile ni ne floute le
+            nouveau plan. Affiche (`hero7.png`) et vidéo (`video1.mp4`) sont le même plan
+            chaud, donc rien ne sursaute si la vidéo n'est pas encore lancée. */}
+        <div ref={resultsLayer} aria-hidden className="absolute inset-0 opacity-0">
+          <Image
+            src="/img/hero7.png"
+            alt=""
+            fill
+            sizes="100vw"
+            className="object-cover object-center"
+          />
+          {allowVideo && (
+            <video
+              ref={resultsVideo}
+              className="absolute inset-0 h-full w-full object-cover object-center"
+              src="/img/video1.mp4"
+              muted
+              loop
+              playsInline
+              preload="none"
+              aria-hidden
+              tabIndex={-1}
+            />
+          )}
+          <div className="absolute inset-0 bg-ink/55" />
+          <div className="absolute inset-y-0 left-0 w-full bg-gradient-to-r from-ink/85 via-ink/45 to-transparent lg:w-[64%]" />
+        </div>
       </div>
 
       <div className="relative mx-auto w-full max-w-[80rem] border-x border-white/15">
@@ -199,6 +312,13 @@ export default function ServicesGlass({ eyebrow, title, body }: ServicesGlassPro
             {ui.viewAllServices}
           </ButtonLink>
         </div>
+      </div>
+
+      {/* 4. Le bloc des résultats : dans la section, donc il défile PAR-DESSUS le cadre
+          collé dont le plan vient de changer. Sa position pilote le fondu (voir l'effet
+          plus haut) ; son contenu s'anime de son côté (`Reveal`, `SplitText`). */}
+      <div ref={resultsBeat} className="relative">
+        {children}
       </div>
     </section>
   );

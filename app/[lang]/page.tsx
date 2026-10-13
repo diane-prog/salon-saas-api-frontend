@@ -33,7 +33,28 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
             ? "Nous accompagnons les entreprises africaines et leurs partenaires à chaque étape de leur développement digital."
             : "We support African companies and their partners at every stage of their digital development."
         }
-      />
+      >
+        {/* Les résultats sont passés en ENFANT (et non posés en voisin) pour rester dans la
+            section : c'est la boîte de la section qui sert de repère à la vidéo collée, donc
+            le bloc défile par-dessus le média — et le plan de ce média vire progressivement
+            au sien pendant qu'il monte (voir `ServicesGlass`). */}
+        <StatsSection
+          eyebrow={lang === "fr" ? "Résultats" : "Results"}
+          title={
+            lang === "fr"
+              ? "Des résultats concrets, pas des promesses."
+              : "Proven results, not promises."
+          }
+          body={
+            lang === "fr"
+              ? "Une décennie de campagnes, de sites et d'identités de marque pour des entreprises africaines et leurs partenaires. Voici ce que cela donne, chiffres en main."
+              : "A decade of campaigns, websites and brand identities for African companies and their partners. Here is what that looks like, in numbers."
+          }
+          linkHref={href("/realisations")}
+          linkLabel={ui.viewAllProjects}
+          stats={stats}
+        />
+      </ServicesGlass>
 
       <ProjectCommunity />
 
@@ -48,24 +69,6 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
       />
 
       <TestimonialsSection />
-
-      {/* Les résultats ferment la page : juste avant le bandeau de conclusion, ils
-          transforment la promesse en preuve au moment où l'on demande le devis — et la
-          section ne coupe plus le récit entre l'accroche du hero et le « pourquoi nous ».
-          Le plan (affiche + vidéo) est dans la section ; la copie est passée ici, comme
-          pour les services. */}
-      <StatsSection
-        eyebrow={lang === "fr" ? "Résultats" : "Results"}
-        title={
-          lang === "fr" ? "Des résultats concrets, pas des promesses." : "Proven results, not promises."
-        }
-        body={
-          lang === "fr"
-            ? "Une décennie de campagnes, de sites et d'identités de marque pour des entreprises africaines et leurs partenaires. Voici ce que cela donne, chiffres en main."
-            : "A decade of campaigns, websites and brand identities for African companies and their partners. Here is what that looks like, in numbers."
-        }
-        stats={stats}
-      />
 
       <CtaBand />
     </>

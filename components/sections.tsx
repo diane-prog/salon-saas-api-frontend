@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useRef, type CSSProperties, type ReactNode } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowUpRight } from "@/components/Icons";
@@ -149,122 +149,81 @@ function Flower({ className = "", style }: { className?: string; style?: CSSProp
 type Stat = { value: number; suffix: string; label: string };
 
 /**
- * Leegi en chiffres — des RÉSULTATS sur le plan de la maison.
+ * Leegi en chiffres — le BLOC DES RÉSULTATS, sur le plan qui a remplacé celui des services.
  *
- * La section n'est plus dans le haut de page : elle ferme la page, juste avant le bandeau
- * de conclusion (`CtaBand`, dans `app/[lang]/page.tsx`). À cette place — après les
- * témoignages, au moment où l'on demande le devis — la preuve juste avant la demande, et
- * elle ne coupe plus le récit entre l'accroche du hero et la promesse du « pourquoi nous ».
+ * Il n'a NI fond NI média : c'est le dernier temps de `ServicesGlass`, posé sur le cadre
+ * collé de la section dont le plan vient d'être remplacé par un fondu (voir `ServicesGlass`,
+ * qui porte la seconde couche — `hero7.png` + `video1.mp4` — et son opacité de défilement).
+ * Tout ce qui suit est donc écrit pour se lire SUR UNE IMAGE : texte clair, filets
+ * `white/15`, ombre douce sous les mots.
  *
- * Le parti est celui de la référence : une copie à gauche (sur-titre, titre, chapô) et un
- * damier de tuiles à droite, par-dessus une VIDÉO plein cadre. Les tuiles reprennent la
- * tuile de verre des services (`ServiceCard` : même bord `white/15`, même verre `white/[0.06]`,
- * même `backdrop-blur`) augmentée des quatre CROIX D'ANGLE de la référence : la carte se lit
- * comme une planche technique, pas comme un panneau.
+ * Deux partis, repris de la référence :
  *
- * Cinq valeurs dans un damier de quatre : la cinquième prend les deux colonnes en bas
- * (`col-span-2`) plutôt que de laisser une case vide — un chiffre orphelin se lirait comme
- * un oubli.
+ *   1. la copie en bas à gauche — sur-titre en pastille (`Eyebrow`, ton `dark`), titre en
+ *      grand thin révélé mot à mot (`SplitText`, comme tous les grands titres du site),
+ *      chapô, puis l'action vers les réalisations ;
+ *   2. les CARTES en bas, pleine largeur : une rangée qui DÉFILE EN CONTINU et se coupe aux
+ *      deux bords de l'écran — le geste du ruban de mots-clés, avec les chiffres dedans.
  *
- * Le média ne tourne QUE dans le champ (`IntersectionObserver`, comme les services) et pas
- * du tout sous `prefers-reduced-motion`, où l'affiche `hero7.png` reste seule : c'est le
- * plan de `video1.mp4`, 1920 × 1080 et chaud (mesuré : 106 / 93 / 85, luminance 95), donc
- * un texte clair tient dessus avec le voile. Affiche et vidéo vont par paire — changer l'une
- * sans l'autre se verrait au chargement.
+ * La boucle est celle du site (`animate-marquee`, `translateX(0)` → `-50 %`), et les trois
+ * conditions de sa justesse sont tenues : quatre copies de la suite (un nombre PAIR, sinon
+ * le saut tomberait au milieu d'une copie), `pr-*` égal à `gap-*` (l'écart de reprise est
+ * alors mesuré au pixel) et `w-max` sur la piste (la moitié tombe juste, et la piste couvre
+ * même un très grand écran). Les copies au-delà de la première sont `aria-hidden` : les cinq
+ * chiffres ne sont pas annoncés quatre fois. La rangée s'arrête au survol, le temps de lire.
  */
 export function StatsSection({
   eyebrow,
   title,
   body,
+  linkHref,
+  linkLabel,
   stats,
 }: {
   eyebrow: string;
   title: string;
   body: string;
+  linkHref: string;
+  linkLabel: string;
   stats: Stat[];
 }) {
-  const [allowVideo, setAllowVideo] = useState(false);
-  const root = useRef<HTMLElement>(null);
-  const video = useRef<HTMLVideoElement>(null);
-
-  useEffect(() => {
-    const query = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const update = () => setAllowVideo(!query.matches);
-    update();
-    query.addEventListener("change", update);
-    return () => query.removeEventListener("change", update);
-  }, []);
-
-  useEffect(() => {
-    const el = root.current;
-    const media = video.current;
-    if (!allowVideo || !el || !media) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) void media.play().catch(() => {});
-        else media.pause();
-      },
-      { rootMargin: "200px" },
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [allowVideo]);
-
-  /* Quatre tuiles, puis les suivantes en pleine largeur (une par rangée). */
-  const tiles = stats.slice(0, 4);
-  const full = stats.slice(4);
+  const row = [...stats, ...stats, ...stats, ...stats];
 
   return (
-    <section ref={root} className="relative isolate overflow-hidden bg-ink text-white">
-      {/* Le plan : affiche puis vidéo, sous deux voiles — un général, un qui assombrit la
-          colonne de texte (les mots restent lisibles sur n'importe quelle image du plan). */}
-      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
-        <Image
-          src="/img/hero7.png"
-          alt=""
-          fill
-          sizes="100vw"
-          className="object-cover object-center"
-        />
-
-        {allowVideo && (
-          <video
-            ref={video}
-            className="absolute inset-0 h-full w-full object-cover object-center"
-            src="/img/video1.mp4"
-            muted
-            loop
-            playsInline
-            preload="none"
-            aria-hidden
-            tabIndex={-1}
-          />
-        )}
-
-        <div className="absolute inset-0 bg-ink/55" />
-        <div className="absolute inset-y-0 left-0 w-full bg-gradient-to-r from-ink/85 via-ink/45 to-transparent lg:w-[64%]" />
-      </div>
-
-      <div className="container-x relative grid gap-12 py-20 sm:py-24 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:items-center lg:gap-16 lg:py-28">
-        <div>
+    <div className="relative flex min-h-[100svh] flex-col justify-end gap-12 pt-32 pb-12 text-white sm:gap-16 sm:pb-16">
+      <div className="container-x">
+        <Reveal className="flex max-w-2xl flex-col items-start gap-6">
           <Eyebrow tone="dark">{eyebrow}</Eyebrow>
-          <h2 className="mt-6 max-w-[16ch] font-light text-4xl leading-[1.06] tracking-tight [text-shadow:0_2px_18px_rgb(0_0_0_/_0.4)] sm:text-5xl lg:text-[3.25rem]">
-            {title}
-          </h2>
-          <p className="mt-6 max-w-md text-base leading-relaxed text-white/70">{body}</p>
-        </div>
 
-        <ul className="grid grid-cols-2 gap-3 sm:gap-4">
-          {tiles.map((stat, i) => (
-            <StatCard key={stat.label} stat={stat} delay={i * 80} />
-          ))}
-          {full.map((stat, i) => (
-            <StatCard key={stat.label} stat={stat} delay={320 + i * 80} wide />
-          ))}
-        </ul>
+          <SplitText
+            as="h2"
+            text={title}
+            breakAfter={2}
+            delay={0.06}
+            className="font-light text-4xl leading-[1.06] tracking-tight [text-shadow:0_2px_18px_rgb(0_0_0_/_0.4)] sm:text-5xl lg:text-[3.25rem]"
+          />
+
+          <p className="max-w-md text-base leading-relaxed text-white/70 [text-shadow:0_1px_12px_rgb(0_0_0_/_0.4)]">
+            {body}
+          </p>
+
+          <ButtonLink href={linkHref} variant="glass" className="mt-1">
+            {linkLabel}
+          </ButtonLink>
+        </Reveal>
       </div>
-    </section>
+
+      {/* La rangée qui défile : pleine largeur, elle sort du cadre des deux côtés. */}
+      <Reveal delay={120}>
+        <div className="w-full overflow-hidden">
+          <ul className="flex w-max animate-marquee items-stretch gap-3 pr-3 hover:[animation-play-state:paused] sm:gap-4 sm:pr-4">
+            {row.map((stat, i) => (
+              <StatCard key={`${stat.label}-${i}`} stat={stat} hidden={i >= stats.length} />
+            ))}
+          </ul>
+        </div>
+      </Reveal>
+    </div>
   );
 }
 
@@ -278,38 +237,31 @@ function PlusMark({ className = "" }: { className?: string }) {
 }
 
 /**
- * Tuile de chiffre : le chiffre en grand thin, un filet, le libellé en petites capitales.
+ * Tuile du ruban : verre, croix d'angle, chiffre en grand thin, filet, libellé.
  *
- * La variante `wide` (pleine largeur) couche la tuile sur le côté : le chiffre à gauche, le
- * libellé à droite, séparés par un filet VERTICAL — la tuile respire sur toute la largeur
- * au lieu d'aligner deux blocs vides.
+ * Largeur FIXE : dans une piste en `w-max`, une tuile dimensionnée par son texte donnerait
+ * une piste de largeur imprévisible — « la moitié » de la boucle ne tomberait plus au pixel.
+ * La hauteur, elle, est commune à toute la rangée (`items-stretch` sur la piste). La tuile
+ * est plus opaque que celle des services (`bg-ink/35` + `backdrop-blur-md`) : elle passe sur
+ * une VIDÉO qui bouge, et doit rester lisible image par image.
  */
-function StatCard({ stat, delay = 0, wide = false }: { stat: Stat; delay?: number; wide?: boolean }) {
+function StatCard({ stat, hidden = false }: { stat: Stat; hidden?: boolean }) {
   return (
-    <Reveal as="li" delay={delay} className={wide ? "col-span-2" : ""}>
-      <div
-        className={`group relative flex h-full min-h-[9.5rem] gap-6 rounded-2xl border border-white/15 bg-white/[0.06] p-5 backdrop-blur-sm transition-colors duration-300 hover:border-white/35 hover:bg-white/[0.11] sm:min-h-[11.5rem] sm:p-6 ${
-          wide ? "flex-col sm:min-h-0 sm:flex-row sm:items-center sm:justify-between" : "flex-col justify-between"
-        }`}
-      >
-        <PlusMark className="absolute left-2 top-2 h-3 w-3 text-white/35" />
-        <PlusMark className="absolute right-2 top-2 h-3 w-3 text-white/35" />
-        <PlusMark className="absolute bottom-2 left-2 h-3 w-3 text-white/35" />
-        <PlusMark className="absolute bottom-2 right-2 h-3 w-3 text-white/35" />
+    <li
+      aria-hidden={hidden}
+      className="relative flex min-h-[10.5rem] w-[15rem] shrink-0 flex-col justify-between gap-6 rounded-2xl border border-white/15 bg-ink/35 p-5 backdrop-blur-md sm:min-h-[12rem] sm:w-[18rem] sm:p-6"
+    >
+      <PlusMark className="absolute left-2 top-2 h-3 w-3 text-white/30" />
+      <PlusMark className="absolute right-2 top-2 h-3 w-3 text-white/30" />
+      <PlusMark className="absolute bottom-2 left-2 h-3 w-3 text-white/30" />
+      <PlusMark className="absolute bottom-2 right-2 h-3 w-3 text-white/30" />
 
-        <span className="text-4xl font-light tracking-tight tabular-nums [text-shadow:0_2px_18px_rgb(0_0_0_/_0.35)] sm:text-5xl lg:text-6xl">
-          <Counter value={stat.value} suffix={stat.suffix} />
-        </span>
+      <span className="text-4xl font-light tracking-tight tabular-nums [text-shadow:0_2px_18px_rgb(0_0_0_/_0.35)] sm:text-5xl">
+        <Counter value={stat.value} suffix={stat.suffix} />
+      </span>
 
-        <span
-          className={`${LABEL} border-white/15 pt-4 text-white/65 ${
-            wide ? "border-t sm:border-l sm:border-t-0 sm:pl-6 sm:pt-0 sm:text-right" : "border-t"
-          }`}
-        >
-          {stat.label}
-        </span>
-      </div>
-    </Reveal>
+      <span className={`${LABEL} border-t border-white/15 pt-4 text-white/70`}>{stat.label}</span>
+    </li>
   );
 }
 
