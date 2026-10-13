@@ -23,6 +23,16 @@ import { clientLogos } from "@/lib/clients";
  * La grille est complète : le tableau porte les filets du haut et de la gauche, chaque case
  * porte les siens en bas et à droite. Il n'y a donc aucune ligne à poser à part, et aucun
  * raccord à recoller (un filet par bord de case, jamais deux).
+ *
+ * Le CADRE autour : deux filets VERTICAUX qui tiennent la colonne de contenu, comme la
+ * section services (`border-x` + même `max-w-[80rem]`) — ici en `navy/10`, le filet clair du
+ * site, puisque la section est sur beige. Le tableau garde ses propres filets : le cadre est
+ * en dehors de la marge, donc les deux ne se touchent jamais et rien n'est doublé.
+ *
+ * L'espace haut et bas est porté par le CADRE et non par la section : les filets montent
+ * jusqu'au bord haut de la section (et descendent jusqu'au bord bas) au lieu de commencer
+ * après une marge — c'est ce qui fait lire une grille, et non un bloc posé au milieu du
+ * beige.
  */
 export default function ClientsWall({
   eyebrow,
@@ -36,8 +46,8 @@ export default function ClientsWall({
   linkLabel: string;
 }) {
   return (
-    <section className="bg-beige/25 py-20 sm:py-24">
-      <div className="mx-auto w-full max-w-[80rem] px-5 sm:px-8">
+    <section className="bg-beige/25">
+      <div className="mx-auto w-full max-w-[80rem] border-x border-navy/10 px-5 py-20 sm:px-8 sm:py-24">
         <div className="grid items-center gap-10 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.5fr)] lg:gap-16">
           {/* Marge de gauche : sur-titre, titre, et le lien vers les réalisations — les
               projets des mêmes clients. Rien d'autre : c'est le tableau qui porte la

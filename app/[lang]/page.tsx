@@ -26,7 +26,6 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
       <WhyStatements />
 
       <ServicesGlass
-        eyebrow={ui.expertise}
         title={lang === "fr" ? "Nos Services" : "Our Services"}
         body={
           lang === "fr"
@@ -39,7 +38,6 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
             le bloc défile par-dessus le média — et le plan de ce média vire progressivement
             au sien pendant qu'il monte (voir `ServicesGlass`). */}
         <StatsSection
-          eyebrow={lang === "fr" ? "Résultats" : "Results"}
           title={
             lang === "fr"
               ? "Des résultats concrets, pas des promesses."

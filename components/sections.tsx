@@ -159,11 +159,18 @@ type Stat = { value: number; suffix: string; label: string };
  *
  * Deux partis, repris de la référence :
  *
- *   1. la copie en bas à gauche — sur-titre en pastille (`Eyebrow`, ton `dark`), titre en
- *      grand thin révélé mot à mot (`SplitText`, comme tous les grands titres du site),
- *      chapô, puis l'action vers les réalisations ;
- *   2. les CARTES en bas, pleine largeur : une rangée qui DÉFILE EN CONTINU et se coupe aux
- *      deux bords de l'écran — le geste du ruban de mots-clés, avec les chiffres dedans.
+ *   1. la copie en bas à gauche — le TITRE d'abord, révélé mot à mot (`SplitText`, comme
+ *      tous les grands titres du site), puis le chapô et l'action vers les réalisations.
+ *      Plus de pastille de sur-titre : elle alourdissait un bloc qui doit aller droit au
+ *      chiffre, et l'information est déjà dans le titre ;
+ *   2. les CARTES en bas : une rangée qui DÉFILE EN CONTINU, rognée par les DEUX FILETS du
+ *      cadre — les tuiles passent derrière les règles, qui restent nettes. Le geste du ruban
+ *      de mots-clés, avec les chiffres dedans.
+ *
+ * Le CADRE, justement : les mêmes filets verticaux que la section services (`max-w-[80rem]`,
+ * `border-white/15`), et il MONTE jusqu'au bord haut du bloc — l'espace du haut est porté par
+ * le cadre, jamais par le bloc. La colonne encadrée traverse donc les services ET les
+ * résultats sans interruption, comme une seule grille.
  *
  * La boucle est celle du site (`animate-marquee`, `translateX(0)` → `-50 %`), et les trois
  * conditions de sa justesse sont tenues : quatre copies de la suite (un nombre PAIR, sinon
@@ -173,14 +180,12 @@ type Stat = { value: number; suffix: string; label: string };
  * chiffres ne sont pas annoncés quatre fois. La rangée s'arrête au survol, le temps de lire.
  */
 export function StatsSection({
-  eyebrow,
   title,
   body,
   linkHref,
   linkLabel,
   stats,
 }: {
-  eyebrow: string;
   title: string;
   body: string;
   linkHref: string;
@@ -190,11 +195,9 @@ export function StatsSection({
   const row = [...stats, ...stats, ...stats, ...stats];
 
   return (
-    <div className="relative flex min-h-[100svh] flex-col justify-end gap-12 pt-32 pb-12 text-white sm:gap-16 sm:pb-16">
-      <div className="container-x">
-        <Reveal className="flex max-w-2xl flex-col items-start gap-6">
-          <Eyebrow tone="dark">{eyebrow}</Eyebrow>
-
+    <div className="relative min-h-[100svh] text-white">
+      <div className="mx-auto flex min-h-[100svh] w-full max-w-[80rem] flex-col justify-end gap-12 border-x border-white/15 pt-32 pb-12 sm:gap-16 sm:pb-16">
+        <Reveal className="flex max-w-2xl flex-col items-start gap-6 px-5 sm:px-8 lg:px-10">
           <SplitText
             as="h2"
             text={title}
@@ -211,18 +214,19 @@ export function StatsSection({
             {linkLabel}
           </ButtonLink>
         </Reveal>
-      </div>
 
-      {/* La rangée qui défile : pleine largeur, elle sort du cadre des deux côtés. */}
-      <Reveal delay={120}>
-        <div className="w-full overflow-hidden">
-          <ul className="flex w-max animate-marquee items-stretch gap-3 pr-3 hover:[animation-play-state:paused] sm:gap-4 sm:pr-4">
-            {row.map((stat, i) => (
-              <StatCard key={`${stat.label}-${i}`} stat={stat} hidden={i >= stats.length} />
-            ))}
-          </ul>
-        </div>
-      </Reveal>
+        {/* La rangée qui défile : elle prend toute la largeur du cadre, donc ce sont les
+            filets du cadre qui la coupent — les cartes passent derrière les règles. */}
+        <Reveal delay={120}>
+          <div className="w-full overflow-hidden">
+            <ul className="flex w-max animate-marquee items-stretch gap-3 pr-3 hover:[animation-play-state:paused] sm:gap-4 sm:pr-4">
+              {row.map((stat, i) => (
+                <StatCard key={`${stat.label}-${i}`} stat={stat} hidden={i >= stats.length} />
+              ))}
+            </ul>
+          </div>
+        </Reveal>
+      </div>
     </div>
   );
 }

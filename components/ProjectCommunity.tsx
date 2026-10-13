@@ -27,7 +27,7 @@ export default function ProjectCommunity() {
 
   return (
     <section
-      className="relative overflow-clip pt-10 pb-16 sm:pt-12 sm:pb-20"
+      className="relative overflow-clip"
       style={
         {
           background: "linear-gradient(160deg, #c9d8e3 0%, #dfe8ef 45%, #d3dfe8 100%)",
@@ -57,20 +57,34 @@ export default function ProjectCommunity() {
         <div className="absolute inset-0 bg-[#e8eef4]/65" />
       </div>
 
-      {/* En-tête : titre NU sur deux lignes, puis la galerie (fiches collantes). */}
-      <div className="relative mx-auto max-w-[80rem] px-6 pt-2">
-        <h2 className="text-4xl leading-[1.14] text-navy sm:text-5xl">
-          <span className="block">{words.slice(0, splitAt).join(" ")}</span>
-          <span className="block text-navy/50">{words.slice(splitAt).join(" ")}</span>
-        </h2>
+      {/* Le CADRE : deux filets VERTICAUX qui tiennent la colonne de contenu, exactement
+          comme le cadre de la section services (`border-x` + même `max-w-[80rem]`). Ici la
+          section est claire : le filet est celui de tout le site (`navy/10`) au lieu du
+          blanc des vidéos. Même dessin, même largeur de colonne, une autre lumière.
 
-        <span className="mt-8 inline-block text-[0.68rem] font-medium uppercase tracking-[0.24em] text-navy/45">
-          {ui.portfolio}
-        </span>
-      </div>
+          Un SEUL cadre pour la section : l'en-tête et la galerie vivent dedans, sinon les
+          filets se couperaient entre le titre et les fiches. */}
+      <div className="relative mx-auto w-full max-w-[80rem] border-x border-navy/10">
+        {/* En-tête : titre NU sur deux lignes, puis la galerie (fiches collantes).
 
-      <div className="relative mx-auto max-w-[80rem] px-6">
-        <ProjectsGallery projects={projects} views={["feed"]} stickyFeed />
+            L'espace du haut est ICI, à l'intérieur du cadre, et non sur la section : les
+            filets verticaux montent donc jusqu'au bord haut de la section au lieu de
+            commencer 40 px plus bas. Même convention que la section services, dont le cadre
+            encadre la colonne de haut en bas. */}
+        <div className="relative px-6 pt-12 sm:pt-14">
+          <h2 className="text-4xl leading-[1.14] text-navy sm:text-5xl">
+            <span className="block">{words.slice(0, splitAt).join(" ")}</span>
+            <span className="block text-navy/50">{words.slice(splitAt).join(" ")}</span>
+          </h2>
+
+          <span className="mt-8 inline-block text-[0.68rem] font-medium uppercase tracking-[0.24em] text-navy/45">
+            {ui.portfolio}
+          </span>
+        </div>
+
+        <div className="relative px-6 pb-16 sm:pb-20">
+          <ProjectsGallery projects={projects} views={["feed"]} stickyFeed />
+        </div>
       </div>
     </section>
   );
