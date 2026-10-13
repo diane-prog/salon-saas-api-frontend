@@ -334,19 +334,35 @@ export const aboutPage = {
     { title: "Résultats concrets", body: "Visibilité accrue et crédibilité renforcée." },
   ],
   whyEyebrow: "Pourquoi travailler avec nous",
-  whyStatements: [
-    "Votre stratégie est pensée sur mesure",
-    "Vos contenus captent et marquent les esprits",
-    "Vous collaborez avec une équipe dédiée",
-    "Vos résultats sont mesurables, pas promis",
-    "Vous gagnez en visibilité, durables",
+  whyHeadline: "Pourquoi nous choisir",
+  /* Une carte par raison : la grille de l'accueil affiche ces cinq entrées numérotées
+     (01 → 05), encadrées par deux photos. */
+  whyCards: [
+    {
+      title: "Stratégie sur mesure",
+      body: "Chaque plan part de vos objectifs, de votre marché et de vos contraintes, jamais d'un modèle pré-établi.",
+    },
+    {
+      title: "Contenus qui captent",
+      body: "Visuels et vidéos pensés pour arrêter le regard et rester en mémoire.",
+    },
+    {
+      title: "Équipe dédiée",
+      body: "Une équipe restreinte qui connaît votre marque et suit votre projet du brief à la livraison.",
+    },
+    {
+      title: "Résultats mesurables",
+      body: "Des objectifs clairs et des indicateurs suivis : vous savez ce que produit chaque action.",
+    },
+    {
+      title: "Visibilité durable",
+      body: "Une présence qui s'installe dans le temps et continue de porter votre croissance.",
+    },
   ],
   whyImage: "/img/partenaires.jpg",
-  whyBadge: "éequipe disponible",
-  whyOpenings: [
-    { label: "Stratégie de marque", detail: "Positionnement, plateforme et messages" },
-    { label: "Campagne digitale", detail: "Contenus, reels et spots publicitaires" },
-  ],
+  whyImageAlt: "L'équipe LEEGI Group en intervention chez un client",
+  whyImage2: "/img/equipe-mareme.jpg",
+  whyImage2Alt: "Membre de l'équipe LEEGI Group",
   mission: {
     title: "Notre mission",
     body: "Aider les entreprises à devenir visibles, crédibles et impactantes. Nous croyons que chaque marque mérite une stratégie à la hauteur de ses ambitions.",
@@ -534,6 +550,9 @@ export const ui = {
   searchLabel: "Rechercher sur le site",
   searchPlaceholder: "Rechercher un service, une réalisation…",
   searchNoResults: "Aucun résultat",
+  /* Affichages de la galerie de réalisations (accueil). */
+  galleryViews: { grid: "Grille", list: "Liste", feed: "Fil", full: "Plein cadre" },
+  galleryViewLabel: "Mode d'affichage des réalisations",
 };
 
 const dictionary = {

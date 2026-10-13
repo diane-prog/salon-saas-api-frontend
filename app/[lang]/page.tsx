@@ -28,9 +28,9 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
 
       <StatsSection stats={stats} />
 
-      {/* Section « À propos » style Careers : eyebrow à gauche, phrases animées au
-          centre, photo + carte de verre à droite. Pas de gros titre : l'eyebrow du
-          composant occupe la zone de gauche, comme « WHY WORK WITH US » dans la réf. */}
+      {/* Section « Pourquoi nous choisir » : grille éditoriale de huit tuiles — une
+          en-tête (sur-titre + titre), cinq raisons numérotées 01 → 05 et deux photos
+          insérées dans le flux. */}
       <WhyStatements />
 
       <ServicesGlass

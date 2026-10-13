@@ -35,44 +35,6 @@
   }
 }
 
-/* Mur « communauté » : colonnes masonry qui défilent en boucle fermée. Chaque bande
-   contient ses colonnes en double et translate de -50 %, la largeur d'une pile : le
-   rebouclage est invisible. Pause au survol et au clavier-focus. */
-.community-track {
-  animation: marquee var(--marquee-duration, 40s) linear infinite;
-}
-
-.community-row:hover .community-track,
-.community-row:focus-within .community-track {
-  animation-play-state: paused;
-}
-
-/* Fondus latéraux, teintés de la couleur du fond clair de la section. */
-.community-fades {
-  position: relative;
-}
-
-.community-fades::before,
-.community-fades::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 20rem;
-  z-index: 10;
-  pointer-events: none;
-}
-
-.community-fades::before {
-  left: 0;
-  background: linear-gradient(to right, #d3dfe8, transparent);
-}
-
-.community-fades::after {
-  right: 0;
-  background: linear-gradient(to left, #d3dfe8, transparent);
-}
-
 @keyframes float {
   0%,
   100% {
@@ -89,6 +51,62 @@
   }
   to {
     transform: translate3d(4%, -5%, 0) scale(1.12);
+  }
+}
+
+/* Vue « Fil » de la galerie de réalisations (accueil) : empilement de fiches.
+   Chaque fiche se colle sous la précédente (`top` décalé d'un cran, posé en inline) et
+   la suivante vient la recouvrir au défilement. La fiche recouverte rentre légèrement
+   sur elle-même : l'animation est pilotée par le défilement (`animation-timeline`),
+   donc sans JS et sans écouteur de scroll.
+
+   `transform-origin: top` est essentiel : c'est la bande du haut, seule visible sous
+   la fiche suivante, qui doit rester en place — la fiche se réduit vers le bas.
+
+   Le `@supports` l'est tout autant : un navigateur qui comprend `animation` mais pas
+   `animation-timeline` jouerait l'animation en durée nulle et laisserait TOUTES les
+   fiches réduites. `view-timeline` sur la trame et `animation-timeline` sur la fiche
+   évitent en plus de lire la progression sur l'élément collé (sa position ne bouge
+   plus, la progression n'y serait pas celle du défilement). */
+.stack-frame {
+  position: relative;
+}
+
+.stack-card {
+  position: sticky;
+  transform-origin: top center;
+  will-change: transform;
+}
+
+@supports (animation-timeline: view()) {
+  .stack-frame {
+    view-timeline: --stack block;
+  }
+
+  .stack-card {
+    animation: stack-dip linear both;
+    animation-timeline: --stack;
+    /* La recouverte commence quand la suivante arrive en bas de l'écran et finit
+       quand la trame est sortie par le haut : autrement dit pendant tout le
+       recouvrement. Les bornes sont des pourcentages de `cover` (entrée par le bas →
+       sortie par le haut), donc justes quelle que soit la hauteur de la fenêtre. */
+    animation-range: cover 40% cover 96%;
+  }
+}
+
+@keyframes stack-dip {
+  to {
+    transform: scale(0.94);
+  }
+}
+
+/* Sous `prefers-reduced-motion`, le bloc global du site met toutes les durées à
+   0,01 ms : sur une animation pilotée par le défilement, cela figerait la fiche à son
+   état final (toutes réduites). Cet effet étant un simple relief de profondeur, on
+   l'annule franchement plutôt que de le figer. */
+@media (prefers-reduced-motion: reduce) {
+  .stack-card {
+    animation: none !important;
   }
 }
 
@@ -220,6 +238,64 @@
   &:focus-within {
     transform: translateY(-6px);
     box-shadow: var(--shadow-lift);
+  }
+}
+
+/* Tuiles « Pourquoi nous choisir » (accueil).
+   Au survol : la tuile se soulève très légèrement et une bande de verre inclinée la
+   traverse — un `backdrop-filter` qui éclaircit et floute ce qu'elle recouvre, comme un
+   reflet qui glisse sur une vitre. La bande n'existe qu'au survol, l'animation ne joue
+   qu'une fois par entrée (aucun état JS). Le site désactive déjà animations et
+   transitions sous `prefers-reduced-motion`, donc rien ne bouge dans ce cas. */
+@utility why-tile {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  transition:
+    transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.4s ease,
+    border-color 0.3s ease;
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: -30%;
+    z-index: 2;
+    pointer-events: none;
+    opacity: 0;
+    background: linear-gradient(
+      105deg,
+      transparent 38%,
+      rgb(255 255 255 / 0.5) 50%,
+      transparent 62%
+    );
+    backdrop-filter: blur(6px) brightness(1.12);
+    transform: translateX(-75%);
+  }
+
+  &:hover,
+  &:focus-within {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lift);
+  }
+
+  &:hover::after,
+  &:focus-within::after {
+    animation: why-sheen 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+}
+
+@keyframes why-sheen {
+  0% {
+    opacity: 0;
+    transform: translateX(-75%);
+  }
+  30% {
+    opacity: 0.85;
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(75%);
   }
 }
 

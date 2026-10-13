@@ -335,19 +335,35 @@ export const aboutPage = {
     { title: "Concrete results", body: "Increased visibility and stronger credibility." },
   ],
   whyEyebrow: "Why work with us",
-  whyStatements: [
-    "Your strategy is designed around you",
-    "Your content captures and stays in minds",
-    "You work with a dedicated team",
-    "Your results are measured, not promised",
-    "You gain visibility that lasts",
+  whyHeadline: "Why choose us",
+  /* One card per reason: the home grid shows these five numbered entries (01 → 05),
+     framed by two photos. */
+  whyCards: [
+    {
+      title: "Strategy built around you",
+      body: "Every plan starts from your goals, your market and your constraints, never from a template.",
+    },
+    {
+      title: "Content that lands",
+      body: "Visuals and videos designed to stop the scroll and stay in people's minds.",
+    },
+    {
+      title: "A dedicated team",
+      body: "A small team that knows your brand and follows your project from brief to delivery.",
+    },
+    {
+      title: "Measured results",
+      body: "Clear objectives and tracked indicators: you know what each action delivers.",
+    },
+    {
+      title: "Lasting visibility",
+      body: "A presence that builds over time and keeps carrying your growth.",
+    },
   ],
   whyImage: "/img/partenaires.jpg",
-  whyBadge: "Team available",
-  whyOpenings: [
-    { label: "Brand strategy", detail: "Positioning, platform and messaging" },
-    { label: "Digital campaign", detail: "Content, reels and ad spots" },
-  ],
+  whyImageAlt: "The LEEGI Group team on site with a client",
+  whyImage2: "/img/equipe-mareme.jpg",
+  whyImage2Alt: "A member of the LEEGI Group team",
   mission: {
     title: "Our mission",
     body: "To help businesses become visible, credible and impactful. We believe every brand deserves a strategy that matches its ambitions.",
@@ -535,6 +551,9 @@ export const ui = {
   searchLabel: "Search the site",
   searchPlaceholder: "Search a service, a project…",
   searchNoResults: "No results",
+  /* Gallery displays on the home page (projects). */
+  galleryViews: { grid: "Grid", list: "List", feed: "Feed", full: "Full" },
+  galleryViewLabel: "Projects view mode",
 };
 const dictionary = {
   site, nav, services, hero, stats, about, projects, filters,

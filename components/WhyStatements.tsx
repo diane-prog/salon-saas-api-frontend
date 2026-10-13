@@ -1,179 +1,134 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Reveal from "@/components/Reveal";
-import { prefersReducedMotion } from "@/lib/motion";
 import { useDictionary } from "@/components/DictionaryProvider";
 
 /**
- * Section « pourquoi nous » de la page À propos, copie du design Careers de la
- * référence :
+ * Section « Pourquoi nous choisir » de l'accueil, d'après la maquette éditoriale :
+ * une grille de huit tuiles, encadrées d'un filet fin — la première porte le sur-titre
+ * et le titre de la section, les cinq suivantes sont les raisons numérotées (01 → 05 :
+ * numéro en haut, titre et texte calés en bas), et deux photos s'insèrent dans le flux
+ * (l'une en fin de première ligne, l'autre en tête de seconde).
  *
- * - colonne de gauche : TW occupée par le titre de la page (rendu par la page hôte,
- *   ce composant ne dessine que la grille dessous) ;
- * - colonne du centre : une même phrase répétée en pile — chaque ligne est grise
- *   (text-navy/12), la ligne ACTIVE est navy plein. La ligne active suit le scroll :
- *   c'est celle dont le centre est le plus proche du centre du viewport (aucun timer,
- *   l'état dérive du défilement, comme dans la référence) ;
- * - colonne de droite : la photo, avec une carte de verre par-dessus (badge + œil du
- *   logo + « OPENINGS » + libellés d'offres).
+ * L'ordre du DOM suit la lecture : titre, 01, 02, photo, photo, 03, 04, 05 — en grille
+ * de quatre colonnes cela donne exactement la disposition de la maquette, sans placement
+ * explicite.
  *
- * Accessibilité : les lignes sont lisibles à pleine opacité en mouvement réduit et
- * sans JS (les classes d'assombrissement ne s'appliquent que sous `html[data-js]`,
- * règle CSS globale déjà en place : sans data-js rien n'est atténué).
+ * Structure : `Reveal` (le fondu au scroll) reste sur le `<li>`, l'habillage — filet,
+ * proportions, effet de survol — sur une boîte interne, comme `glow-card` ailleurs sur
+ * le site. C'est nécessaire ici : `html[data-js] .reveal.reveal-visible` impose
+ * `transform: none` et sa propre transition, et écraserait le soulèvement du survol.
  */
 
 /**
- * Animation AUTOMATIQUE de la pile : un minuteur fait avancer la ligne active toutes
- * les 2,4 s ; elle passe à pleine teinte (navy), les autres restent gris pâle. La pile
- * tourne en permanence (boucle), l'utilisateur n'a rien à faire — et en mouvement
- * réduit, rien n'est animé : tout reste lisible.
+ * Habillage commun aux huit tuiles : filet fin, fond beige très clair, proportions et
+ * effet de survol.
+ * Le rapport 10:11 (un peu plus haut que large) est celui de la maquette : des carrés
+ * légèrement verticaux à toutes les largeurs, jamais des bandes. `h-full` égalise les
+ * tuiles d'une même ligne ; `why-tile` (globals.css) n'ajoute que l'effet de survol.
  *
- * Pause au survol et au focus clavier (comme le carrousel réalisations) ; survol ou
- * clic d'une ligne = elle devient active et le cycle reprend d'elle. Le hook remonte
- * l'index actif pour le sync de la carte de verre (contenu qui change avec la pile).
+ * `relative` et `overflow-hidden` sont écrits ICI, et pas seulement dans l'utilitaire :
+ * la photo en `fill` a besoin d'un parent positionné, et sans lui elle se cale sur
+ * l'ancêtre positionné le plus proche — c'est-à-dire la page (l'image remontait sur le
+ * hero) tandis que la tuile restait vide. Une CSS servie en retard (dev) ne doit pas
+ * pouvoir casser la mise en page, seulement l'effet.
  */
-function useAutoHighlight(
-  onIndexChange?: (index: number) => void,
-): { ref: React.RefObject<HTMLUListElement | null>; pause: (p: boolean) => void } {
-  const ref = useRef<HTMLUListElement>(null);
-  const pausedRef = useRef(false);
-
-  useEffect(() => {
-    if (prefersReducedMotion()) return;
-    const pile = ref.current;
-    if (!pile) return;
-    const lines = [...pile.querySelectorAll<HTMLElement>("[data-statement]")];
-    if (lines.length === 0) return;
-
-    let index = 0;
-    const paint = () => {
-      lines.forEach((line, i) => {
-        line.style.color = i === index ? "var(--color-navy)" : "";
-        line.style.cursor = "pointer";
-      });
-      onIndexChange?.(index);
-    };
-
-    let interval: number | undefined;
-    const start = () => {
-      if (interval || pausedRef.current) return;
-      interval = window.setInterval(() => {
-        index = (index + 1) % lines.length;
-        paint();
-      }, 2400);
-    };
-    const stop = () => {
-      if (interval) {
-        window.clearInterval(interval);
-        interval = undefined;
-      }
-    };
-
-    const observer = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting) start();
-      else stop();
-    }, { threshold: 0.25 });
-
-    lines.forEach((line, i) => {
-      // Survol d'une ligne : elle devient active, le cycle s'arrête jusqu'à sortie.
-      line.addEventListener("mouseenter", () => {
-        index = i;
-        paint();
-        stop();
-      });
-      // Clic : même effet, et maintient la pause après le clic.
-      line.addEventListener("click", () => {
-        index = i;
-        paint();
-      });
-    });
-
-    observer.observe(pile);
-    paint();
-
-    return () => {
-      observer.disconnect();
-      stop();
-    };
-  }, [onIndexChange]);
-
-  return { ref, pause: (p: boolean) => { pausedRef.current = p; } };
-}
+const TILE =
+  "why-tile group relative h-full aspect-[10/11] overflow-hidden border border-navy/10 bg-beige/35 hover:border-navy/25";
 
 export default function WhyStatements() {
   const { dict } = useDictionary();
   const why = dict.aboutPage;
-  const statements = why.whyStatements;
-  /* L'index actif de la pile pilote le contenu de la carte sur l'image. */
-  const [activeIndex, setActiveIndex] = useState(0);
-  const setActive = useCallback((index: number) => setActiveIndex(index), []);
-  const { ref: pileRef, pause } = useAutoHighlight(setActive);
+  /* Les deux premières cartes ferment la première ligne, les trois autres suivent les
+     photos : la grille reproduit la maquette sans placer chaque tuile à la main. */
+  const [first, second, ...rest] = why.whyCards;
 
   return (
     <section className="border-y border-navy/8 bg-white">
-      <div className="mx-auto grid w-full max-w-[95rem] gap-10 px-5 py-20 sm:px-8 sm:py-24 lg:grid-cols-[0.55fr_1.5fr_1.25fr] lg:gap-16">
-        {/* Colonne 1 : sur-titre discret, comme « WHY WORK WITH US ». */}
-        <Reveal>
-          <p className="text-[0.7rem] font-light uppercase tracking-[0.22em] text-navy/70">
-            {why.whyEyebrow}
-          </p>
-        </Reveal>
-
-        {/* Colonne 2 : la pile de phrases, animée automatiquement (boucle). Pause
-            au survol de la zone — pour lire tranquillement ou cliquer une ligne. */}
-        <Reveal delay={80}>
-          <ul
-            ref={pileRef}
-            onMouseEnter={() => pause(true)}
-            onMouseLeave={() => pause(false)}
-            className="why-pile flex flex-col gap-7 lg:gap-8"
-            aria-label={why.whyEyebrow}
-          >
-            {statements.map((statement) => (
-              <li
-                key={statement}
-                data-statement
-                className="text-3xl leading-[1.18] tracking-tight text-navy/15 transition-colors duration-300 sm:text-4xl"
-              >
-                {statement}
-              </li>
-            ))}
-          </ul>
-        </Reveal>
-
-        {/* Colonne 3 : photo + carte de verre superposée, agrandie (hauteur pleine
-            de la pile, comme la référence où l'image occupe tout le bord droit). */}
-        <Reveal delay={160}>
-          <div className="relative h-full min-h-[30rem] overflow-hidden rounded-[1.1rem] lg:min-h-[34rem]">
-            <Image
-              src={why.whyImage}
-              alt={aboutImageAlt(dict)}
-              fill
-              sizes="(max-width: 1024px) 100vw, 40vw"
-              className="object-cover"
-            />
-
-            {/* Carte simple posée sur l'image : blur LÉGER (sm, pas xl), une seule
-                ligne de texte — celle ACTIVE dans la pile. Elle change quand la pile
-                avance, hover ou clic : c'est l'écho visuel du carrousel. */}
-            <div className="absolute inset-x-4 bottom-4 rounded-[0.9rem] border border-white/20 bg-navy/20 px-5 py-4 backdrop-blur-sm sm:inset-x-5 sm:bottom-5">
-              <p
-                key={statements[activeIndex]}
-                className="text-[0.95rem] leading-snug text-white transition-opacity duration-300"
-              >
-                {statements[activeIndex]}
+      <div className="mx-auto w-full max-w-[95rem] px-5 py-20 sm:px-8 sm:py-24">
+        <ol className="grid gap-2.5 sm:grid-cols-2 sm:gap-3 lg:grid-cols-4">
+          {/* Tuile d'en-tête : sur-titre discret en haut, titre en bas, comme la réf. */}
+          <Reveal as="li" className="h-full">
+            <div className="why-tile group relative flex h-full aspect-[10/11] flex-col justify-between gap-10 overflow-hidden border border-navy/10 bg-white p-6 hover:border-navy/25 sm:p-7">
+              <p className="text-[0.68rem] font-medium uppercase tracking-[0.24em] text-navy/55">
+                {why.whyEyebrow}
               </p>
+              <h2 className="max-w-[11ch] text-3xl leading-[1.06] tracking-tight text-navy sm:text-4xl">
+                {why.whyHeadline}
+              </h2>
             </div>
-          </div>
-        </Reveal>
+          </Reveal>
+
+          <ReasonCard index={0} card={first} delay={60} />
+          <ReasonCard index={1} card={second} delay={120} />
+
+          <MediaTile src={why.whyImage} alt={why.whyImageAlt} delay={180} />
+
+          {/* Photo recolorée en orange (duotone maison) : elle répond à la photo sombre
+              de l'autre coin, comme dans la maquette. */}
+          <MediaTile src={why.whyImage2} alt={why.whyImage2Alt} delay={240} duotone />
+
+          {rest.map((card, i) => (
+            <ReasonCard key={card.title} index={i + 2} card={card} delay={300 + i * 60} />
+          ))}
+        </ol>
       </div>
     </section>
   );
 }
 
-/** Texte alternatif de l'image, localisé (le hook n'existe qu'ici). */
-function aboutImageAlt(dict: { site: { name: string } }): string {
-  return `L'équipe ${dict.site.name}`;
+/** Carte « raison » : numéro en haut, titre + texte calés sur le bas de la tuile. */
+function ReasonCard({
+  index,
+  card,
+  delay,
+}: {
+  index: number;
+  card: { title: string; body: string };
+  delay: number;
+}) {
+  return (
+    <Reveal as="li" delay={delay} className="h-full">
+      <div className={`${TILE} flex flex-col justify-between gap-10 p-6 sm:p-7`}>
+        <span className="text-base font-medium tracking-[0.14em] text-navy/45 transition-colors duration-300 group-hover:text-navy/80">
+          {String(index + 1).padStart(2, "0")}
+        </span>
+        <div>
+          <h3 className="text-lg leading-snug text-navy">{card.title}</h3>
+          <p className="mt-2 text-sm leading-relaxed text-muted">{card.body}</p>
+        </div>
+      </div>
+    </Reveal>
+  );
+}
+
+/** Tuile photo : remplit la case de la grille, sans marge interne. */
+function MediaTile({
+  src,
+  alt,
+  delay,
+  duotone = false,
+}: {
+  src: string;
+  alt: string;
+  delay: number;
+  duotone?: boolean;
+}) {
+  return (
+    <Reveal as="li" delay={delay} className="h-full">
+      <div className={TILE}>
+        <Image
+          src={src}
+          alt={alt}
+          fill
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+          className={duotone ? "object-cover grayscale" : "object-cover"}
+        />
+        {duotone ? (
+          <span aria-hidden className="absolute inset-0 bg-orange/80 mix-blend-multiply" />
+        ) : null}
+      </div>
+    </Reveal>
+  );
 }
