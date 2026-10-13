@@ -21,8 +21,13 @@ import { observeReveal } from "@/lib/reveal";
  * pourcentage (`LEFT` / `TOP` / `ROTATE`) qui ne s'appliquent qu'à partir de `lg` — le
  * composant pose les valeurs, `globals.css` ne fait que la mécanique (`.client-field`).
  *
- * L'inclinaison passe par la propriété CSS `rotate` et non par `transform` : elle cohabite
- * ainsi avec la révélation (qui, elle, écrit `transform`) sans que l'une écrase l'autre.
+ * L'apparition des tuiles a son propre mouvement (`.client-tile` dans `globals.css`) :
+ * chacune part un peu plus bas, un peu plus petite et plus penchée, puis se redresse et se
+ * pose. Le décalage entre deux tuiles suit leur HAUTEUR dans le champ et non leur rang dans
+ * le tableau : l'ensemble descend donc comme une vague, du haut vers le bas — un ordre que
+ * l'œil peut suivre, alors que les tuiles sont dispersées. Le mouvement ne touche que
+ * `opacity`, `translate`, `scale` et `rotate`, des propriétés indépendantes : aucune n'en
+ * écrase une autre, et l'inclinaison de repos reste une variable (`--tile-rotate`).
  */
 
 /**
@@ -34,6 +39,20 @@ import { observeReveal } from "@/lib/reveal";
  * de 100 px pour les autres, avec un logo minuscule dedans. Dans une boîte, chacun occupe
  * la même place optique et les cartes restent de tailles voisines.
  */
+/**
+ * Décalage de l'apparition d'une tuile, en millisecondes.
+ *
+ * `TILE_STAGGER` = millisecondes par pour cent de hauteur : une tuile posée à 85 % du champ
+ * part donc bien après une tuile posée à 5 %. Les tuiles de droite sont en plus très
+ * légèrement en retard (+ 45 ms) : la vague prend une pente, du haut-gauche vers le
+ * bas-droit, au lieu d'être un simple balayage horizontal.
+ */
+const TILE_STAGGER = 5;
+
+function tileDelay(spot: { top: string; right?: string }): number {
+  return Math.round(60 + parseFloat(spot.top) * TILE_STAGGER + (spot.right ? 45 : 0));
+}
+
 const PLACEMENT: { left?: string; right?: string; top: string; rotate: number; logo: string }[] = [
   { left: "12%", top: "2%", rotate: -6, logo: "h-9 w-[4.75rem]" },
   { left: "41%", top: "7%", rotate: 4, logo: "h-9 w-[4.75rem]" },
@@ -65,12 +84,21 @@ const DOTS = [
   { left: "8%", top: "88%", className: "h-2 w-2 bg-brand" },
 ];
 
-/** Arcs de liaison, dans le repère 1152 × 560 du champ. */
+/**
+ * Arcs de liaison, dans le repère 1152 × 560 du champ.
+ *
+ * Ils vont du titre vers l'extérieur, par paires symétriques autour du centre (x = 576) :
+ * à gauche celui qui part vers la bande du haut (1) répond à celui de droite (3), et sous le
+ * titre celui du bas-gauche (5) répond à celui du bas-droit (4). Le cinquième est le MIRROIR
+ * exact du quatrième — c'est ce qui manquait : le bas-gauche du champ était le seul coin
+ * sans liaison, et un côté vide à cet endroit se voyait.
+ */
 const ARCS = [
   "M 214 208 C 262 232, 300 246, 372 262",
   "M 560 96 C 566 140, 566 168, 562 214",
   "M 772 236 C 848 220, 906 198, 962 172",
   "M 700 330 C 792 358, 852 396, 900 424",
+  "M 452 330 C 360 358, 300 396, 252 424",
 ];
 
 export default function ClientsWall({
@@ -84,23 +112,42 @@ export default function ClientsWall({
   linkHref: string;
   linkLabel: string;
 }) {
-  const arcs = useRef<SVGSVGElement>(null);
+  const decor = useRef<HTMLDivElement>(null);
+  const field = useRef<HTMLUListElement>(null);
 
-  /* Les arcs se dessinent quand le champ entre dans le champ de vision, avec le même
-     déclencheur partagé que les textes (un seul écouteur pour tout le site). */
+  /* Le calque décoratif — les arcs se dessinent, puis les points s'allument — quand le
+     champ entre dans le champ de vision, avec le même déclencheur partagé que les textes
+     (un seul écouteur pour tout le site).
+
+     Le nom `client-arc-in` vient des arcs : c'est le signal qui existait déjà pour eux, et
+     le même allume désormais les points. On le garde plutôt que d'en inventer un second —
+     un seul état `in` pour le calque, et les CSS déjà servies (celles d'un serveur de dev
+     lancé avant ces changements) continuent au moins de dessiner les arcs. */
   useEffect(() => {
-    const svg = arcs.current;
-    if (!svg) return;
-    return observeReveal(svg, () => svg.classList.add("client-arc-in"));
+    const layer = decor.current;
+    if (!layer) return;
+    return observeReveal(layer, () => layer.classList.add("client-arc-in"));
+  }, []);
+
+  /* Une tuile = une entrée : chacune se pose pour son compte, donc celles du bas du champ
+     se posent quand on arrive sur elles — y compris sous `lg`, où le champ devient un long
+     flux et où déclencher tout d'un coup ferait jouer la fin du mouvement hors écran. */
+  useEffect(() => {
+    const list = field.current;
+    if (!list) return;
+    const stops = Array.from(list.querySelectorAll<HTMLElement>(".client-tile")).map((tile) =>
+      observeReveal(tile, () => tile.classList.add("client-tile-in")),
+    );
+    return () => stops.forEach((stop) => stop());
   }, []);
 
   return (
-    <section className="relative overflow-hidden py-20">
+    <section className="relative overflow-hidden bg-beige/25 py-20">
       <div className="mx-auto w-full max-w-[80rem] px-5 sm:px-8">
         {/* Le champ : cadre de référence à partir de `lg` (mêmes proportions que le
             `viewBox` des arcs, donc le tracé tombe juste), flux simple en dessous. */}
         <div className="relative lg:aspect-[1152/560]">
-          <ul className="client-field">
+          <ul ref={field} className="client-field">
             {/* Le titre est un élément du champ : au centre sur grand écran, en tête sur
                 mobile. Pas de `Reveal` sur la boîte positionnée elle-même — la règle de
                 révélation écrit `transform`, ce qui annulerait le centrage par translation. */}
@@ -124,21 +171,24 @@ export default function ClientsWall({
               const tag = TAGS[client.src.split("/").pop()?.replace(".png", "") ?? ""];
 
               return (
-                <Reveal
-                  as="li"
+                <li
                   key={client.src}
-                  delay={80 + i * 55}
                   className="client-tile"
-                  style={{
-                    left: spot.left,
-                    right: spot.right,
-                    top: spot.top,
-                    rotate: `${spot.rotate}deg`,
-                  }}
+                  style={
+                    {
+                      left: spot.left,
+                      right: spot.right,
+                      top: spot.top,
+                      "--tile-rotate": `${spot.rotate}deg`,
+                      "--tile-delay": `${tileDelay(spot)}ms`,
+                    } as React.CSSProperties
+                  }
                 >
+                  {/* Tuile de papier nue : angles droits, un filet, aucun relief — la tuile
+                      se pose sur la page, elle ne flotte pas au-dessus. */}
                   <div
                     title={client.name}
-                    className="relative flex items-center justify-center rounded-2xl bg-white px-4 py-3.5 shadow-soft ring-1 ring-navy/5 lg:shadow-lift"
+                    className="relative flex items-center justify-center bg-white px-4 py-3.5 ring-1 ring-navy/5"
                   >
                     <Image
                       src={client.src}
@@ -148,20 +198,19 @@ export default function ClientsWall({
                       className={`object-contain ${spot.logo}`}
                     />
                     {tag ? (
-                      <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-navy px-2.5 py-1 text-[0.6rem] font-medium uppercase tracking-[0.12em] text-white">
+                      <span className="client-tag absolute -bottom-2 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-navy px-2.5 py-1 text-[0.6rem] font-medium uppercase tracking-[0.12em] text-white">
                         {tag}
                       </span>
                     ) : null}
                   </div>
-                </Reveal>
+                </li>
               );
             })}
           </ul>
 
           {/* Arcs et points : seulement là où les tuiles tournent autour du texte. */}
-          <div aria-hidden className="pointer-events-none absolute inset-0 hidden lg:block">
+          <div ref={decor} aria-hidden className="pointer-events-none absolute inset-0 hidden lg:block">
             <svg
-              ref={arcs}
               viewBox="0 0 1152 560"
               fill="none"
               preserveAspectRatio="xMidYMid meet"
@@ -182,7 +231,7 @@ export default function ClientsWall({
             {DOTS.map((dot) => (
               <span
                 key={`${dot.left ?? dot.right}-${dot.top}`}
-                className={`absolute rounded-full ${dot.className}`}
+                className={`client-dot absolute rounded-full ${dot.className}`}
                 style={{ left: dot.left, right: dot.right, top: dot.top }}
               />
             ))}
