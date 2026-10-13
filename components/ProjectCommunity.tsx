@@ -1,11 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ArrowUpRight } from "@/components/Icons";
 import Reveal from "@/components/Reveal";
 import { useDictionary } from "@/components/DictionaryProvider";
+import { prefersReducedMotion } from "@/lib/motion";
 
 /**
  * Réalisations (accueil) : la liste des projets façon « Selected Works » — un titre,
@@ -22,9 +25,10 @@ import { useDictionary } from "@/components/DictionaryProvider";
  * - `grid` (défaut) : la planche de vignettes de la référence, régulière, 2 colonnes sur
  *   mobile puis 3 par ligne.
  * - `list`  : un sommaire — numéro, vignette, titre, catégorie — une ligne par projet.
- * - `feed`  : un empilement de fiches — chaque visuel se colle sous le précédent, la
- *   fiche suivante le recouvre et il rentre légèrement sur lui-même (relief de
- *   profondeur piloté par le défilement, voir `.stack-card` dans globals.css).
+ * - `feed`  : des fiches collantes — la fiche atteinte reste collée à sa place et la
+ *   suivante la recouvre au défilement, en laissant un vrai espace vertical sous elle
+ *   (les fiches ne font que 70 % de la hauteur de fenêtre) ; la fiche recouverte rentre
+ *   légèrement sur elle-même, en douceur (réglages `STACK_STEP` / `STACK_HEIGHT`).
  * - `full`  : les mêmes vignettes en plein cadre, bord à bord.
  *
  * Le choix vit dans l'état du composant (aucun rechargement, aucun paramètre d'URL) et
@@ -35,14 +39,98 @@ type View = "grid" | "list" | "feed" | "full";
 
 const VIEWS: View[] = ["grid", "list", "feed", "full"];
 
+/**
+ * Vue « Fil » : les réglages de la pile. Tout est exprimé en fraction de la hauteur de
+ * fenêtre — y compris les collages — pour que la géométrie soit la même sur toutes les
+ * fenêtres (plus de mélange rem/svh à recalculer).
+ *
+ * `PIN_BASE` : hauteur à laquelle la première fiche se colle (sous le header).
+ * `STACK_STEP` : décalage d'un collage au suivant, donc épaisseur de la bande qu'une
+ *   fiche recouverte laisse voir avant de disparaître.
+ * `STACK_HEIGHT` : hauteur d'une fiche.
+ * `STACK_GAP` : écart entre deux fiches — la suivante monte d'abord détachée du bas de
+ *   la fiche collée, puis l'écart se referme et elle glisse par-dessus. Il découle des
+ *   deux autres valeurs : c'est ce qui reste sous la fiche collée quand elle s'arrête
+ *   (100 − collage − hauteur). Réduire l'écart = coller plus bas ou faire les fiches
+ *   plus hautes ; ici il vaut 15 %.
+ *
+ * Les fenêtres d'effacement (voir `.stack-card` dans globals.css) sont déduites de ces
+ * valeurs et du nombre de fiches. La pile se déroule sur `span` fenêtres — un créneau par
+ * fiche, créneau = fiche + écart. L'effacement d'une fiche se joue pendant le seul
+ * recouvrement : il commence quand la suivante la touche (donc après la phase d'écart,
+ * d'où `dipLag`) et finit quand la suivante se colle — soit `dipLen`.
+ */
+const PIN_BASE = 18; // % de fenêtre
+const STACK_STEP = 2.5; // % de fenêtre
+const STACK_HEIGHT = 0.67; // fraction de fenêtre
+const STACK_GAP = 1 - PIN_BASE / 100 - STACK_HEIGHT; // fraction de fenêtre (0,15)
+
 export default function ProjectCommunity() {
   const { dict, locale } = useDictionary();
   const { projects, ui } = dict;
   const [view, setView] = useState<View>("grid");
+  const stackRef = useRef<HTMLUListElement>(null);
 
   const words = ui.projectsHeading.split(/\s+/).filter(Boolean);
   const splitAt = Math.max(2, Math.ceil(words.length / 2));
   const flush = view === "full";
+
+  /**
+   * L'effet de la pile : la fiche recouverte se rétrécit et disparaît pendant que la
+   * suivante monte sur elle. Il est piloté par GSAP/ScrollTrigger plutôt que par les
+   * animations natives liées au défilement (`animation-timeline`), pour deux raisons :
+   * d'abord parce que celles-ci ne sont pas encore disponibles partout — ici l'effet se
+   * joue à coup sûr ; ensuite parce que le défilement du site passe par Lenis, qui est
+   * déjà synchronisé avec ScrollTrigger (voir `SmoothScroll`), donc l'effet suit la même
+   * horloge que le reste des animations du site. `scrub` lie l'avancement au doigt et à l'œil.
+   *
+   * Le tween observe la fiche SUIVANTE : la réduction démarre quand son bord haut touche
+   * le bas de la fiche collée (qui ne bouge plus, elle est en `sticky`) et se termine
+   * quand elle atteint sa propre hauteur d'arrivée. `start`/`end` sont des fonctions :
+   * elles sont recalculées à chaque `refresh` (redimensionnement, changement de vue).
+   */
+  useEffect(() => {
+    if (view !== "feed") return;
+    const list = stackRef.current;
+    if (!list) return;
+    if (prefersReducedMotion()) return;
+
+    gsap.registerPlugin(ScrollTrigger);
+
+    /* Les `top` des fiches sont en svh : on retrouve le même repère en pixels. */
+    const vh = window.innerHeight / 100;
+    const pinTop = (i: number) => (PIN_BASE + i * STACK_STEP) * vh;
+    const cards = Array.from(list.children) as HTMLElement[];
+
+    const tweens = cards.slice(0, -1).map((card, i) =>
+      gsap.fromTo(
+        card,
+        { scale: 1, opacity: 1 },
+        {
+          scale: 0.9,
+          opacity: 0,
+          ease: "none",
+          scrollTrigger: {
+            trigger: cards[i + 1],
+            start: () => `top ${pinTop(i) + card.offsetHeight}px`,
+            end: () => `top ${pinTop(i + 1)}px`,
+            scrub: true,
+            invalidateOnRefresh: true,
+          },
+        },
+      ),
+    );
+
+    ScrollTrigger.refresh();
+
+    return () => {
+      for (const tween of tweens) {
+        tween.scrollTrigger?.kill();
+        tween.kill();
+      }
+      for (const card of cards) gsap.set(card, { clearProps: "transform,opacity" });
+    };
+  }, [view]);
 
   return (
     <section
@@ -175,27 +263,47 @@ export default function ProjectCommunity() {
           </ul>
         ) : null}
 
-        {/* Vue « Fil » : l'empilement. Pas de `Reveal` ici — son fondu au scroll pose un
-            `transform` sur l'ancêtre de la fiche, ce qui la priverait de son `sticky`. */}
+        {/* Vue « Fil » : les fiches collent l'une après l'autre. Chaque `<li>` est
+            `sticky` avec son propre `top`, un cran plus bas que le précédent : la fiche
+            atteinte reste collée à sa place et la suivante la recouvre, en laissant
+            dépasser la bande du haut de toutes les précédentes. Elles collent toutes
+            dans le même parent, donc aucune n'est relâchée avant la fin de la pile.
+            `marginBottom` creuse l'écart entre deux fiches : la suivante monte d'abord
+            détachée du bas de la fiche collée, l'écart se referme, puis elle glisse
+            par-dessus. Puis l'effet décrit plus haut (le `useEffect` du composant) : la
+            fiche recouverte se rétrécit et disparaît pendant que la suivante la recouvre,
+            si bien qu'aucune bande recouverte ne s'empile à l'écran.
+            Pas de `Reveal` : son fondu au scroll pose un `transform` sur l'ancêtre de la
+            fiche, ce qui la priverait de son `sticky`. */}
         {view === "feed" ? (
-          <ul className="relative">
-            {projects.map((project, i) => (
-              <li key={project.title} className="stack-frame">
-                <div
-                  className="stack-card"
-                  style={{ top: `calc(4.5rem + ${i} * 0.75rem)`, zIndex: i + 1 }}
+          <ul ref={stackRef} className="relative">
+            {projects.map((project, i) => {
+              const last = i === projects.length - 1;
+
+              return (
+                <li
+                  key={project.title}
+                  className="stack-card sticky"
+                  style={
+                    {
+                      top: `calc(${PIN_BASE}svh + ${i * STACK_STEP}svh)`,
+                      zIndex: i + 1,
+                      marginBottom: last ? undefined : `${(STACK_GAP * 100).toFixed(2)}svh`,
+                    } as React.CSSProperties
+                  }
                 >
                   <Tile
                     href={`/${locale}/realisations`}
                     title={project.title}
                     category={project.category}
                     image={project.image}
-                    className="aspect-[4/5] sm:aspect-auto sm:h-[calc(100svh-12rem)]"
+                    /* 67svh : doit rester égal à `STACK_HEIGHT`. */
+                    className="aspect-[4/5] rounded-[0.9rem] sm:aspect-auto sm:h-[67svh]"
                     sizes="(min-width: 80rem) 80rem, 100vw"
                   />
-                </div>
-              </li>
-            ))}
+                </li>
+              );
+            })}
           </ul>
         ) : null}
 

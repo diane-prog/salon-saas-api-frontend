@@ -54,60 +54,19 @@
   }
 }
 
-/* Vue « Fil » de la galerie de réalisations (accueil) : empilement de fiches.
-   Chaque fiche se colle sous la précédente (`top` décalé d'un cran, posé en inline) et
-   la suivante vient la recouvrir au défilement. La fiche recouverte rentre légèrement
-   sur elle-même : l'animation est pilotée par le défilement (`animation-timeline`),
-   donc sans JS et sans écouteur de scroll.
+/* Vue « Fil » de la galerie de réalisations (accueil) : la pile.
 
-   `transform-origin: top` est essentiel : c'est la bande du haut, seule visible sous
-   la fiche suivante, qui doit rester en place — la fiche se réduit vers le bas.
+   Tout l'effet (rétrécissement puis effacement de la fiche recouverte) est piloté par
+   GSAP/ScrollTrigger, dans le composant — pas ici — pour deux raisons : le défilement
+   du site passe par Lenis, déjà synchronisé avec ScrollTrigger, donc l'effet suit la
+   même horloge que le reste des animations ; et les animations pilotées par le défilement
+   natives (`animation-timeline`) ne sont pas encore disponibles partout, alors que là on
+   est sûr que l'effet se joue.
 
-   Le `@supports` l'est tout autant : un navigateur qui comprend `animation` mais pas
-   `animation-timeline` jouerait l'animation en durée nulle et laisserait TOUTES les
-   fiches réduites. `view-timeline` sur la trame et `animation-timeline` sur la fiche
-   évitent en plus de lire la progression sur l'élément collé (sa position ne bouge
-   plus, la progression n'y serait pas celle du défilement). */
-.stack-frame {
-  position: relative;
-}
-
+   Ici, seul l'ancrage : le bord du haut d'une fiche est la seule partie encore visible
+   quand la suivante la recouvre, donc elle se réduit et s'efface sans le déplacer. */
 .stack-card {
-  position: sticky;
   transform-origin: top center;
-  will-change: transform;
-}
-
-@supports (animation-timeline: view()) {
-  .stack-frame {
-    view-timeline: --stack block;
-  }
-
-  .stack-card {
-    animation: stack-dip linear both;
-    animation-timeline: --stack;
-    /* La recouverte commence quand la suivante arrive en bas de l'écran et finit
-       quand la trame est sortie par le haut : autrement dit pendant tout le
-       recouvrement. Les bornes sont des pourcentages de `cover` (entrée par le bas →
-       sortie par le haut), donc justes quelle que soit la hauteur de la fenêtre. */
-    animation-range: cover 40% cover 96%;
-  }
-}
-
-@keyframes stack-dip {
-  to {
-    transform: scale(0.94);
-  }
-}
-
-/* Sous `prefers-reduced-motion`, le bloc global du site met toutes les durées à
-   0,01 ms : sur une animation pilotée par le défilement, cela figerait la fiche à son
-   état final (toutes réduites). Cet effet étant un simple relief de profondeur, on
-   l'annule franchement plutôt que de le figer. */
-@media (prefers-reduced-motion: reduce) {
-  .stack-card {
-    animation: none !important;
-  }
 }
 
 @layer base {
