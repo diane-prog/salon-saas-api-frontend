@@ -2,8 +2,41 @@
 
 import { useState, type ReactNode } from "react";
 
-const base =
-  "w-full rounded-xl border border-navy/10 bg-white px-4 py-3 text-sm text-navy outline-none transition-all duration-200 placeholder:text-muted/60 focus:border-brand focus:ring-4 focus:ring-brand/10";
+/**
+ * Deux tons pour les mêmes champs : `light` sur une page claire (la feuille latérale du
+ * contact, la page devis), `dark` sur l'encre du panneau plein écran. Le ton ne change que
+ * l'habillage — cadres et libellés — jamais la structure : un champ est un champ.
+ */
+type Tone = "light" | "dark";
+
+const LABEL_TONE: Record<Tone, string> = {
+  light: "text-navy",
+  dark: "text-paper/50",
+};
+
+/** L'astérisque des champs obligatoires : orange sur clair, turquoise sur l'encre. */
+const STAR_TONE: Record<Tone, string> = {
+  light: "text-orange",
+  dark: "text-turquoise",
+};
+
+/**
+ * En clair : une boîte arrondie sur fond blanc. Sur l'encre : pas de boîte du tout, un
+ * simple filet sous le champ, dans la même écriture que la barre de recherche du panneau —
+ * la ligne passe au bleu de marque au focus.
+ */
+const INPUT_TONE: Record<Tone, string> = {
+  light:
+    "w-full rounded-xl border border-navy/10 bg-white px-4 py-3 text-sm text-navy outline-none transition-all duration-200 placeholder:text-muted/60 focus:border-brand focus:ring-4 focus:ring-brand/10",
+  dark: "w-full border-0 border-b border-paper/25 bg-transparent px-0 py-3 text-lg font-light text-paper outline-none transition-colors duration-300 placeholder:text-paper/25 focus:border-brand",
+};
+
+/** Chevron du `<select>`, en jeu de données : un seul des deux est monté par champ. */
+const CHEVRON = {
+  light:
+    "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23718096' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E\")",
+  dark: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E\")",
+};
 
 export function Field({
   label,
@@ -12,6 +45,7 @@ export function Field({
   required = false,
   placeholder,
   autoComplete,
+  tone = "light",
 }: {
   label: string;
   name: string;
@@ -19,11 +53,12 @@ export function Field({
   required?: boolean;
   placeholder?: string;
   autoComplete?: string;
+  tone?: Tone;
 }) {
   return (
     <label className="flex flex-col gap-2">
-      <span className="text-xs font-medium uppercase tracking-wider text-navy">
-        {label} {required && <span className="text-orange">*</span>}
+      <span className={`text-xs font-medium uppercase tracking-wider ${LABEL_TONE[tone]}`}>
+        {label} {required && <span className={STAR_TONE[tone]}>*</span>}
       </span>
       <input
         type={type}
@@ -31,7 +66,7 @@ export function Field({
         required={required}
         placeholder={placeholder}
         autoComplete={autoComplete}
-        className={base}
+        className={INPUT_TONE[tone]}
       />
     </label>
   );
@@ -42,18 +77,26 @@ export function TextArea({
   name,
   required = false,
   placeholder,
+  tone = "light",
 }: {
   label: string;
   name: string;
   required?: boolean;
   placeholder?: string;
+  tone?: Tone;
 }) {
   return (
     <label className="flex flex-col gap-2">
-      <span className="text-xs font-medium uppercase tracking-wider text-navy">
-        {label} {required && <span className="text-orange">*</span>}
+      <span className={`text-xs font-medium uppercase tracking-wider ${LABEL_TONE[tone]}`}>
+        {label} {required && <span className={STAR_TONE[tone]}>*</span>}
       </span>
-      <textarea name={name} required={required} placeholder={placeholder} rows={5} className={`${base} resize-y`} />
+      <textarea
+        name={name}
+        required={required}
+        placeholder={placeholder}
+        rows={5}
+        className={`${INPUT_TONE[tone]} resize-y`}
+      />
     </label>
   );
 }
@@ -64,22 +107,27 @@ export function Select({
   options,
   placeholder,
   required = false,
+  tone = "light",
 }: {
   label: string;
   name: string;
   options: string[];
   placeholder: string;
   required?: boolean;
+  tone?: Tone;
 }) {
   return (
     <label className="flex flex-col gap-2">
-      <span className="text-xs font-medium uppercase tracking-wider text-navy">
-        {label} {required && <span className="text-orange">*</span>}
+      <span className={`text-xs font-medium uppercase tracking-wider ${LABEL_TONE[tone]}`}>
+        {label} {required && <span className={STAR_TONE[tone]}>*</span>}
       </span>
-      <select name={name} required={required} defaultValue="" className={`${base} appearance-none bg-[length:1rem] pr-10`}
+      <select
+        name={name}
+        required={required}
+        defaultValue=""
+        className={`${INPUT_TONE[tone]} appearance-none bg-[length:1rem] pr-10`}
         style={{
-          backgroundImage:
-            "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23718096' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E\")",
+          backgroundImage: CHEVRON[tone],
           backgroundRepeat: "no-repeat",
           backgroundPosition: "right 1rem center",
         }}
@@ -103,6 +151,7 @@ export function FormShell({
   submitLabel,
   successTitle = "Message envoyé",
   successBody = "Merci pour votre message. Notre équipe vous répondra dans les meilleurs délais.",
+  tone = "light",
 }: {
   children: ReactNode;
   note?: string;
@@ -110,8 +159,10 @@ export function FormShell({
   /** Confirmation affichée après l'envoi (une page anglaise doit pouvoir la traduire). */
   successTitle?: string;
   successBody?: string;
+  tone?: Tone;
 }) {
   const [sent, setSent] = useState(false);
+  const dark = tone === "dark";
 
   if (sent) {
     return (
@@ -121,8 +172,10 @@ export function FormShell({
             <path d="m5 13 4 4L19 7" />
           </svg>
         </span>
-        <h3 className="text-xl font-light text-navy">{successTitle}</h3>
-        <p className="max-w-sm text-sm leading-relaxed text-muted">{successBody}</p>
+        <h3 className={`text-xl font-light ${dark ? "text-paper" : "text-navy"}`}>{successTitle}</h3>
+        <p className={`max-w-sm text-sm leading-relaxed ${dark ? "text-paper/60" : "text-muted"}`}>
+          {successBody}
+        </p>
       </div>
     );
   }
@@ -137,7 +190,13 @@ export function FormShell({
       className="flex flex-col gap-6"
     >
       {note && (
-        <p className="rounded-xl bg-navy/[0.04] px-4 py-3 text-xs text-muted">{note}</p>
+        <p
+          className={`rounded-xl px-4 py-3 text-xs ${
+            dark ? "bg-paper/[0.06] text-paper/60" : "bg-navy/[0.04] text-muted"
+          }`}
+        >
+          {note}
+        </p>
       )}
       {children}
       <button

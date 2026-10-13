@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import ContactSheet from "@/components/ContactSheet";
 import Reveal from "@/components/Reveal";
+import Parallax from "@/components/Parallax";
 import { HeroSection } from "@/components/sections";
 import { ArrowUpRight } from "@/components/Icons";
 import { isLocale, getDictionary, localePath } from "@/lib/dictionaries";
@@ -117,13 +118,16 @@ export default async function ContactPage({ params }: PageProps<"/[lang]/contact
 
               <Reveal delay={120} className="mt-14">
                 <div className="relative aspect-[16/11] overflow-hidden rounded-card sm:aspect-[16/9]">
-                  <Image
-                    src="/img/partenaires.jpg"
-                    alt=""
-                    fill
-                    sizes="(min-width: 1024px) 55vw, 100vw"
-                    className="object-cover"
-                  />
+                  {/* Cadre fermé : l'échelle couvre le débattement (±4 % → 1,09). */}
+                  <Parallax className="absolute inset-0" amount={4} scale={1.09}>
+                    <Image
+                      src="/img/partenaires.jpg"
+                      alt=""
+                      fill
+                      sizes="(min-width: 1024px) 55vw, 100vw"
+                      className="object-cover"
+                    />
+                  </Parallax>
                 </div>
               </Reveal>
             </div>

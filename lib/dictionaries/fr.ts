@@ -567,6 +567,12 @@ export const ui = {
   searchLabel: "Rechercher sur le site",
   searchPlaceholder: "Rechercher un service, une réalisation…",
   searchNoResults: "Aucun résultat",
+  /* Recherche plein écran (icône du header). « Résultats » est un intitulé, jamais accordé :
+     le nombre s'ajoute à côté (« Résultats · 3 »), donc aucun pluriel à gérer. */
+  searchResults: "Résultats",
+  searchSuggestions: "Suggestions",
+  /* Rappel de clavier en pied de panneau plein écran (recherche, formulaire de contact). */
+  panelHint: "Échap pour fermer",
   /* Affichages de la galerie de réalisations (accueil). */
   galleryViews: { grid: "Grille", list: "Liste", feed: "Fil" },
   galleryDisplay: "Affichage",

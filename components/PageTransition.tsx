@@ -321,8 +321,11 @@ export default function PageTransition({ children }: { children: ReactNode }) {
  * Panneau du rideau. Un seul panneau est monté à la fois : couverture puis retrait.
  *
  * L'animation est purement CSS (`curtain-cover` / `curtain-reveal`) : translation
- * verticale seule, fond beige uni. Aucun dégradé ni aucune lueur — un dégradé plein
- * écran se rastériserait image par image, et le rendu demandé est volontairement sobre.
+ * verticale seule, fond d'ENCRE uni — le même que les panneaux plein écran de la recherche
+ * et du formulaire, et que la barre de téléphone. Le rideau, la recherche et le formulaire
+ * sont donc un seul objet visuel, et le libellé du rideau est CLAIR (papier), puisqu'il est
+ * posé sur l'encre. Aucun dégradé ni aucune lueur — un dégradé plein écran se rastériserait
+ * image par image, et le rendu demandé est volontairement sobre.
  */
 function CurtainPanel({ phase, label }: { phase: Exclude<Phase, "idle">; label: string }) {
   const className =
@@ -339,7 +342,7 @@ function CurtainPanel({ phase, label }: { phase: Exclude<Phase, "idle">; label: 
       }
     >
       <div className="relative flex h-full flex-col items-center justify-center gap-5 px-6 text-center">
-        <span className="text-[0.68rem] font-medium uppercase tracking-[0.3em] text-navy/70">
+        <span className="text-[0.68rem] font-medium uppercase tracking-[0.3em] text-paper/60">
           LEEGI GROUP
         </span>
 
@@ -350,7 +353,7 @@ function CurtainPanel({ phase, label }: { phase: Exclude<Phase, "idle">; label: 
           delay={CURTAIN.label}
           stagger={0.025}
           duration={0.46}
-          className="max-w-[16ch] text-[clamp(2rem,7vw,5rem)] font-light uppercase leading-[1.02] tracking-[-0.02em] text-navy"
+          className="max-w-[16ch] text-[clamp(2rem,7vw,5rem)] font-light uppercase leading-[1.02] tracking-[-0.02em] text-paper"
         />
       </div>
     </div>

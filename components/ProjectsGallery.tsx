@@ -6,6 +6,7 @@ import Link from "next/link";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ArrowRight, ChevronDown } from "@/components/Icons";
+import Parallax from "@/components/Parallax";
 import { useDictionary } from "@/components/DictionaryProvider";
 import { prefersReducedMotion } from "@/lib/motion";
 import { BODY, LABEL, RULE } from "@/lib/editorial";
@@ -189,7 +190,12 @@ export function GalleryViewSelect({
           role="menu"
           aria-label={ui.galleryViewLabel}
           onKeyDown={onMenuKeyDown}
-          className={`absolute right-0 top-full z-50 mt-3 w-52 border border-navy/10 bg-paper p-2 transition duration-150 ease-out ${
+          /* Le menu est ancré à DROITE du bouton sur grand écran, à GAUCHE sur téléphone.
+             À droite, il s'ouvrait vers la gauche : sur un écran de 390 px, le bouton est
+             au milieu de la barre, donc le panneau de 208 px partait hors du cadre à gauche.
+             Ancrè à gauche sous `sm`, il se déploie vers la droite et reste entier ; sa
+             largeur suit la fenêtre au lieu d'être fixe, pour la même raison. */
+          className={`absolute top-full left-0 z-50 mt-3 w-[min(18rem,calc(100vw-2.5rem))] border border-navy/10 bg-paper p-2 transition duration-150 ease-out sm:left-auto sm:right-0 sm:w-52 ${
             shown ? "translate-y-0 opacity-100" : "pointer-events-none -translate-y-1 opacity-0"
           }`}
         >
@@ -382,13 +388,18 @@ export default function ProjectsGallery({
                     className="group flex h-[67svh] w-full flex-col overflow-hidden bg-white"
                   >
                     <span className="relative block flex-1 overflow-hidden bg-ink/[0.06]">
-                      <Image
-                        src={project.image}
-                        alt={project.title}
-                        fill
-                        sizes="(min-width: 80rem) 80rem, 100vw"
-                        className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.02]"
-                      />
+                      {/* Parallaxe DANS la fiche : la découpe ne bouge pas, seule la photo
+                          glisse sous la légende. Le survol (`scale` de la fiche) porte sur
+                          l'image, la parallaxe sur le cadre : les deux se composent. */}
+                      <Parallax className="absolute inset-0" amount={4} scale={1.09}>
+                        <Image
+                          src={project.image}
+                          alt={project.title}
+                          fill
+                          sizes="(min-width: 80rem) 80rem, 100vw"
+                          className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.02]"
+                        />
+                      </Parallax>
                     </span>
                     <span className={`flex items-baseline justify-between gap-6 border-t px-5 py-4 ${RULE}`}>
                       <span className={`${BODY} text-ink`}>{project.title}</span>
@@ -424,13 +435,15 @@ function Plate({
   return (
     <Link href={href} className="group block">
       <span className={`relative block overflow-hidden bg-ink/[0.06] ${ratio}`}>
-        <Image
-          src={project.image}
-          alt={project.title}
-          fill
-          sizes={sizes}
-          className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
-        />
+        <Parallax className="absolute inset-0" amount={4} scale={1.09}>
+          <Image
+            src={project.image}
+            alt={project.title}
+            fill
+            sizes={sizes}
+            className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
+          />
+        </Parallax>
       </span>
       <span className={`mt-4 flex items-baseline justify-between gap-6 border-t pt-3 ${RULE}`}>
         <span className={`${BODY} text-ink`}>{project.title}</span>

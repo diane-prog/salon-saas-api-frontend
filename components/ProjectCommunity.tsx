@@ -34,9 +34,14 @@ export default function ProjectCommunity() {
         } as React.CSSProperties
       }
     >
-      {/* Fond : l'image floutée COUVRE TOUTE la section + un voile clair qui unifie. */}
+      {/* Fond : l'image floutée COUVRE TOUTE la section + un voile clair qui unifie.
+
+          L'image floutée à 80 px est MASQUÉE sur téléphone : recomposer un plein écran de
+          flou à chaque frame coûte cher sur un GPU de poche, et le fond du dessous
+          (le dégradé de la section) suffit — le voile par-dessus, lui, reste à toutes les
+          largeurs, c'est lui qui unifie le fond. */}
       <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute inset-0">
+        <div className="absolute inset-0 hidden sm:block">
           <Image
             src="/img/hero3.png"
             alt=""

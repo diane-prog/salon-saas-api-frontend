@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Reveal from "@/components/Reveal";
+import Parallax from "@/components/Parallax";
 import { useDictionary } from "@/components/DictionaryProvider";
 
 /**
@@ -15,10 +16,13 @@ import { useDictionary } from "@/components/DictionaryProvider";
  * de quatre colonnes cela donne exactement la disposition de la maquette, sans placement
  * explicite.
  *
- * Structure : `Reveal` (le fondu au scroll) reste sur le `<li>`, l'habillage — filet,
+ * Structure : `Reveal` (l'entrée au scroll) reste sur le `<li>`, l'habillage — filet,
  * proportions, effet de survol — sur une boîte interne, comme `glow-card` ailleurs sur
- * le site. C'est nécessaire ici : `html[data-js] .reveal.reveal-visible` impose
- * `transform: none` et sa propre transition, et écraserait le soulèvement du survol.
+ * le site. C'est nécessaire ici : l'entrée GSAP écrit un `transform` sur le `<li>` et
+ * écraserait le soulèvement du survol (GSAP rend la main à la fin, mais l'ordre des
+ * couches reste plus simple à lire ainsi).
+ *
+ * Les deux photos glissent en parallaxe dans leur tuile.
  */
 
 /**
@@ -47,14 +51,19 @@ export default function WhyStatements() {
   return (
     <section className="border-y border-navy/8 bg-white">
       <div className="mx-auto w-full max-w-[95rem] px-5 py-20 sm:px-8 sm:py-24">
-        <ol className="grid gap-2.5 sm:grid-cols-2 sm:gap-3 lg:grid-cols-4">
+        {/* Deux colonnes DÈS LE PLUS PETIT ÉCRAN : en une seule colonne, les huit tuiles
+            de 10:11 s'étiraient sur près de 3 000 px de haut, avec les trois quarts de
+            chaque tuile vides — c'est la section qui « s'affichait bizarrement » sur un
+            téléphone. En deux colonnes, chaque tuile garde ses proportions et la section
+            fait la moitié du chemin. La grille passe à quatre colonnes à partir de `lg`. */}
+        <ol className="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-4">
           {/* Tuile d'en-tête : sur-titre discret en haut, titre en bas, comme la réf. */}
           <Reveal as="li" className="h-full">
-            <div className="why-tile group relative flex h-full aspect-[10/11] flex-col justify-between gap-10 overflow-hidden border border-navy/10 bg-white p-6 hover:border-navy/25 sm:p-7">
-              <p className="text-[0.68rem] font-medium uppercase tracking-[0.24em] text-navy/55">
+            <div className="why-tile group relative flex h-full aspect-[10/11] flex-col justify-between gap-6 overflow-hidden border border-navy/10 bg-white p-4 hover:border-navy/25 sm:gap-10 sm:p-7">
+              <p className="text-[0.62rem] font-medium uppercase tracking-[0.2em] text-navy/55 sm:text-[0.68rem] sm:tracking-[0.24em]">
                 {why.whyEyebrow}
               </p>
-              <h2 className="max-w-[11ch] text-3xl leading-[1.06] tracking-tight text-navy sm:text-4xl">
+              <h2 className="max-w-[11ch] text-xl leading-[1.08] tracking-tight text-navy sm:text-4xl md:text-3xl lg:text-4xl">
                 {why.whyHeadline}
               </h2>
             </div>
@@ -90,12 +99,12 @@ function ReasonCard({
 }) {
   return (
     <Reveal as="li" delay={delay} className="h-full">
-      <div className={`${TILE} flex flex-col justify-between gap-10 p-6 sm:p-7`}>
-        <span className="text-base font-medium tracking-[0.14em] text-navy/45 transition-colors duration-300 group-hover:text-navy/80">
+      <div className={`${TILE} flex flex-col justify-between gap-6 p-4 sm:gap-10 sm:p-7`}>
+        <span className="text-sm font-medium tracking-[0.14em] text-navy/45 transition-colors duration-300 group-hover:text-navy/80 sm:text-base">
           {String(index + 1).padStart(2, "0")}
         </span>
         <div>
-          <h3 className="text-lg leading-snug text-navy">{card.title}</h3>
+          <h3 className="text-base leading-snug text-navy sm:text-lg">{card.title}</h3>
           <p className="mt-2 text-sm leading-relaxed text-muted">{card.body}</p>
         </div>
       </div>
@@ -118,15 +127,19 @@ function MediaTile({
   return (
     <Reveal as="li" delay={delay} className="h-full">
       <div className={TILE}>
-        <Image
-          src={src}
-          alt={alt}
-          fill
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-          className={duotone ? "object-cover grayscale" : "object-cover"}
-        />
+        {/* Cadre fermé (`aspect-[10/11]`) : c'est l'échelle qui couvre le débattement
+            (±4 % → 1,09), la tuile garde exactement sa découpe. */}
+        <Parallax className="absolute inset-0" amount={4} scale={1.09}>
+          <Image
+            src={src}
+            alt={alt}
+            fill
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+            className={duotone ? "object-cover grayscale" : "object-cover"}
+          />
+        </Parallax>
         {duotone ? (
-          <span aria-hidden className="absolute inset-0 bg-orange/80 mix-blend-multiply" />
+          <span aria-hidden className="absolute inset-0 bg-black/30 mix-blend-multiply" />
         ) : null}
       </div>
     </Reveal>

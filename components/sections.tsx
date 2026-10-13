@@ -32,7 +32,7 @@ export function HeroSection({
 
      Trois couches posées sous le texte, dans cet ordre :
      1. la photo — bande en bas sur mobile (le texte reste sur le fond uni), plein
-        cadre dès `sm` ;
+        cadre dès `sm` ; elle glisse en parallaxe (GSAP) sous le texte ;
      2. un voile clair de gauche à droite : les titres longs ne tombent jamais sur
         les cheveux foncés ;
      3. un léger dégradé noir depuis le haut, sur TOUT le hero : le header, toujours
@@ -42,25 +42,41 @@ export function HeroSection({
     <section className="relative overflow-hidden bg-[#f1f2f2] pt-36 pb-64 sm:pt-92 sm:pb-32">
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-x-0 bottom-0 h-56 sm:inset-0 sm:h-auto"
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-56 overflow-hidden sm:inset-0 sm:h-auto"
       >
-        <Image
-          src="/img/other-hero.png"
-          alt=""
-          fill
-          priority
-          sizes="100vw"
-          className="object-cover object-[78%_center] sm:object-center"
-        />
+        {/* Le cadre déborde de 8 % en haut et en bas : la photo peut glisser de ±5 % au
+            défilement sans jamais découvrir un bord (la boîte clippe le débattement). */}
+        <Parallax className="absolute -inset-y-[8%] inset-x-0" amount={5} scale={1.04}>
+          <Image
+            src="/img/other-hero.png"
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover object-[78%_center] sm:object-center"
+          />
+        </Parallax>
       </div>
 
       <div
         aria-hidden
         className="pointer-events-none absolute left-0 top-0 h-[58%] w-full bg-gradient-to-r from-[#f1f2f2] via-[#f1f2f2]/70 to-transparent sm:h-full sm:w-[62%] sm:via-[#f1f2f2]/85"
       />
+      {/* Assombrissement sous le header — mais SUR MOBILE, seulement une bande courte.
+
+          Le header est blanc au repos : sur ce fond clair il a besoin d'un fond sombre
+          derrière lui. Sur un écran large, ce voile peut couvrir tout le hero, parce que le
+          titre est repoussé sur la gauche par le dégradé clair. Sur un téléphone, la même
+          bande pleine hauteur tombe PILE sur le titre bleu nuit, qui devient illisible —
+          c'est ce qui se voyait mal. D'où deux voiles : une bande de 6 rem sous le header
+          sous `sm`, le voile complet au-dessus. */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/70 via-black/45 to-transparent"
+        className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-black/45 to-transparent sm:hidden"
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 hidden bg-gradient-to-b from-black/70 via-black/45 to-transparent sm:block"
       />
 
       <div className="container-x relative">
@@ -120,7 +136,10 @@ export function StatsSection({ stats }: { stats: { value: number; suffix: string
   return (
     <section className="relative overflow-hidden border-b border-navy/8 bg-white">
       <div className="container-x">
-        <ul className="grid grid-cols-2 divide-navy/8 sm:grid-cols-3 lg:grid-cols-5 lg:divide-x">
+        {/* En deux colonnes, la cinquième valeur (un nombre impair) restait seule dans la
+            colonne de gauche, un trou à côté d'elle. Elle prend donc toute la largeur en
+            bas de bloc sur téléphone, et rentre dans la grille dès `sm`. */}
+        <ul className="grid grid-cols-2 divide-navy/8 sm:grid-cols-3 lg:grid-cols-5 lg:divide-x [&>li:last-child]:col-span-2 sm:[&>li:last-child]:col-span-1">
           {stats.map((s, i) => (
             <Reveal
               as="li"
@@ -182,7 +201,14 @@ export function TestimonialsSection() {
     /* Échelle finale ciblée : la fleur doit couvrir LE BAS DE LA SECTION — pas
        l'écran entier. La hauteur de la zone basse ≈ 16rem (badge + paddings) ; la
        fleur de 9rem doit faire ~160rem de large pour couvrir tous les angles de
-       cette bande : scale final 18 suffit, on reste sobre. */
+       cette bande : scale final 18 suffit, on reste sobre.
+
+       Mais 18 est un réglage de GRAND ÉCRAN. Sur un téléphone, la fleur de 144 px
+       ferait 2 600 px de large et son libellé 180 px de haut : le bas de la section
+       devenait un aplat bleu et « Client Stories » sortait de toute mesure. L'échelle
+       se dérive donc de la LARGEUR de la fenêtre, avec un plancher — 3,4 × est le
+       minimum pour couvrir 390 px de large — et le libellé suit la même proportion,
+       pour que le mot reste lisible au lieu de grossir indépendamment du fond. */
     const update = () => {
       const badge = anchor.getBoundingClientRect();
       const view = window.innerHeight;
@@ -201,29 +227,62 @@ export function TestimonialsSection() {
       smoothed.current += (eased - smoothed.current) * 0.16;
       if (Math.abs(eased - smoothed.current) < 0.001) smoothed.current = eased;
       const progress = smoothed.current;
-      const scale = 1 + progress * 17;
+      /* Couvre la largeur de la fenêtre, plafonné à 18 : 3,4 × sur un téléphone,
+         ~14 × sur un écran de bureau de 1440 px, 18 au-delà. */
+      const scaleMax = Math.min(18, Math.max(3.4, (window.innerWidth / 144) * 1.4));
+      const scale = 1 + progress * (scaleMax - 1);
       blob.style.transform = `scale(${scale}) rotate(${progress * 180}deg)`;
       /* Pas de translate ici : en Tailwind v4, `-translate-x-1/2 -translate-y-1/2`
          s'applique via la propriété `translate` (indépendante de `transform`),
          donc le centrage du libellé survit à ce transform — le dupliquer ici
          décalait le texte de ~41 px. */
-      label.style.transform = `scale(${1 + progress * 7})`;
+      /* Le libellé suit la fleur : à l'échelle 18 il monte à 8 × (comme avant), à
+         l'échelle 3,4 il ne monte qu'à 2,3 × — lisible sur un téléphone. */
+      label.style.transform = `scale(${1 + progress * scaleMax * 0.39})`;
     };
+    if (prefersReducedMotion()) return;
+
     /* Lenis pilote la page via des transforms : l'événement `scroll` natif n'est pas
        fiable ici. On rafraîchit donc en boucle rAF — la mesure est ainsi toujours à
-       jour, dans les deux sens (descente ET remontée). */
-    let stopRequested = false;
+       jour, dans les deux sens (descente ET remontée).
+
+       Mais la boucle ne tourne QUE quand la section approche de l'écran (une demi-fenêtre
+       de marge, pour que la fleur soit déjà à jour quand elle arrive). Une boucle qui
+       mesure et écrit une transformation à chaque frame, y compris quand la section est
+       hors écran, coûte des frames au défilement de toute la page : c'est exactement ce
+       qu'on ne veut pas d'un site qu'on parcourt au scroll. */
+    let frame = 0;
+    let running = false;
     const tick = () => {
-      if (stopRequested) return;
+      if (!running) return;
       update();
-      window.requestAnimationFrame(tick);
+      frame = window.requestAnimationFrame(tick);
     };
-    if (prefersReducedMotion()) {
-      return;
-    }
-    window.requestAnimationFrame(tick);
+    const start = () => {
+      if (running) return;
+      running = true;
+      frame = window.requestAnimationFrame(tick);
+    };
+    const stop = () => {
+      running = false;
+      if (frame) window.cancelAnimationFrame(frame);
+      frame = 0;
+    };
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) start();
+          else stop();
+        }
+      },
+      { rootMargin: "50% 0px" },
+    );
+    observer.observe(section);
+
     return () => {
-      stopRequested = true;
+      observer.disconnect();
+      stop();
     };
   }, []);
 
@@ -247,7 +306,7 @@ export function TestimonialsSection() {
   return (
     <section
       ref={root}
-      className="relative overflow-hidden bg-ink py-24 sm:py-28"
+      className="relative overflow-hidden bg-ink/90 py-24 sm:py-28"
     >
       <div className="container-x relative z-10">
         {/* En-tête : titre + sous-titre à gauche, flèches rondes à droite. */}
@@ -402,7 +461,8 @@ export function SplitShowcase({
         <div className="relative">
           <div aria-hidden className="absolute -inset-3 rounded-[1.75rem] bg-gradient-to-br from-brand/15 to-turquoise/15 blur-2xl" />
           <div className="relative aspect-[4/3] overflow-hidden rounded-[1.25rem] shadow-lift">
-            <Parallax className="absolute inset-0" amount={6} scale={1.1}>
+            {/* Cadre fermé : l'échelle couvre le débattement (±6 % → 1,12). */}
+            <Parallax className="absolute inset-0" amount={6} scale={1.12}>
               <Image src={image} alt={imageAlt} fill sizes="(max-width: 1024px) 100vw, 50vw" className="object-cover" />
             </Parallax>
           </div>

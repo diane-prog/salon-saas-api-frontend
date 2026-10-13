@@ -65,22 +65,45 @@ export default function Header() {
 
   return (
     <>
+      {/* La barre a DEUX comportements, et c'est voulu.
+
+          Sur TELEPHONE : une barre d'ENCRE, toujours — la même que les panneaux plein écran
+          (recherche, formulaire) et que le rideau de transition. Le logo clair y est lisible
+          en permanence, alors qu'une barre transparente le faisait disparaître au-dessus des
+          heros clairs des pages internes ; et la page ne « saute » plus au premier scroll,
+          puisque le fond ne change pas.
+
+          Sur GRAND ÉCRAN : le comportement d'origine — transparent au repos, blanc translucide
+          une fois la page défilée — parce que le hero de l'accueil est sombre et que la barre y
+          doit s'effacer. */}
       <header
         className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${
           scrolled
-            ? "border-b border-navy/8 bg-white/85 py-2 shadow-soft backdrop-blur-xl"
-            : "border-b border-transparent bg-transparent py-4"
+            ? "border-b border-paper/10 bg-bg-white/85 py-2 backdrop-blur-xl lg:border-navy/8 lg:bg-white/85 lg:shadow-soft"
+            : "border-b border-paper/10 bg-transparent py-3 lg:border lg:bg-transparent lg:py-4"
         }`}
       >
-        <div className="max-w-[90rem] mx-auto flex items-center justify-between gap-6">
+        <div className="max-w-[91rem] mx-auto flex items-center justify-between gap-4 px-4 sm:gap-6 sm:px-6 lg:px-0">
           <Link href={href("/")} aria-label="LEEGI Group" className="relative z-10 flex items-center">
+            {/* Deux logos, un par terrain : le clair dans la barre d'encre du téléphone, et
+                celui qui suit l'état de la barre sur grand écran. Un `src` ne se change pas en
+                CSS, donc les deux images coexistent et l'une est masquée. */}
             <Image
-              src={scrolled ? "/img/logo-navy.png" : "/img/logo.png"}
+              src="/img/logo.png"
               alt="LEEGI Group"
               width={180}
               height={80}
               priority
-              className={`w-auto transition-all duration-300 ${scrolled ? "h-16" : "h-16"}`}
+              className="h-9 w-auto lg:hidden"
+            />
+            <Image
+              src={scrolled ? "/img/logo-navy.png" : "/img/logo.png"}
+              alt=""
+              width={180}
+              height={80}
+              priority
+              aria-hidden
+              className="hidden h-16 w-auto transition-all duration-300 lg:block"
             />
           </Link>
 
@@ -179,9 +202,7 @@ export default function Header() {
               type="button"
               onClick={() => setOpen(true)}
               aria-label="Ouvrir le menu"
-              className={`grid h-11 w-11 place-items-center rounded-full transition-colors lg:hidden ${
-                scrolled ? "text-navy hover:bg-navy/5" : "text-white hover:bg-white/10"
-              }`}
+              className="grid h-11 w-11 place-items-center rounded-full text-white transition-colors hover:bg-white/10 lg:hidden"
             >
               <Menu />
             </button>
@@ -190,62 +211,89 @@ export default function Header() {
       </header>
 
       {open && (
-        <div className="fixed inset-0 z-60 flex flex-col bg-navy grain lg:hidden">
+        <div className="fixed inset-0 z-60 flex flex-col bg-ink text-paper grain lg:hidden">
+          {/* Barre haute : le MÊME en-tête que les autres panneaux plein écran — logo clair,
+              croix cerclée. Les trois surfaces du site (recherche, formulaire, menu) se
+              ressemblent, on ne change pas de vocabulaire en changeant de panneau. */}
           <div className="container-x flex items-center justify-between py-4">
             <Image src="/img/logo.png" alt="LEEGI Group" width={150} height={60} className="h-9 w-auto" priority />
             <button
               type="button"
               onClick={() => setOpen(false)}
               aria-label="Fermer le menu"
-              className="grid h-11 w-11 place-items-center rounded-full text-white hover:bg-white/10"
+              className="grid h-11 w-11 place-items-center rounded-full text-paper/70 ring-1 ring-paper/20 transition-colors hover:text-paper hover:ring-paper/50"
             >
               <Close />
             </button>
           </div>
 
-          <nav className="container-x flex-1 overflow-y-auto pb-10" aria-label="Navigation mobile">
-            <ul className="flex flex-col gap-1 pt-6">
+          {/* Le menu est une LISTE ÉDITORIALE : un numéro, un grand libellé, un filet — la
+              grammaire des listes du site (services, valeurs, réalisations), tenue à l'échelle
+              d'un menu de téléphone. Les liens ne sont plus des lignes muettes : chaque entrée
+              se numérote et se souligne, comme une page de sommaire. */}
+          <nav
+            className="no-scrollbar container-x flex-1 overflow-y-auto pb-12"
+            aria-label="Navigation mobile"
+          >
+            <ul className="mt-2 border-t border-paper/10">
               {dict.nav
                 .filter((n) => n.href !== "/services")
-                .map((item) => (
-                  <li key={item.href}>
+                .map((item, i) => (
+                  <li key={item.href} className="border-b border-paper/10">
                     <Link
                       href={href(item.href)}
                       onClick={() => setOpen(false)}
-                      className="block py-3 text-2xl font-light text-white/90"
+                      className="group flex items-baseline gap-5 py-5"
                     >
-                      {item.label}
+                      <span className="text-[0.7rem] font-medium tabular-nums uppercase tracking-[0.2em] text-paper/35">
+                        {String(i + 1).padStart(2, "0")}
+                      </span>
+                      <span className="font-light text-3xl text-paper transition-transform duration-500 group-hover:translate-x-1.5">
+                        {item.label}
+                      </span>
                     </Link>
                   </li>
                 ))}
             </ul>
 
+            {/* Services : la même ligne que les autres, mais dépliable. Le libellé porte
+                l'accent (turquoise) — c'est la seule entrée qui a un contenu derrière. */}
             <button
               type="button"
               onClick={() => setServicesOpen((v) => !v)}
               aria-expanded={servicesOpen}
-              className="mt-2 flex w-full items-center justify-between py-3 text-2xl font-light text-turquoise"
+              className="flex w-full items-baseline gap-5 border-b border-paper/10 py-5 text-left"
             >
-              {dict.nav.find((n) => n.href === "/services")?.label}
-              <ChevronDown className={`h-6 w-6 transition-transform duration-300 ${servicesOpen ? "rotate-180" : ""}`} />
+              <span className="text-[0.7rem] font-medium tabular-nums uppercase tracking-[0.2em] text-paper/35">
+                {String(dict.nav.filter((n) => n.href !== "/services").length + 1).padStart(2, "0")}
+              </span>
+              <span className="flex-1 font-light text-3xl text-turquoise">
+                {dict.nav.find((n) => n.href === "/services")?.label}
+              </span>
+              <ChevronDown
+                className={`h-5 w-5 shrink-0 self-center text-paper/50 transition-transform duration-300 ${
+                  servicesOpen ? "rotate-180" : ""
+                }`}
+              />
             </button>
             {servicesOpen && (
-              <ul className="grid gap-1 pb-4">
+              <ul className="border-b border-paper/10">
                 {dict.services.map((s) => (
                   <li key={s.slug}>
                     <Link
                       href={href(`/services/${s.slug}`)}
                       onClick={() => setOpen(false)}
-                      className="block border-l-2 border-brand/40 py-2 pl-4 text-base text-slate-300"
+                      className="flex items-baseline justify-between gap-4 border-b border-paper/[0.06] py-4 pl-9 last:border-b-0"
                     >
-                      {s.title}
+                      <span className="font-light text-lg text-paper/85">{s.title}</span>
+                      <ArrowRight className="h-4 w-4 shrink-0 text-paper/30" />
                     </Link>
                   </li>
                 ))}
               </ul>
             )}
 
-            <div className="mt-6 flex items-center gap-3">
+            <div className="mt-8 flex items-center gap-3">
               <LocaleSwitch
                 locale={locale}
                 scrolled={false}
@@ -260,6 +308,17 @@ export default function Header() {
               >
                 {locale === "fr" ? "Demander un devis" : "Get a quote"}
               </Link>
+            </div>
+
+            {/* Le pied du panneau : les coordonnées, en petites capitales — la même clôture
+                que les panneaux de recherche et de contact. */}
+            <div className="mt-10 flex flex-col gap-1 border-t border-paper/10 pt-6 text-[0.7rem] font-medium uppercase tracking-[0.2em] text-paper/35">
+              <a href={`mailto:${dict.site.email}`} className="transition-colors hover:text-paper">
+                {dict.site.email}
+              </a>
+              <a href={dict.site.phoneRaw} className="transition-colors hover:text-paper">
+                {dict.site.phone}
+              </a>
             </div>
           </nav>
         </div>
@@ -283,9 +342,12 @@ function LocaleSwitch({
 }) {
   const labels = switchLabels[locale];
   const base =
-    "inline-flex items-center rounded-full p-0.5 text-[0.68rem] font-light transition-colors";
-  const tone = scrolled ? "bg-navy/[0.06] text-muted" : "bg-white/10 text-white/70";
-  const active = scrolled ? "bg-white text-navy shadow-soft" : "bg-white text-navy";
+    "inline-flex items-center rounded-full p-0.5 text-[0.68rem] font-light transition-colors bg-white/10 text-white/70";
+  /* Le fond de la barre change sur GRAND ÉCRAN (blanc une fois défilé) et jamais sur
+     téléphone (encre, toujours) : le ton de la pastille suit donc la barre, mais seulement à
+     partir de `lg` — et en clair la pastille active reste blanche dans les deux cas. */
+  const tone = scrolled ? "lg:bg-navy/[0.06] lg:text-muted" : "";
+  const active = scrolled ? "bg-white text-navy lg:shadow-soft" : "bg-white text-navy";
   const pad = size === "lg" ? "py-2 px-1" : "py-1";
 
   return (
@@ -295,7 +357,7 @@ function LocaleSwitch({
         onClick={() => onChange("fr")}
         aria-current={locale === "fr" ? "true" : undefined}
         className={`rounded-full px-2.5 py-1 transition-colors ${
-          locale === "fr" ? active : "hover:text-navy hover:opacity-80"
+          locale === "fr" ? active : `hover:text-white hover:opacity-80 ${scrolled ? "lg:hover:text-navy" : ""}`
         }`}
       >
         {labels.fr}
@@ -305,7 +367,7 @@ function LocaleSwitch({
         onClick={() => onChange("en")}
         aria-current={locale === "en" ? "true" : undefined}
         className={`rounded-full px-2.5 py-1 transition-colors ${
-          locale === "en" ? active : scrolled ? "hover:text-navy" : "hover:text-white"
+          locale === "en" ? active : `hover:text-white ${scrolled ? "lg:hover:text-navy" : ""}`
         }`}
       >
         {labels.en}

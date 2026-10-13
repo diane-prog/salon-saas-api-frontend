@@ -154,6 +154,20 @@
     -webkit-text-size-adjust: 100%;
   }
 
+  /* Avec JavaScript, le défilement est piloté par Lenis (`components/SmoothScroll.tsx`). Le `scroll-behavior: smooth` du navigateur se SUPERPOSE alors à son
+     interpolation : chaque écriture de position est reprise par l'animation native, si
+     bien que Lenis « lisse » un défilement que le navigateur lisse à nouveau — le
+     mouvement devient mou et saccadé au lieu d'être fluide. On le réserve donc au cas
+     sans JavaScript, où c'est le navigateur qui fait tout.
+
+     `!important` est nécessaire : pendant une transition de route, Next écrit lui-même
+     `scroll-behavior` EN LIGNE sur `<html>` (disable-smooth-scroll.js) et restaure ensuite
+     la valeur qu'il a lue. Une déclaration en ligne l'emportant sur une règle de feuille,
+     la nôtre serait sans effet dès la première navigation entre pages. */
+  html[data-js] {
+    scroll-behavior: auto !important;
+  }
+
   body {
     background: #fff;
     color: var(--color-navy);
@@ -208,6 +222,20 @@
   }
   @media (width >= 80rem) {
     padding-inline: 2.5rem;
+  }
+}
+
+/* Conteneur qui défile SANS montrer sa barre. Le défilement reste entier — au doigt, à la
+   molette, au clavier — seule la barre disparaît : dans un panneau plein écran, elle
+   tombait au beau milieu du noir et coupait la scène.
+
+   `scrollbar-width` couvre Firefox, `::-webkit-scrollbar` les navigateurs Chromium et
+   Safari ; les deux sont écrits, donc la barre ne réapparaît nulle part. */
+@utility no-scrollbar {
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
   }
 }
 
@@ -337,23 +365,31 @@
   }
 }
 
+/* Entrées de section : état de repos, puis état de départ.
+
+   Le MOUVEMENT (soulèvement + fondu) est en GSAP, dans `components/Reveal.tsx`. Mais l'état
+   de DÉPART vit ici, en CSS, et pas en JS : la feuille est appliquée dès la première frame,
+   alors que l'hydratation arrive après le premier rendu. Poser le masque dans un effet
+   (`gsap.set`) laissait donc le contenu visible le temps de l'hydratation — mesuré : ~2,2 s
+   en développement — puis le faisait disparaître avant de le relever.
+
+   Le masque est retiré par GSAP à la fin du mouvement : il rend les propriétés au CSS
+   (`clearProps`) ET pose `data-reveal="played"` dans le même souffle. Sans ce marqueur,
+   la règle ci-dessous remasquerait l'élément dès que les styles en ligne disparaîssent.
+
+   Deux garde-fous : rien n'est masqué sans JavaScript (`html[data-js]`), et rien ne l'est
+   quand l'utilisateur demande moins d'animations — chez lui le contenu est là d'emblée,
+   sans mouvement, ce qu'aucun `gsap.set` ne ferait à sa place. */
 @utility reveal {
   opacity: 1;
   transform: none;
 }
 
-html[data-js] .reveal {
-  opacity: 0;
-  transform: translateY(28px);
-  transition:
-    opacity 0.75s cubic-bezier(0.22, 1, 0.36, 1),
-    transform 0.75s cubic-bezier(0.22, 1, 0.36, 1);
-  transition-delay: var(--reveal-delay, 0ms);
-}
-
-html[data-js] .reveal.reveal-visible {
-  opacity: 1;
-  transform: none;
+@media (prefers-reduced-motion: no-preference) {
+  html[data-js] .reveal:not([data-reveal="played"]) {
+    opacity: 0;
+    transform: translateY(48px); /* même valeur que `LIFT` dans components/Reveal.tsx */
+  }
 }
 
 /* Révélation de texte mot à mot : le mot remonte dans un cadre masqué.
@@ -412,11 +448,16 @@ html[data-js] .split-anim .split-word {
 
 /* Rideau de transition : un panneau uni qui GLISSE (plus de bascule 3D), animé en CSS
    (et non en JS) pour rester fluide. Il descend du haut pour couvrir, puis redescend
-   en s'effaçant — un seul axe, aucune décoration, aucun dégradé. */
+   en s'effaçant — un seul axe, aucune décoration, aucun dégradé.
+
+   Le fond est l'encre du site (`ink`), la MÊME que les panneaux plein écran de la
+   recherche et du formulaire : le rideau, la recherche et le formulaire sont le même objet
+   visuel — l'encre du site — et l'arrivée sur la page est une suite, pas un objet à part.
+   Le libellé du rideau est donc clair (`text-paper`), pas bleu nuit. */
 .curtain-panel {
   position: absolute;
   inset: 0;
-  background: var(--color-beige);
+  background: var(--color-ink);
   will-change: transform;
 }
 
@@ -477,121 +518,6 @@ html[data-js] .split-anim .split-word {
 
 html[data-js] .page-enter {
   animation: page-enter 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-/* Mur de clients (accueil) : des tuiles flottantes autour du titre.
-
-   Sous `lg`, la liste reste un flux de cartes centrées, sous le titre ; à partir de `lg`
-   elle devient un champ : la liste est le repère de position et chaque tuile est placée en
-   pourcentage, avec sa propre inclinaison. Les positions vivent dans le composant (elles
-   sont données par tuile) ; ici, seulement la mécanique. */
-.client-field {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 0.75rem;
-}
-
-@media (min-width: 1024px) {
-  .client-field {
-    position: relative;
-    display: block;
-    height: 100%;
-  }
-
-  .client-field .client-tile {
-    position: absolute;
-  }
-}
-
-/* Entrée des tuiles : elles se posent sur la page.
-
-   Chaque tuile part un peu plus bas, un peu plus petite, et inclinée DE PLUS que son
-   inclinaison finale ; puis elle remonte, grandit, et son inclinaison se redresse. Le
-   décalage (`--tile-delay`) est posé par le composant : il suit la HAUTEUR de la tuile dans
-   le champ, donc l'apparition descend le champ comme une vague — un ordre que l'œil peut
-   suivre, là où l'ordre du tableau ne veut rien dire (les tuiles sont dispersées).
-
-   Les quatre propriétés animées — `opacity`, `translate`, `scale`, `rotate` — sont
-   indépendantes : aucune n'en écrase une autre, contrairement à `transform` où la dernière
-   déclarée gagne. L'inclinaison de repos est une variable (`--tile-rotate`), posée tuile
-   par tuile.
-
-   Sans JavaScript, rien de tout cela : les tuiles sont simplement à leur place, inclinées.
-   Sous `prefers-reduced-motion`, la règle globale ramène toutes les transitions à 0.01 ms. */
-.client-tile {
-  rotate: var(--tile-rotate, 0deg);
-}
-
-html[data-js] .client-tile {
-  opacity: 0;
-  scale: 0.92;
-  translate: 0 26px;
-  rotate: calc(var(--tile-rotate, 0deg) - 8deg);
-  transition:
-    opacity 0.6s ease-out,
-    translate 0.95s cubic-bezier(0.22, 1, 0.36, 1),
-    scale 0.95s cubic-bezier(0.22, 1, 0.36, 1),
-    rotate 1.05s cubic-bezier(0.22, 1, 0.36, 1);
-  transition-delay: var(--tile-delay, 0ms);
-}
-
-html[data-js] .client-tile.client-tile-in {
-  opacity: 1;
-  scale: 1;
-  translate: 0 0;
-  rotate: var(--tile-rotate, 0deg);
-}
-
-/* Les pastilles de contexte (« Campagne Ads », « Branding »…) n'apparaissent qu'après leur
-   tuile : elles héritent du décalage de la tuile (`--tile-delay`, qui se transmet aux
-   enfants) et y ajoutent le leur, le temps que la tuile se pose.
-
-   Le mouvement passe par `transform`, et non par `translate` comme les tuiles : la pastille
-   est centrée avec l'utilitaire `-translate-x-1/2`, qui écrit la propriété `translate`
-   (Tailwind v4) — la nôtre, plus spécifique, l'écraserait et décalerait la pastille. */
-html[data-js] .client-tag {
-  opacity: 0;
-  transform: translateY(6px);
-  transition:
-    opacity 0.5s ease-out,
-    transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
-  transition-delay: calc(var(--tile-delay, 0ms) + 420ms);
-}
-
-html[data-js] .client-tile-in .client-tag {
-  opacity: 1;
-  transform: none;
-}
-
-/* Le calque décoratif du champ, allumé d'un coup quand il entre dans le champ de vision :
-   les arcs se dessinent (le trait part de son extrémité et se déroule), et les points
-   s'allument juste après — le temps que la première vague de tuiles parte. Le composant
-   pose `client-arc-in` sur le calque, via le même déclencheur partagé que les révélations
-   de texte (lib/reveal) : le tracé se joue donc au bon moment, pas au chargement de la
-   page. Le nom vient des arcs (c'était le signal existant) ; le même état allume les
-   points. Sans JavaScript, les lignes sont pleines et les points allumés. */
-.client-arc {
-  stroke-dasharray: var(--arc-length, 700);
-  stroke-dashoffset: 0;
-}
-
-html[data-js] .client-arc {
-  stroke-dashoffset: var(--arc-length, 700);
-  transition: stroke-dashoffset 1.5s cubic-bezier(0.22, 1, 0.36, 1) 0.2s;
-}
-
-html[data-js] .client-arc-in .client-arc {
-  stroke-dashoffset: 0;
-}
-
-html[data-js] .client-dot {
-  opacity: 0;
-  transition: opacity 0.9s ease-out 0.5s;
-}
-
-html[data-js] .client-arc-in .client-dot {
-  opacity: 1;
 }
 
 /* Sheet (panneau latéral des formulaires) — voir components/ui/sheet.tsx.

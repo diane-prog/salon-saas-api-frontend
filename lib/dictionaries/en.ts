@@ -568,6 +568,12 @@ export const ui = {
   searchLabel: "Search the site",
   searchPlaceholder: "Search a service, a project…",
   searchNoResults: "No results",
+  /* Full-screen search (header icon). “Results” is a heading, never inflected: the count is
+     appended next to it (“Results · 3”), so there is no plural to handle. */
+  searchResults: "Results",
+  searchSuggestions: "Suggestions",
+  /* Keyboard hint in the footer of a full-screen panel (search, contact form). */
+  panelHint: "Esc to close",
   /* Gallery displays on the home page (projects). */
   galleryViews: { grid: "Grid", list: "List", feed: "Feed" },
   galleryDisplay: "Layout",

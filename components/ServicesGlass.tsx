@@ -112,7 +112,16 @@ export default function ServicesGlass({ eyebrow, title, body }: ServicesGlassPro
         {allowVideo && (
           <video
             ref={video}
-            className="absolute inset-0 h-full w-full object-cover object-center"
+            /* Même raisonnement que le hero de l'accueil, avec les mesures de CE plan :
+               en 16:9 dans un écran portrait, on n'en voit qu'une tranche de ~26 % de large.
+               Ici la peau est centrée sur 65 % du plan et la tranche la plus fournie
+               commence vers 51 % : `object-position` à `51 / 74 ≈ 68 %` place les personnes
+               au milieu de l'écran au lieu de les laisser au bord droit.
+
+               Sur téléphone seulement : l'écran large étant plus large que haut, la vidéo
+               s'y cadre en `cover` sans perdre de champ horizontal, et la valeur centrée
+               d'origine reste la bonne. */
+            className="absolute inset-0 h-full w-full object-cover object-[68%_center] sm:object-center"
             src="/img/videoo.mp4"
             muted
             loop
@@ -160,8 +169,12 @@ export default function ServicesGlass({ eyebrow, title, body }: ServicesGlassPro
         </div>
 
         {/* 2. Interstice d'un plein écran : la vague 1 est entièrement sortie
-            du champ quand la vague 2 entre. */}
-        <div ref={gapRef} aria-hidden className="h-[100svh]" />
+            du champ quand la vague 2 entre.
+
+            Sur un téléphone, ce plein écran de vidéo nue devient un long moment où rien
+            ne se passe : la hauteur est donc réduite sous `sm`, la respiration reste
+            visible sans faire attendre. */}
+        <div ref={gapRef} aria-hidden className="h-[42svh] sm:h-[100svh]" />
 
         {/* 3. Les trois autres : même grille que la première vague. */}
         <ul className="grid border-y border-white/15 sm:grid-cols-3">
@@ -177,8 +190,9 @@ export default function ServicesGlass({ eyebrow, title, body }: ServicesGlassPro
           ))}
         </ul>
 
-        {/* La course : une demi-page de vidéo nue pour conclure la traversée. */}
-        <div aria-hidden className="h-[45vh]" />
+        {/* La course : une demi-page de vidéo nue pour conclure la traversée (plus courte
+            sur un téléphone, même raison que l'interstice ci-dessus). */}
+        <div aria-hidden className="h-[26svh] sm:h-[45vh]" />
 
         <div className="flex justify-center px-5 pb-28 sm:px-8 sm:pb-36">
           <ButtonLink href={`/${locale}/services`} variant="ghost">

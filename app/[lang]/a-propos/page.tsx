@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import type { CSSProperties } from "react";
 import CtaBand from "@/components/CtaBand";
 import Reveal from "@/components/Reveal";
+import Parallax from "@/components/Parallax";
 import { HeroSection } from "@/components/sections";
 import { TextLink } from "@/components/ui";
 import { isLocale, getDictionary, localePath } from "@/lib/dictionaries";
@@ -190,22 +191,25 @@ export default async function AboutPage({ params }: PageProps<"/[lang]/a-propos"
 
           C'est la seule section sombre du site, volontairement : elle marque le moment
           où la page parle de ce que l'agence porte elle-même. */}
-      <section className="bg-navy">
+      <section className="bg-ink/90">
         <div className="grid lg:grid-cols-2">
-          <figure className="relative min-h-[52svh] lg:min-h-[78svh]">
-            <Image
-              src="/img/projet-etincelles.jpg"
-              alt={initiatives.name}
-              fill
-              sizes="(min-width: 1024px) 50vw, 100vw"
-              className={PHOTO}
-            />
+          <figure className="relative min-h-[52svh] overflow-hidden lg:min-h-[78svh]">
+            {/* Cadre débordant : la photo glisse de ±5 % au défilement sans découvrir de bord. */}
+            <Parallax className="absolute -inset-y-[7%] inset-x-0" amount={5} scale={1.04}>
+              <Image
+                src="/img/projet-etincelles.jpg"
+                alt={initiatives.name}
+                fill
+                sizes="(min-width: 1024px) 50vw, 100vw"
+                className={PHOTO}
+              />
+            </Parallax>
             <figcaption className={`absolute bottom-5 left-5 ${LABEL} text-white/60`}>
               {initiatives.name}
             </figcaption>
           </figure>
 
-          <div className="flex flex-col justify-center gap-6 px-6 py-16 sm:px-10 lg:px-16 lg:py-24">
+          <div className="flex flex-col  justify-center gap-6 px-6 py-16 sm:px-10 lg:px-16 lg:py-24">
             <span className={`${LABEL} text-white/45`}>{initiatives.title}</span>
             <h2 className="max-w-xl font-light text-[clamp(1.75rem,3.2vw,2.75rem)] leading-[1.08] text-white">
               {initiatives.name}
@@ -235,13 +239,16 @@ export default async function AboutPage({ params }: PageProps<"/[lang]/a-propos"
           <div className="mt-14 grid gap-10 lg:grid-cols-12 lg:gap-12">
             <figure className="lg:col-span-5">
               <div className="relative aspect-[4/5] overflow-hidden bg-ink/[0.06]">
-                <Image
-                  src={director.image}
-                  alt={director.name}
-                  fill
-                  sizes="(min-width: 1024px) 40vw, 100vw"
-                  className={PHOTO}
-                />
+                {/* Portrait : cadre fermé, c'est l'échelle qui couvre le débattement (±4 % → 1,09). */}
+                <Parallax className="absolute inset-0" amount={4} scale={1.09}>
+                  <Image
+                    src={director.image}
+                    alt={director.name}
+                    fill
+                    sizes="(min-width: 1024px) 40vw, 100vw"
+                    className={PHOTO}
+                  />
+                </Parallax>
               </div>
             </figure>
 
@@ -265,13 +272,15 @@ export default async function AboutPage({ params }: PageProps<"/[lang]/a-propos"
               <Reveal as="li" key={member.name} delay={i * 90} className={i === 1 ? "lg:mt-24" : ""}>
                 <figure>
                   <div className="relative aspect-[4/5] overflow-hidden bg-ink/[0.06]">
-                    <Image
-                      src={member.image}
-                      alt={member.name}
-                      fill
-                      sizes="(min-width: 1024px) 40vw, 100vw"
-                      className={PHOTO}
-                    />
+                    <Parallax className="absolute inset-0" amount={4} scale={1.09}>
+                      <Image
+                        src={member.image}
+                        alt={member.name}
+                        fill
+                        sizes="(min-width: 1024px) 40vw, 100vw"
+                        className={PHOTO}
+                      />
+                    </Parallax>
                   </div>
                   <figcaption className={`mt-4 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 border-t pt-4 ${RULE}`}>
                     <span className={SUB}>{member.name}</span>
