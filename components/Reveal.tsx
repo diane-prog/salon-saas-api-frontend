@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type ElementType, type ReactNode } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type ElementType, type ReactNode } from "react";
 import { observeReveal } from "@/lib/reveal";
 
 type RevealProps = {
@@ -8,9 +8,17 @@ type RevealProps = {
   delay?: number;
   as?: ElementType;
   className?: string;
+  /** Styles de mise en place de l'élément (position, inclinaison…), fusionnés avec le délai. */
+  style?: CSSProperties;
 };
 
-export default function Reveal({ children, delay = 0, as: Tag = "div", className = "" }: RevealProps) {
+export default function Reveal({
+  children,
+  delay = 0,
+  as: Tag = "div",
+  className = "",
+  style,
+}: RevealProps) {
   const ref = useRef<HTMLElement>(null);
   const [shown, setShown] = useState(false);
 
@@ -24,7 +32,7 @@ export default function Reveal({ children, delay = 0, as: Tag = "div", className
     <Tag
       ref={ref}
       className={`reveal ${shown ? "reveal-visible" : ""} ${className}`}
-      style={{ "--reveal-delay": `${delay}ms` } as React.CSSProperties}
+      style={{ "--reveal-delay": `${delay}ms`, ...style } as CSSProperties}
     >
       {children}
     </Tag>

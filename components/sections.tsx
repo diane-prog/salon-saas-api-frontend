@@ -323,26 +323,6 @@ export function TestimonialsSection() {
   );
 }
 
-export function ClientsMarquee({ items }: { items: string[] }) {
-  const row = [...items, ...items, ...items];
-  return (
-    <div className="relative overflow-hidden border-y border-navy/8 bg-navy/[0.02] py-10">
-      <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-24 bg-gradient-to-r from-white to-transparent" />
-      <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-24 bg-gradient-to-l from-white to-transparent" />
-      <div className="flex shrink-0 animate-marquee-slow items-center gap-16 whitespace-nowrap pr-16">
-        {row.map((name, i) => (
-          <span
-            key={`${name}-${i}`}
-            className="text-2xl font-light uppercase tracking-tight text-navy/25 transition-colors hover:text-navy/50"
-          >
-            {name}
-          </span>
-        ))}
-      </div>
-    </div>
-  );
-}
-
 export function SplitShowcase({
   eyebrow,
   title,

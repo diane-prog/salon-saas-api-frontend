@@ -1,16 +1,10 @@
-import Link from "next/link";
-import Reveal from "@/components/Reveal";
 import CtaBand from "@/components/CtaBand";
 import HomeHero from "@/components/HomeHero";
 import ServicesGlass from "@/components/ServicesGlass";
 import WhyStatements from "@/components/WhyStatements";
 import ProjectCommunity from "@/components/ProjectCommunity";
-import {
-  ClientsMarquee,
-  StatsSection,
-  TestimonialsSection,
-} from "@/components/sections";
-import { SectionHeading } from "@/components/ui";
+import ClientsWall from "@/components/ClientsWall";
+import { StatsSection, TestimonialsSection } from "@/components/sections";
 import { notFound } from "next/navigation";
 import { isLocale, getDictionary } from "@/lib/dictionaries";
 
@@ -20,7 +14,7 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
 
   const dict = await getDictionary(lang);
   const href = (p: string) => `/${lang}${p === "/" ? "" : p}`;
-  const { stats, clients, ui } = dict;
+  const { stats, ui } = dict;
 
   return (
     <>
@@ -45,24 +39,15 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
 
       <ProjectCommunity />
 
-      <section className="py-20">
-        <div className="container-x">
-          <SectionHeading eyebrow={ui.references} title={ui.clientsTitle} align="center" />
-        </div>
-        <div className="mt-12">
-          <ClientsMarquee items={clients} />
-        </div>
-        <div className="container-x mt-10 flex justify-center">
-          <Reveal>
-            <Link
-              href={href("/realisations")}
-              className="text-sm font-medium text-muted underline-offset-4 transition-colors hover:text-brand hover:underline"
-            >
-              {ui.clientsLink}
-            </Link>
-          </Reveal>
-        </div>
-      </section>
+      {/* Section « Nos Clients » : le titre au centre, les logos des clients posés autour
+          comme des vignettes, reliés par de fins arcs. Le titre et le lien lui sont passés
+          pour qu'ils prennent place DANS le champ. */}
+      <ClientsWall
+        eyebrow={ui.references}
+        title={ui.clientsTitle}
+        linkHref={href("/realisations")}
+        linkLabel={ui.clientsLink}
+      />
 
       <TestimonialsSection />
 

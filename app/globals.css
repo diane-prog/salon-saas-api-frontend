@@ -21,7 +21,6 @@
   --shadow-lift: 0 2px 4px rgb(15 23 42 / 0.05), 0 18px 44px rgb(15 23 42 / 0.12);
 
   --animate-marquee: marquee 38s linear infinite;
-  --animate-marquee-slow: marquee 60s linear infinite;
   --animate-float: float 7s ease-in-out infinite;
   --animate-drift: drift 18s ease-in-out infinite alternate;
 }
@@ -384,6 +383,49 @@ html[data-js] .split-anim .split-word {
 
 html[data-js] .page-enter {
   animation: page-enter 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Mur de clients (accueil) : des tuiles flottantes autour du titre.
+
+   Sous `lg`, la liste reste un flux de cartes centrées, sous le titre ; à partir de `lg`
+   elle devient un champ : la liste est le repère de position et chaque tuile est placée en
+   pourcentage, avec sa propre inclinaison. Les positions vivent dans le composant (elles
+   sont données par tuile) ; ici, seulement la mécanique. */
+.client-field {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+@media (min-width: 1024px) {
+  .client-field {
+    position: relative;
+    display: block;
+    height: 100%;
+  }
+
+  .client-field .client-tile {
+    position: absolute;
+  }
+}
+
+/* Les arcs de liaison : traits fins qui « se dessinent » quand la section entre dans le
+   champ. Le composant pose `client-arc-in` sur le groupe, via le même déclencheur partagé
+   que les révélations de texte (lib/reveal) — donc le tracé se joue au bon moment, pas au
+   chargement de la page. Sans JavaScript, la ligne est simplement pleine. */
+.client-arc {
+  stroke-dasharray: var(--arc-length, 700);
+  stroke-dashoffset: 0;
+}
+
+html[data-js] .client-arc {
+  stroke-dashoffset: var(--arc-length, 700);
+  transition: stroke-dashoffset 1.5s cubic-bezier(0.22, 1, 0.36, 1) 0.2s;
+}
+
+html[data-js] .client-arc-in .client-arc {
+  stroke-dashoffset: 0;
 }
 
 .counter-live {
