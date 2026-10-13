@@ -20,8 +20,6 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
     <>
       <HomeHero />
 
-      <StatsSection stats={stats} />
-
       {/* Section « Pourquoi nous choisir » : grille éditoriale de huit tuiles — une
           en-tête (sur-titre + titre), cinq raisons numérotées 01 → 05 et deux photos
           insérées dans le flux. */}
@@ -50,6 +48,24 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
       />
 
       <TestimonialsSection />
+
+      {/* Les résultats ferment la page : juste avant le bandeau de conclusion, ils
+          transforment la promesse en preuve au moment où l'on demande le devis — et la
+          section ne coupe plus le récit entre l'accroche du hero et le « pourquoi nous ».
+          Le plan (affiche + vidéo) est dans la section ; la copie est passée ici, comme
+          pour les services. */}
+      <StatsSection
+        eyebrow={lang === "fr" ? "Résultats" : "Results"}
+        title={
+          lang === "fr" ? "Des résultats concrets, pas des promesses." : "Proven results, not promises."
+        }
+        body={
+          lang === "fr"
+            ? "Une décennie de campagnes, de sites et d'identités de marque pour des entreprises africaines et leurs partenaires. Voici ce que cela donne, chiffres en main."
+            : "A decade of campaigns, websites and brand identities for African companies and their partners. Here is what that looks like, in numbers."
+        }
+        stats={stats}
+      />
 
       <CtaBand />
     </>

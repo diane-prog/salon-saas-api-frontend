@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowUpRight } from "@/components/Icons";
@@ -10,6 +10,7 @@ import Parallax from "@/components/Parallax";
 import Counter from "@/components/Counter";
 import { ButtonLink, Eyebrow } from "@/components/ui";
 import { prefersReducedMotion } from "@/lib/motion";
+import { LABEL } from "@/lib/editorial";
 import { useDictionary } from "@/components/DictionaryProvider";
 
 export function HeroSection({
@@ -132,30 +133,183 @@ export function KeywordMarquee({ items }: { items: string[] }) {
   );
 }
 
-export function StatsSection({ stats }: { stats: { value: number; suffix: string; label: string }[] }) {
+/**
+ * La fleur de marque, en un seul exemplaire : elle sert de badge dans la section
+ * témoignages et de SÉPARATEUR dans le ruban des chiffres. Un motif de la maison plutôt
+ * qu'un point générique, et une seule source si sa forme change.
+ */
+function Flower({ className = "", style }: { className?: string; style?: CSSProperties }) {
   return (
-    <section className="relative overflow-hidden border-b border-navy/8 bg-white">
-      <div className="container-x">
-        {/* En deux colonnes, la cinquième valeur (un nombre impair) restait seule dans la
-            colonne de gauche, un trou à côté d'elle. Elle prend donc toute la largeur en
-            bas de bloc sur téléphone, et rentre dans la grille dès `sm`. */}
-        <ul className="grid grid-cols-2 divide-navy/8 sm:grid-cols-3 lg:grid-cols-5 lg:divide-x [&>li:last-child]:col-span-2 sm:[&>li:last-child]:col-span-1">
-          {stats.map((s, i) => (
-            <Reveal
-              as="li"
-              key={s.label}
-              delay={i * 80}
-              className="flex flex-col items-center gap-2 px-4 py-10 text-center"
-            >
-              <span className="text-3xl font-light tracking-tight text-navy sm:text-4xl">
-                <Counter value={s.value} suffix={s.suffix} />
-              </span>
-              <span className="text-xs font-medium uppercase tracking-[0.1em] text-muted">{s.label}</span>
-            </Reveal>
+    <svg viewBox="0 0 200 200" className={className} style={style} aria-hidden>
+      <path d="M100 22c15 0 24 10 30 18 10-3 22-1 28 10 6 10 2 22-5 29 7 7 11 19 5 29-6 11-18 13-28 10-6 8-15 18-30 18s-24-10-30-18c-10 3-22 1-28-10-6-10-2-22 5-29-7-7-11-19-5-29 6-11 18-13 28-10 6-8 15-18 30-18Z" />
+    </svg>
+  );
+}
+
+type Stat = { value: number; suffix: string; label: string };
+
+/**
+ * Leegi en chiffres — des RÉSULTATS sur le plan de la maison.
+ *
+ * La section n'est plus dans le haut de page : elle ferme la page, juste avant le bandeau
+ * de conclusion (`CtaBand`, dans `app/[lang]/page.tsx`). À cette place — après les
+ * témoignages, au moment où l'on demande le devis — la preuve juste avant la demande, et
+ * elle ne coupe plus le récit entre l'accroche du hero et la promesse du « pourquoi nous ».
+ *
+ * Le parti est celui de la référence : une copie à gauche (sur-titre, titre, chapô) et un
+ * damier de tuiles à droite, par-dessus une VIDÉO plein cadre. Les tuiles reprennent la
+ * tuile de verre des services (`ServiceCard` : même bord `white/15`, même verre `white/[0.06]`,
+ * même `backdrop-blur`) augmentée des quatre CROIX D'ANGLE de la référence : la carte se lit
+ * comme une planche technique, pas comme un panneau.
+ *
+ * Cinq valeurs dans un damier de quatre : la cinquième prend les deux colonnes en bas
+ * (`col-span-2`) plutôt que de laisser une case vide — un chiffre orphelin se lirait comme
+ * un oubli.
+ *
+ * Le média ne tourne QUE dans le champ (`IntersectionObserver`, comme les services) et pas
+ * du tout sous `prefers-reduced-motion`, où l'affiche `hero7.png` reste seule : c'est le
+ * plan de `video1.mp4`, 1920 × 1080 et chaud (mesuré : 106 / 93 / 85, luminance 95), donc
+ * un texte clair tient dessus avec le voile. Affiche et vidéo vont par paire — changer l'une
+ * sans l'autre se verrait au chargement.
+ */
+export function StatsSection({
+  eyebrow,
+  title,
+  body,
+  stats,
+}: {
+  eyebrow: string;
+  title: string;
+  body: string;
+  stats: Stat[];
+}) {
+  const [allowVideo, setAllowVideo] = useState(false);
+  const root = useRef<HTMLElement>(null);
+  const video = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const query = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const update = () => setAllowVideo(!query.matches);
+    update();
+    query.addEventListener("change", update);
+    return () => query.removeEventListener("change", update);
+  }, []);
+
+  useEffect(() => {
+    const el = root.current;
+    const media = video.current;
+    if (!allowVideo || !el || !media) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) void media.play().catch(() => {});
+        else media.pause();
+      },
+      { rootMargin: "200px" },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [allowVideo]);
+
+  /* Quatre tuiles, puis les suivantes en pleine largeur (une par rangée). */
+  const tiles = stats.slice(0, 4);
+  const full = stats.slice(4);
+
+  return (
+    <section ref={root} className="relative isolate overflow-hidden bg-ink text-white">
+      {/* Le plan : affiche puis vidéo, sous deux voiles — un général, un qui assombrit la
+          colonne de texte (les mots restent lisibles sur n'importe quelle image du plan). */}
+      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
+        <Image
+          src="/img/hero7.png"
+          alt=""
+          fill
+          sizes="100vw"
+          className="object-cover object-center"
+        />
+
+        {allowVideo && (
+          <video
+            ref={video}
+            className="absolute inset-0 h-full w-full object-cover object-center"
+            src="/img/video1.mp4"
+            muted
+            loop
+            playsInline
+            preload="none"
+            aria-hidden
+            tabIndex={-1}
+          />
+        )}
+
+        <div className="absolute inset-0 bg-ink/55" />
+        <div className="absolute inset-y-0 left-0 w-full bg-gradient-to-r from-ink/85 via-ink/45 to-transparent lg:w-[64%]" />
+      </div>
+
+      <div className="container-x relative grid gap-12 py-20 sm:py-24 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:items-center lg:gap-16 lg:py-28">
+        <div>
+          <Eyebrow tone="dark">{eyebrow}</Eyebrow>
+          <h2 className="mt-6 max-w-[16ch] font-light text-4xl leading-[1.06] tracking-tight [text-shadow:0_2px_18px_rgb(0_0_0_/_0.4)] sm:text-5xl lg:text-[3.25rem]">
+            {title}
+          </h2>
+          <p className="mt-6 max-w-md text-base leading-relaxed text-white/70">{body}</p>
+        </div>
+
+        <ul className="grid grid-cols-2 gap-3 sm:gap-4">
+          {tiles.map((stat, i) => (
+            <StatCard key={stat.label} stat={stat} delay={i * 80} />
+          ))}
+          {full.map((stat, i) => (
+            <StatCard key={stat.label} stat={stat} delay={320 + i * 80} wide />
           ))}
         </ul>
       </div>
     </section>
+  );
+}
+
+/** Croix d'angle de la référence (quatre par tuile). */
+function PlusMark({ className = "" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 12 12" className={className} aria-hidden>
+      <path d="M6 0.5v11M0.5 6h11" stroke="currentColor" strokeWidth="1" />
+    </svg>
+  );
+}
+
+/**
+ * Tuile de chiffre : le chiffre en grand thin, un filet, le libellé en petites capitales.
+ *
+ * La variante `wide` (pleine largeur) couche la tuile sur le côté : le chiffre à gauche, le
+ * libellé à droite, séparés par un filet VERTICAL — la tuile respire sur toute la largeur
+ * au lieu d'aligner deux blocs vides.
+ */
+function StatCard({ stat, delay = 0, wide = false }: { stat: Stat; delay?: number; wide?: boolean }) {
+  return (
+    <Reveal as="li" delay={delay} className={wide ? "col-span-2" : ""}>
+      <div
+        className={`group relative flex h-full min-h-[9.5rem] gap-6 rounded-2xl border border-white/15 bg-white/[0.06] p-5 backdrop-blur-sm transition-colors duration-300 hover:border-white/35 hover:bg-white/[0.11] sm:min-h-[11.5rem] sm:p-6 ${
+          wide ? "flex-col sm:min-h-0 sm:flex-row sm:items-center sm:justify-between" : "flex-col justify-between"
+        }`}
+      >
+        <PlusMark className="absolute left-2 top-2 h-3 w-3 text-white/35" />
+        <PlusMark className="absolute right-2 top-2 h-3 w-3 text-white/35" />
+        <PlusMark className="absolute bottom-2 left-2 h-3 w-3 text-white/35" />
+        <PlusMark className="absolute bottom-2 right-2 h-3 w-3 text-white/35" />
+
+        <span className="text-4xl font-light tracking-tight tabular-nums [text-shadow:0_2px_18px_rgb(0_0_0_/_0.35)] sm:text-5xl lg:text-6xl">
+          <Counter value={stat.value} suffix={stat.suffix} />
+        </span>
+
+        <span
+          className={`${LABEL} border-white/15 pt-4 text-white/65 ${
+            wide ? "border-t sm:border-l sm:border-t-0 sm:pl-6 sm:pt-0 sm:text-right" : "border-t"
+          }`}
+        >
+          {stat.label}
+        </span>
+      </div>
+    </Reveal>
   );
 }
 
@@ -380,14 +534,7 @@ export function TestimonialsSection() {
           2) la section clippe : à fin de course le brand couvre le bas, le noir avalé. */}
       <div data-stories-anchor className="relative z-0 mt-14 flex justify-center pb-24">
         <div data-stories-blob className="flex items-center justify-center">
-          <svg
-            viewBox="0 0 200 200"
-            className="h-36 w-36 fill-brand"
-            style={{ willChange: "transform" }}
-            aria-hidden
-          >
-            <path d="M100 22c15 0 24 10 30 18 10-3 22-1 28 10 6 10 2 22-5 29 7 7 11 19 5 29-6 11-18 13-28 10-6 8-15 18-30 18s-24-10-30-18c-10 3-22 1-28-10-6-10-2-22 5-29-7-7-11-19-5-29 6-11 18-13 28-10 6-8 15-18 30-18Z" />
-          </svg>
+          <Flower className="h-36 w-36 fill-brand" style={{ willChange: "transform" }} />
         </div>
         <span
           data-stories-label

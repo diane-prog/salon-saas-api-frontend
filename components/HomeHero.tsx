@@ -72,10 +72,21 @@ export default function HomeHero() {
         <div className="absolute inset-0 bg-black/30" />
       </div>
 
-      {/* Overlay blanc en bas du hero : la photo se fond dans la section blanche suivante. */}
+      {/* Voile blanc — ANGLES BAS-DROIT seulement, et LÉGER.
+
+          L'ancien voile (`bg-gradient-to-t from-white`) courait sur toute la largeur : posé
+          au bas d'un plan déjà clair, il blanchissait toute la moitié basse du hero. Celui-ci
+          ne quitte pas le coin : un dégradé RADIAL centré sur le coin bas-droit, qui s'éteint
+          bien avant le bord.
+
+          Ce qui le garde léger, ce sont les rayons (110 % × 130 % de la boîte) : le long du
+          bord gauche comme du bord haut, la lueur est déjà retombée à zéro. Elle ne touche
+          donc jamais le texte — titre, sur-titre, paragraphe et boutons sont blancs eux
+          aussi, et sur téléphone ils descendent bas et vont jusqu'au bord droit. Un seul
+          réglage à toucher : la taille de la boîte (`h-*` / `w-[…]`). */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-white to-transparent sm:h-20"
+        className="pointer-events-none absolute bottom-0 right-0 h-36 w-[50%] bg-[radial-gradient(110%_130%_at_100%_100%,#fff_0%,rgb(255_255_255_/_0.55)_42%,transparent_78%)] sm:h-64 sm:w-[64%]"
       />
 
       <div className="relative mx-auto flex w-full max-w-[90rem] flex-1 flex-col px-5 md:px-8 xl:px-10">
