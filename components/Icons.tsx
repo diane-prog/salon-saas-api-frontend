@@ -181,6 +181,17 @@ export function Megaphone({ className = "" }: IconProps) {
   );
 }
 
+export function Share({ className = "" }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" className={`${base} ${className}`} aria-hidden>
+      <circle cx="18" cy="5" r="2.6" />
+      <circle cx="6" cy="12" r="2.6" />
+      <circle cx="18" cy="19" r="2.6" />
+      <path d="m8.4 10.7 7.3-4.4M8.4 13.3l7.3 4.4" />
+    </svg>
+  );
+}
+
 export const serviceIcons = {
   branding: Spark,
   "site-web": Monitor,

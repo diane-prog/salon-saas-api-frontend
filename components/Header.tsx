@@ -66,6 +66,13 @@ export default function Header() {
   const href = (path: string) => `/${locale}${path === "/" ? "" : path}`;
 
   const changeLocale = (next: Locale) => {
+    /* Les panneaux du header se referment AVANT de partir. Changer de langue depuis le menu
+       mobile laissait sinon le panneau par-dessus la page d'arrivée : l'écran restait couvert
+       et il fallait actualiser. Ici, pas d'état à rattraper après coup — on referme à la
+       source, dans le geste qui quitte la page. */
+    setOpen(false);
+    setServicesOpen(false);
+    setServicesPanel(false);
     document.cookie = `leegi-locale=${next};path=/;max-age=31536000;samesite=lax`;
     navigate(switchLocalePath(next, pathname), next === "fr" ? "Français" : "English");
   };
@@ -176,7 +183,8 @@ export default function Header() {
       </header>
 
       {/* Mega menu Services : PLEIN ÉCRAN, comme la recherche — même `FullScreenPanel`
-          (logo, croix cerclée, Échap, Tab contenu, page figée, entrée en cascade), mais sur
+          (logo, croix cerclée, Échap, Tab contenu, page figée, panneau qui descend du haut
+          puis cascade du contenu — le geste du rideau de transition), mais sur
           une surface VERRE (`tone="glass"`) : encre translucide et flou d'arrière-plan, la
           page restant lisible en filigrane derrière le menu.
 

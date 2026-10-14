@@ -502,6 +502,28 @@ html[data-js] .split-anim .split-word {
   }
 }
 
+/* Entrée des panneaux plein écran (méga menu Services, recherche, formulaire) : le panneau
+   lui-même entre par le HAUT, du même geste que le rideau de transition — mêmes keyframes,
+   même courbe, même durée. Le geste du site n'est décrit qu'une fois.
+
+   `backwards` et non `both` : le panneau porte l'état de départ avant le premier pixel (il
+   est hors écran, puis descend), et une fois posé PLUS AUCUNE transformation ne reste
+   appliquée — un `transform` résiduel reste une matrice, donc un containing block pour les
+   descendants (cf. `page-enter`).
+
+   Le mouvement est en CSS et une seule translation verticale : pas de JS par frame, pas de
+   démarcation du viewport, et c'est le compositeur qui la joue. */
+.panel-cover {
+  animation: curtain-cover 0.52s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+/* Mouvement réduit : pas d'entrée animée, le panneau est simplement là. */
+@media (prefers-reduced-motion: reduce) {
+  .panel-cover {
+    animation: none;
+  }
+}
+
 /* Entrée de page : jouée pendant que le rideau couvre encore l'écran.
    Volontairement en opacité seule : avec `fill-mode: both`, une déformation
    (même `transform: none`) reste appliquée sous forme de matrice identité, ce qui crée un

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useRef, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
 import gsap from "gsap";
@@ -22,8 +22,12 @@ import { prefersReducedMotion } from "@/lib/motion";
  * - ce retour de focus se fait à la frame SUIVANTE, jamais dans la foulée de la fermeture :
  *   traité tout de suite, la fin de la séquence de la touche qui a fermé (Entrée) activait
  *   le déclencheur redevenu focalisé, et le panneau se rouvrait aussitôt ;
- * - l'entrée est en GSAP — fondu du panneau, puis cascade des `[data-panel-in]` — et
- *   s'efface entièrement sous `prefers-reduced-motion`.
+ * - l'entrée est en deux temps : le PANNEAU lui-même glisse du haut vers le bas, du même
+ *   geste que le rideau de transition (animation CSS `panel-cover`, cf. globals.css), puis
+ *   les `[data-panel-in]` montent en cascade ; le tout s'efface sous
+ *   `prefers-reduced-motion` ; son état de départ est posé
+ *   AVANT la première peinture (voir l'effet d'entrée), pour que le panneau ne clignote
+ *   jamais une frame à pleine opacité avant de repartir de zéro.
  *
  * Le panneau n'existe dans le document que lorsqu'il est ouvert : il est monté par
  * l'appelant, qui garde l'état et le déclencheur.
@@ -69,22 +73,35 @@ export default function FullScreenPanel({
      Pas d'état ni d'effet ici, donc pas de re-rendu en cascade à l'ouverture. */
   const host = typeof document === "undefined" ? null : document.body;
 
-  /* Entrée : fondu du panneau puis cascade des contenus marqués. La dépendance `host`
-     fait repartir l'effet quand le portail rend enfin le panneau : au premier passage,
-     `panelRef.current` est encore vide. */
-  useEffect(() => {
+  /* Entrée : le panneau glisse depuis le haut (CSS, `panel-cover` — le geste du rideau de
+     transition), puis les contenus montent en cascade. La dépendance `host` fait repartir
+     l'effet quand le portail rend enfin le panneau : au premier passage, `panelRef.current`
+     est encore vide.
+
+     Ici, seulement la CASCADE. Le glissement du panneau est en CSS : une translation
+     verticale jouée par le compositeur, sans JS par frame, et sans démarcation du viewport.
+
+     L'état de départ de la cascade est posé en LAYOUT (avant peinture) et non après : le
+     panneau descend avec sa surface SEULE, puis son contenu apparaît — jamais l'inverse.
+
+     Le départ de la cascade (0,28 s) tombe pendant la descente du panneau (0,52 s) : le
+     contenu arrive quand la surface se pose, comme le libellé du rideau. */
+  useLayoutEffect(() => {
     const panel = panelRef.current;
     if (!panel || prefersReducedMotion()) return;
 
+    const items = panel.querySelectorAll("[data-panel-in]");
+    gsap.set(items, { y: 30, opacity: 0 });
+
     const timeline = gsap.timeline();
-    timeline
-      .fromTo(panel, { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power2.out" })
-      .fromTo(
-        panel.querySelectorAll("[data-panel-in]"),
-        { y: 26, opacity: 0 },
-        { y: 0, opacity: 1, duration: 0.7, ease: "power3.out", stagger: 0.055 },
-        0.05,
-      );
+    timeline.to(items, {
+      y: 0,
+      opacity: 1,
+      duration: 0.7,
+      ease: "power3.out",
+      stagger: 0.055,
+      delay: 0.28,
+    });
 
     return () => {
       timeline.kill();
@@ -148,8 +165,8 @@ export default function FullScreenPanel({
       role="dialog"
       aria-modal="true"
       aria-label={label}
-      className={`grain fixed inset-0 z-70 flex flex-col text-paper ${
-        tone === "glass" ? "bg-ink/70 backdrop-blur-2xl" : "bg-ink"
+      className={`panel-cover grain fixed inset-0 z-70 flex flex-col text-paper ${
+        tone === "glass" ? "bg-ink/70 backdrop-blur-md" : "bg-ink"
       }`}
     >
       {/* Barre haute : le logo clair, comme le menu mobile, et la fermeture cerclée. */}

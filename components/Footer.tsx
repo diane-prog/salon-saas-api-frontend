@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowUpRight } from "@/components/Icons";
+import { socialIcon, socialLinks } from "@/components/SocialIcons";
 import { useDictionary } from "@/components/DictionaryProvider";
 import { LABEL } from "@/lib/editorial";
 
@@ -19,19 +20,25 @@ export default function Footer() {
                 papier, et le pied de page referme la page sur l'encre. */}
             <Image src="/img/logo.png" alt="LEEGI Group" width={180} height={84} className="h-16 -ml-10 w-auto" />
             <p className="mt-5 max-w-sm text-sm leading-relaxed text-paper/60">{dict.site.tagline}</p>
+            {/* Les VRAIS logos des réseaux (WhatsApp compris, déduit du téléphone) : deux
+                lettres dans une pastille ne disent pas de quel réseau il s'agit, une marque si. */}
             <div className="mt-6 flex flex-wrap gap-2">
-              {dict.site.socials.map((s) => (
-                <a
-                  key={s.label}
-                  href={s.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={s.label}
-                  className="grid h-10 w-10 place-items-center rounded-full text-xs font-light text-paper/70 ring-1 ring-paper/15 transition-colors duration-300 hover:text-turquoise hover:ring-turquoise/40"
-                >
-                  {s.label.slice(0, 2)}
-                </a>
-              ))}
+              {socialLinks(dict.site).map((s) => {
+                const Icon = socialIcon(s.label);
+                return (
+                  <a
+                    key={s.label}
+                    href={s.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={s.label}
+                    title={s.label}
+                    className="grid h-10 w-10 place-items-center rounded-full text-paper/70 ring-1 ring-paper/15 transition-colors duration-300 hover:text-turquoise hover:ring-turquoise/40"
+                  >
+                    {Icon ? <Icon className="h-[1.1rem] w-[1.1rem]" /> : s.label.slice(0, 2)}
+                  </a>
+                );
+              })}
             </div>
           </div>
 

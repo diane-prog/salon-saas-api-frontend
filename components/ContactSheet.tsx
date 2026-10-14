@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { ArrowRight } from "@/components/Icons";
 import { Field, FormShell, TextArea } from "@/components/Form";
 import FullScreenPanel from "@/components/FullScreenPanel";
@@ -79,7 +79,18 @@ function ContactFields({
  * « message envoyé » repart de zéro à chaque fois, et la page reste légère pour qui ne
  * clique jamais.
  */
-export default function ContactSheet({ labels }: { labels: ContactSheetLabels }) {
+export default function ContactSheet({
+  labels,
+  triggerClassName,
+  triggerContent,
+}: {
+  labels: ContactSheetLabels;
+  /* Apparence du déclencheur : par défaut la pastille dégradée du site. La barre d'actions
+     flottante passe sa propre classe et son propre contenu (icône + mot) pour rester dans sa
+     grammaire — mais c'est le MÊME panneau, avec la même mécanique et le même focus. */
+  triggerClassName?: string;
+  triggerContent?: ReactNode;
+}) {
   const { dict, locale } = useDictionary();
   const [open, setOpen] = useState(false);
   const [desktop, setDesktop] = useState(false);
@@ -100,10 +111,17 @@ export default function ContactSheet({ labels }: { labels: ContactSheetLabels })
       onClick={() => setOpen(true)}
       aria-haspopup="dialog"
       aria-expanded={open}
-      className="group inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-brand to-turquoise px-7 py-4 text-sm font-light text-white shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lift focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-turquoise"
+      className={
+        triggerClassName ??
+        "group inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-brand to-turquoise px-7 py-4 text-sm font-light text-white shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lift focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-turquoise"
+      }
     >
-      {labels.trigger}
-      <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+      {triggerContent ?? (
+        <>
+          {labels.trigger}
+          <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+        </>
+      )}
     </button>
   );
 

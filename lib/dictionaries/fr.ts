@@ -573,6 +573,35 @@ export const ui = {
   searchSuggestions: "Suggestions",
   /* Rappel de clavier en pied de panneau plein écran (recherche, formulaire de contact). */
   panelHint: "Échap pour fermer",
+  /* Barre d'actions flottante (bas d'écran, après le premier scroll) et l'éventail de
+     réseaux qu'elle ouvre. Les intitulés servent aussi d'`aria-label` : un seul mot, pour ce
+     qu'on voit et pour ce qu'un lecteur d'écran annonce. */
+  dock: {
+    title: "Actions rapides",
+    quote: "Demander un devis",
+    contact: "Contacter",
+    chat: "Assistant",
+    socials: "Nos réseaux",
+    openSocials: "Afficher les réseaux sociaux",
+    closeSocials: "Masquer les réseaux sociaux",
+    whatsapp: "WhatsApp",
+  },
+  /* Assistant conversationnel : libellés de la fenêtre de discussion. */
+  chat: {
+    title: "Assistant LEEGI",
+    subtitle: "Une réponse immédiate sur nos services",
+    placeholder: "Posez votre question…",
+    send: "Envoyer",
+    greeting:
+      "Bonjour 👋 Je suis l'assistant LEEGI. Demandez-moi ce que vous voulez sur nos services, nos délais ou nos tarifs.",
+    suggestions: [
+      "Quels services proposez-vous ?",
+      "Combien coûte un site web ?",
+      "Comment obtenir un devis ?",
+    ],
+    error: "L'assistant est momentanément indisponible. Écrivez-nous à",
+    close: "Fermer l'assistant",
+  },
   /* Affichages de la galerie de réalisations (accueil). */
   galleryViews: { grid: "Grille", list: "Liste", feed: "Fil" },
   galleryDisplay: "Affichage",

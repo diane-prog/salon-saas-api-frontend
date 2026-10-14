@@ -156,7 +156,16 @@ export default function PageTransition({ children }: { children: ReactNode }) {
 
   const navigate = useCallback(
     (href: string, nextLabel?: string) => {
-      if (typeof window === "undefined" || phaseRef.current !== "idle") return;
+      if (typeof window === "undefined") return;
+      /* Un rideau est déjà en vol ? Le clic n'est PAS avalé pour autant : on part en
+         navigation pleine page, qui repart d'un état propre. C'est ce qui évite le bouton
+         mort du changement de LANGUE quand une transition précédente couvre encore l'écran
+         (symptôme : « le rideau se bloque, je suis obligé d'actualiser »). La langue, elle,
+         est déjà posée en cookie par l'appelant : l'arrivée se fait dans la bonne locale. */
+      if (phaseRef.current !== "idle") {
+        window.location.assign(href);
+        return;
+      }
       if (prefersReducedMotion()) {
         router.push(href);
         return;
@@ -293,6 +302,29 @@ export default function PageTransition({ children }: { children: ReactNode }) {
       setLabel("");
     }, CURTAIN.revealMs);
     timers.current.push(id);
+    return () => window.clearTimeout(id);
+  }, [phase]);
+
+  /**
+   * Chien de garde : le rideau ne doit JAMAIS rester en place.
+   *
+   * La séquence normale retombe toujours sur « idle » (navigation aboutie, puis filet de
+   * sécurité de `start`). Mais un changement de LANGUE est un cas à part : la route d'arrivée
+   * peut ne pas correspondre exactement à `pending` — redirection de la locale par défaut,
+   * URL normalisée — et le rideau restait alors baissé, obligeant à actualiser la page.
+   *
+   * Ce minuteur est la dernière sortie de secours : armé dès qu'une phase est en vol, il
+   * force le retour sur « idle » bien après la durée maximale de la séquence. Il est levé
+   * par le nettoyage à chaque changement de phase, donc la séquence normale ne le voit pas.
+   */
+  useEffect(() => {
+    if (phase === "idle") return;
+    const id = window.setTimeout(() => {
+      if (phaseRef.current === "idle") return;
+      setPhase("idle");
+      pending.current = null;
+      setLabel("");
+    }, CURTAIN.maxWaitMs + CURTAIN.revealMs + 500);
     return () => window.clearTimeout(id);
   }, [phase]);
 

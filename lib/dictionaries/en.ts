@@ -574,6 +574,35 @@ export const ui = {
   searchSuggestions: "Suggestions",
   /* Keyboard hint in the footer of a full-screen panel (search, contact form). */
   panelHint: "Esc to close",
+  /* Floating action bar (bottom of the screen, after the first scroll) and the social fan it
+     opens. The labels double as `aria-label`s: one word, both what you see and what a screen
+     reader announces. */
+  dock: {
+    title: "Quick actions",
+    quote: "Get a quote",
+    contact: "Contact us",
+    chat: "Assistant",
+    socials: "Our socials",
+    openSocials: "Show social networks",
+    closeSocials: "Hide social networks",
+    whatsapp: "WhatsApp",
+  },
+  /* Conversational assistant: the chat window labels. */
+  chat: {
+    title: "LEEGI assistant",
+    subtitle: "An instant answer about our services",
+    placeholder: "Ask your question…",
+    send: "Send",
+    greeting:
+      "Hi 👋 I'm the LEEGI assistant. Ask me anything about our services, timelines or pricing.",
+    suggestions: [
+      "Which services do you offer?",
+      "How much does a website cost?",
+      "How do I get a quote?",
+    ],
+    error: "The assistant is temporarily unavailable. Write to us at",
+    close: "Close the assistant",
+  },
   /* Gallery displays on the home page (projects). */
   galleryViews: { grid: "Grid", list: "List", feed: "Feed" },
   galleryDisplay: "Layout",

@@ -1,3 +1,4 @@
+import ActionDock from "@/components/ActionDock";
 import { DictionaryProvider } from "@/components/DictionaryProvider";
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
@@ -145,6 +146,9 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[la
               <PageFade>{children}</PageFade>
             </main>
             <Footer />
+            {/* Barre d'actions flottante : dans `PageTransition`, donc sous le rideau comme
+                le reste de la page — elle n'a rien à faire au-dessus d'une transition. */}
+            <ActionDock />
           </PageTransition>
         </DictionaryProvider>
       </body>
