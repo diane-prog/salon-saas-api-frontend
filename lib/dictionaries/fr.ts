@@ -587,6 +587,27 @@ export const ui = {
   notFoundBody: "On dirait que rien n'a été trouvé à cet endroit. Retournez à l'accueil pour poursuivre votre navigation.",
   backHome: "Retour à l'accueil",
   languageLabel: "Langue",
+  /* Repères de navigation : jamais visibles, ils nomment les régions et les boutons pour les
+     lecteurs d'écran. Ils vivent ici, avec les autres libellés, parce qu'ils chan{
+     gent avec la langue doublée — écrits en dur, ils restaient français sur le site anglais. */
+  navLabel: "Navigation principale",
+  menuOpenLabel: "Ouvrir le menu",
+  menuCloseLabel: "Fermer le menu",
+  menuNavLabel: "Navigation mobile",
+  searchCloseLabel: "Fermer la recherche",
+  formCloseLabel: "Fermer le formulaire",
+  otherServices: "Autres services",
+  /* Libellé de la fleur bleue de la section témoignages : deux lignes, donc deux entrées —
+     la coupure est une décision de mise en page, pas un effet du hasard. */
+  clientStories: ["Histoires", "Clients"],
+  /* Section Services de l'accueil : les deux phrases étaient écrites en clair dans la page,
+     doublées par un ternaire sur la langue. */
+  servicesTitle: "Nos Services",
+  servicesBody:
+    "Nous accompagnons les entreprises africaines et leurs partenaires à chaque étape de leur développement digital.",
+  statsTitle: "Des résultats concrets, pas des promesses.",
+  statsBody:
+    "Une décennie de campagnes, de sites et d'identités de marque pour des entreprises africaines et leurs partenaires. Voici ce que cela donne, chiffres en main.",
   searchLabel: "Rechercher sur le site",
   searchPlaceholder: "Rechercher un service, une réalisation…",
   searchNoResults: "Aucun résultat",
@@ -600,9 +621,11 @@ export const ui = {
      `components/VideoIntro.tsx`). Le libellé nomme la région pour les lecteurs d'écran — la
      vidéo est décorative (pas de son, pas de sous-titres), donc rien d'autre à annoncer. */
   intro: {
-    /* Un seul intitulé : celui de l'écran d'ouverture, lu par les lecteurs d'écran. Il n'y a
-       plus de libellé de bouton « passer » — cette sortie passe désormais par le geste. */
+    /* L'écran d'ouverture, en deux morceaux : son intitulé (lu par les lecteurs d'écran) et
+       le mot affiché avant la vidéo. Il n'y a plus de libellé de bouton « passer » : cette
+       sortie passe désormais par le geste. */
     label: "Animation de bienvenue",
+    welcome: "Bienvenue chez",
   },
   /* Barre d'actions flottante (bas d'écran, après le premier scroll) et l'éventail de
      réseaux qu'elle ouvre. Les intitulés servent aussi d'`aria-label` : un seul mot, pour ce

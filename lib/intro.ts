@@ -49,9 +49,10 @@ export const INTRO_VIDEO_SECONDS = 6;
 
 /**
  * Filet de sécurité du script d'en-tête : au pire, l'écran est découvert au bout de ce délai.
- * Il doit rester AU-DESSUS de la séquence réelle, sinon il la couperait : 5,4 s de vidéo,
- * plus le fondu de sortie (`INTRO_FADE_MS`), plus une marge. 9 s laisse plus de 2 s de rab. */
-export const INTRO_SCRIPT_MAX_MS = 9000;
+ * Il doit rester AU-DESSUS de la séquence réelle, sinon il la couperait : `INTRO_VIDEO_START_MS`
+ * (le mot de bienvenue), plus 5,4 s de vidéo, plus le fondu de sortie (`INTRO_FADE_MS`), plus
+ * une marge. 11 s laisse plus de 4 s de rab. */
+export const INTRO_SCRIPT_MAX_MS = 11000;
 
 /**
  * Événement émis par le script d'en-tête quand quelqu'un touche à l'écran. Il existe pour un
@@ -64,10 +65,34 @@ export const INTRO_SCRIPT_MAX_MS = 9000;
 export const INTRO_SKIP_EVENT = "leegi-intro-skip";
 
 /**
+ * Instant où la VIDÉO démarre, en ms depuis le début du document.
+ *
+ * Elle ne démarre pas toute seule : elle attend la fin du mot de bienvenue (`globals.css`,
+ * `.intro-welcome` — 2 s d'apparition, tenue et fondu). 1700 ms tombe PENDANT ce fondu de
+ * sortie, pour que le mot se dissolve dans l'apparition du logo au lieu de laisser un temps
+ * mort sur un écran noir. Si l'une des deux durées change, faire bouger l'autre : elles se
+ * répondent, et rien ne les relie automatiquement.
+ */
+export const INTRO_VIDEO_START_MS = 1700;
+
+/**
  * Le script d'en-tête, en ligne. Écrit en une seule expression, sans dépendance ni attente :
  * il s'exécute pendant l'analyse du `<head>`, donc avant que quoi que ce soit de la page ne
  * soit peint. Tout est enveloppé dans un `try` : en navigation privée, `sessionStorage` peut
  * lever, et dans ce cas on préfère ne pas d'ouverture du tout plutôt qu'une page cassée.
+ *
+ * Il fait TROIS choses de plus que d'ouvrir l'écran :
+ *   - `warm` : dès le DOM construit et seulement si l'ouverture a lieu, il précharge la vidéo
+ *     (`load()`), pour qu'elle soit prête quand le mot de bienvenue se termine — 92 Ko, mais
+ *     personne n'a à les attendre après coup. Elle n'est jamais préchargée sur les visites
+ *     où l'ouverture n'a pas lieu : le balisage reste en `preload="none"`.
+ *   - `boot` : à `INTRO_VIDEO_START_MS`, il démarre la lecture. C'est LA raison d'être de ce
+ *     script pour la vidéo : avant l'hydratation, React n'existe pas encore, et le mot de
+ *     bienvenue serait suivi d'un écran noir en développement (l'hydratation y arrive
+ *     plusieurs secondes après la peinture).
+ *   - les deux patientent si la vidéo n'est pas encore dans le DOM (60 essais, 80 ms).
+ *     Le minuteur de fermeture ci-dessous reste le filet : quoi qu'il arrive, l'écran ne peut
+ *     pas rester couvert.
  */
 export const INTRO_SCRIPT = `(function(){try{
 if(sessionStorage.getItem("${INTRO_STORAGE_KEY}"))return;
@@ -79,4 +104,11 @@ function close(){if(root.getAttribute("${INTRO_ATTR}")!=="on")return;root.remove
 document.addEventListener("pointerdown",close,{once:true,capture:true});
 document.addEventListener("keydown",close,{once:true,capture:true});
 window.setTimeout(close,${INTRO_SCRIPT_MAX_MS});
+var tries=0;
+function vid(){return document.querySelector(".intro-video video")}
+function wait(fn){var v=vid();if(v){fn(v);return}if(++tries<60)window.setTimeout(function(){wait(fn)},80)}
+function warm(v){v.muted=true;try{v.load()}catch(e){}}
+function boot(v){v.muted=true;var p=v.play();if(p&&p.catch)p.catch(function(){})}
+document.addEventListener("DOMContentLoaded",function(){tries=0;wait(warm)});
+window.setTimeout(function(){tries=0;wait(boot)},${INTRO_VIDEO_START_MS});
 }catch(e){}})();`;

@@ -600,9 +600,11 @@ export const ui = {
      The label names the region for screen readers — the video is decorative (no sound, no
      captions), so there is nothing else to announce. */
   intro: {
-    /* A single label: the opening screen's, read by screen readers. There is no longer a
-       "skip" button label — that exit now goes through the gesture itself. */
+    /* The opening screen in two parts: its label (read by screen readers) and the word shown
+       before the video. There is no longer a "skip" button label — that exit now goes
+       through the gesture itself. */
     label: "Welcome animation",
+    welcome: "Welcome to",
   },
   /* Floating action bar (bottom of the screen, after the first scroll) and the social fan it
      opens. The labels double as `aria-label`s: one word, both what you see and what a screen

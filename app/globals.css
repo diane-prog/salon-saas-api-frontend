@@ -519,6 +519,43 @@ html[data-intro] .intro-video {
   display: flex;
 }
 
+/* Mot de bienvenue de l'ouverture : « Welcome to » / « Bienvenue chez », selon la langue
+   (dictionnaire `ui.intro.welcome`).
+
+   Il est dans le HTML servi, donc peint dès la première frame, et son animation est purement
+   CSS : il apparaît même si React n'est pas encore monté — c'est la même raison qui fait
+   toute l'ouverture sans JavaScript.
+
+   Il dure 2 s : apparition (0 → 20 %), courte tenue (20 → 70 %), fondu de sortie
+   (70 → 100 %). LA VIDÉO DÉMARRE PENDANT CE FONDU DE SORTIE, à `INTRO_VIDEO_START_MS`
+   (lib/intro.ts) : le mot se dissout donc dans l'apparition du logo, sans temps mort.
+   Les deux valeurs sont jumelles — si l'une bouge, faire bouger l'autre.
+
+   Il est peint PAR-DESSUS la vidéo (elle est opaque, du fond plein) : dans le balisage il
+   vient après elle. */
+.intro-welcome {
+  animation: intro-welcome 2000ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes intro-welcome {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  20% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  70% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+
 /* Sur un écran au moins aussi large que haut, l'ouverture REMPLIT la fenêtre : le logo est
    centré et n'occupe que les ~14 % centraux du cadre (vidéo dézoomée), donc le recadrage de
    `cover` ne tombe jamais sur lui — seulement dans le fond uni. Sur un écran plus haut que large (téléphone),

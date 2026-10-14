@@ -9,12 +9,17 @@ import {
   INTRO_SKIP_EVENT,
   INTRO_TAIL_MS,
   INTRO_VIDEO_SECONDS,
+  INTRO_VIDEO_START_MS,
 } from "@/lib/intro";
 import { lockScroll } from "@/lib/scroll";
 
 /**
- * Ouverture du site : la vidéo de logo (`public/img/leegie-global-loader.mp4`) couvre
- * l'écran à la PREMIÈRE arrivée de la session, puis s'efface en fondu sur la page.
+ * Ouverture du site, à la PREMIÈRE arrivée de la session : le mot de bienvenue
+ * (`ui.intro.welcome`, selon la langue) apparaît, se dissout, PUIS la vidéo de logo joue —
+ * et s'efface en fondu sur la page.
+ *
+ * C'est le script d'en-tête qui lance la lecture, à `INTRO_VIDEO_START_MS`, c'est-à-dire
+ * pendant le fondu de sortie du mot : ce composant ne démarre rien, il constate et il range.
  *
  * LE FICHIER EST FABRIQUÉ POUR CET USAGE, et ces réglages sont dans le média, pas ici :
  *   - il dure 5,4 s : la prise d'origine (8 s) est ACCÉLÉRÉE 1,5× ;
@@ -89,10 +94,11 @@ export default function VideoIntro() {
        l'attribut `muted` sur un élément déjà présent dans le HTML). */
     video.muted = true;
 
-    /* LA VIDÉO DÉMARRE TOUTE SEULE (`autoPlay` dans le balisage) : elle n'attend pas
-       l'hydratation, qui peut arriver plusieurs secondes après la peinture — c'est mesuré en
-       développement, et c'est ce qui faisait qu'un visiteur cliquait dans le vide pendant que
-       l'écran couvrait. On ne fait donc ici que CONSTATER :
+    /* LA VIDÉO NE DÉMARRE PAS ICI : elle attend la fin du mot de bienvenue, et c'est le
+       SCRIPT D'EN-TÊTE qui la lance (`INTRO_VIDEO_START_MS`) — sans attendre React, qui peut
+       arriver plusieurs secondes après la peinture en développement. Ce bloc ne fait donc
+       que : (1) armer le départ après le temps restant du mot, au cas où le script aurait
+       été empêché, (2) CONSTATER l'état si elle joue déjà :
          - déjà finie (l'animation a joué pendant que React se montait) : on découvre ;
          - déjà en cours : on ne relance rien, et le minuteur « ça ne démarre pas » n'a plus
            d'objet — l'événement `playing` est déjà passé ;
@@ -102,20 +108,29 @@ export default function VideoIntro() {
       return;
     }
 
-    if (video.paused) {
-      video.play().catch(finish);
-      readyTimer.current = window.setTimeout(finish, INTRO_READY_MS);
-    }
+    /* Temps restant du mot de bienvenue, mesuré depuis le DÉBUT DU DOCUMENT et non depuis
+       l'hydratation : sinon une hydratation tardive repousserait d'autant le départ de la
+       vidéo. Même ancrage que le rideau de transition et que le retrait de l'ouverture. */
+    let watchdog = 0;
+    const startTimer = window.setTimeout(() => {
+      /* Le script d'en-tête a déjà lancé la lecture : il n'y a rien à faire, sinon le
+         chien de garde ci-dessous, qui protège aussi ce cas. */
+      if (video.paused) {
+        video.play().catch(finish);
+        readyTimer.current = window.setTimeout(finish, INTRO_READY_MS);
+      }
 
-    /* Le chien de garde de fin part de la somme : même si la vidéo a mis trois secondes à
-       démarrer, on lui laisse sa durée entière après la première image. */
-    const watchdog = window.setTimeout(
-      finish,
-      INTRO_READY_MS + (video.duration || INTRO_VIDEO_SECONDS) * 1000 + INTRO_TAIL_MS,
-    );
+      /* Le chien de garde de fin part de la somme : même si la vidéo a mis trois secondes à
+         démarrer, on lui laisse sa durée entière après la première image. */
+      watchdog = window.setTimeout(
+        finish,
+        INTRO_READY_MS + (video.duration || INTRO_VIDEO_SECONDS) * 1000 + INTRO_TAIL_MS,
+      );
+    }, Math.max(0, INTRO_VIDEO_START_MS - performance.now()));
 
     return () => {
       window.clearTimeout(readyTimer.current);
+      window.clearTimeout(startTimer);
       window.clearTimeout(watchdog);
     };
   }, [done, finish]);
@@ -167,10 +182,11 @@ export default function VideoIntro() {
       <video
         ref={videoRef}
         src="/img/leegie-global-loader.mp4"
-        /* `autoPlay` : l'animation part dès que le HTML est analysé, SANS attendre React —
-           c'est le point corrigé ci-dessus. Muette et `playsInline` : le navigateur l'autorise
-           donc même sans geste du visiteur. */
-        autoPlay
+        /* PAS D'`autoPlay`, ET C'EST VOULU : la lecture est lancée par le script d'en-tête à
+           `INTRO_VIDEO_START_MS`, c'est-à-dire après le mot de bienvenue. Muette et
+           `playsInline` : le navigateur l'autorise donc sans geste du visiteur.
+           `preload="none"` : elle n'est téléchargée que si l'ouverture a lieu (le script
+           l'appelle `load()`), jamais sur les visites suivantes. */
         muted
         playsInline
         preload="none"
@@ -187,6 +203,14 @@ export default function VideoIntro() {
            le fond de la vidéo et celui de l'écran étant la même couleur. */
         className="h-full w-full object-contain"
       />
+      {/* Le mot de bienvenue, APRÈS la vidéo dans le balisage : elle est opaque, donc pour
+          être vue il doit être peint au-dessus d'elle. L'animation est en CSS (globals.css) et
+          la vidéo démarre pendant son fondu de sortie. */}
+      <div className="pointer-events-none absolute inset-0 grid place-items-center px-6">
+        <p className="intro-welcome text-center text-[clamp(0.75rem,1.2vw,1rem)] font-medium uppercase tracking-[0.34em] text-paper/70">
+          {dict.ui.intro.welcome}
+        </p>
+      </div>
       {/* Aucun bouton « passer » : la séquence est courte, et l'écran s'en va au premier
           geste — clic n'importe où (ci-dessus), touche Échap, ou tout premier contact
           entendu par le script d'en-tête, y compris avant l'hydratation. Un bouton visible
