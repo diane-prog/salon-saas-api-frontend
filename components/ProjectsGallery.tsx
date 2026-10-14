@@ -385,7 +385,7 @@ export default function ProjectsGallery({
                       géométrie de la pile (ou de la suite) ne bouge donc jamais. */}
                   <Link
                     href={`/${locale}/realisations`}
-                    className="group flex h-[67svh] w-full flex-col overflow-hidden bg-white"
+                    className="group flex h-[77svh] w-full flex-col overflow-hidden bg-white"
                   >
                     <span className="relative block flex-1 overflow-hidden bg-ink/[0.06]">
                       {/* Parallaxe DANS la fiche : la découpe ne bouge pas, seule la photo
@@ -396,7 +396,7 @@ export default function ProjectsGallery({
                           src={project.image}
                           alt={project.title}
                           fill
-                          sizes="(min-width: 80rem) 80rem, 100vw"
+                          sizes="(min-width: 90rem) 90rem, 100vw"
                           className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.02]"
                         />
                       </Parallax>

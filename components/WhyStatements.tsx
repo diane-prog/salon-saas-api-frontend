@@ -135,7 +135,7 @@ function MediaTile({
             alt={alt}
             fill
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-            className={duotone ? "object-cover grayscale" : "object-cover"}
+            className={duotone ? "object-cover" : "object-cover"}
           />
         </Parallax>
         {duotone ? (

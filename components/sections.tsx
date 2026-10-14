@@ -173,11 +173,13 @@ type Stat = { value: number; suffix: string; label: string };
  * résultats sans interruption, comme une seule grille.
  *
  * La boucle est celle du site (`animate-marquee`, `translateX(0)` → `-50 %`), et les trois
- * conditions de sa justesse sont tenues : quatre copies de la suite (un nombre PAIR, sinon
- * le saut tomberait au milieu d'une copie), `pr-*` égal à `gap-*` (l'écart de reprise est
- * alors mesuré au pixel) et `w-max` sur la piste (la moitié tombe juste, et la piste couvre
- * même un très grand écran). Les copies au-delà de la première sont `aria-hidden` : les cinq
- * chiffres ne sont pas annoncés quatre fois. La rangée s'arrête au survol, le temps de lire.
+ * conditions de sa justesse sont tenues : SIX copies de la suite (un nombre PAIR, sinon le
+ * saut tomberait au milieu d'une copie), `pr-*` égal à `gap-*` (l'écart de reprise est alors
+ * mesuré au pixel) et `w-max` sur la piste. La piste sort du cadre et va d'un bord à l'autre
+ * de la FENÊTRE, donc la moitié de la suite — trois copies, ≈ 4 560 px — doit couvrir un
+ * écran entier, largeurs d'écran ultrapanoramiques comprises ; quatre copies ne tenaient
+ * plus qu'à 1 280 px de cadre. Les copies au-delà de la première sont `aria-hidden` : les
+ * cinq chiffres ne sont pas annoncés six fois. La rangée s'arrête au survol, le temps de lire.
  */
 export function StatsSection({
   title,
@@ -192,7 +194,7 @@ export function StatsSection({
   linkLabel: string;
   stats: Stat[];
 }) {
-  const row = [...stats, ...stats, ...stats, ...stats];
+  const row = [...stats, ...stats, ...stats, ...stats, ...stats, ...stats];
 
   return (
     <div className="relative min-h-[100svh] text-white">
@@ -215,10 +217,13 @@ export function StatsSection({
           </ButtonLink>
         </Reveal>
 
-        {/* La rangée qui défile : elle prend toute la largeur du cadre, donc ce sont les
-            filets du cadre qui la coupent — les cartes passent derrière les règles. */}
+        {/* La rangée qui défile : elle QUITTE le cadre — marge négative calculée depuis le
+            cadre centré + `w-screen`, donc elle court d'un bord à l'autre de la fenêtre et
+            les cartes sortent totalement de la zone de grille, coupées aux bords de la page.
+            Le débord est lui-même rogné par `overflow-clip` de la section (le `100vw` inclut la
+            largeur de la barre de défilement), donc aucun défilement horizontal n'est créé. */}
         <Reveal delay={120}>
-          <div className="w-full overflow-hidden">
+          <div className="ml-[calc(50%_-_50vw)] w-screen overflow-hidden">
             <ul className="flex w-max animate-marquee items-stretch gap-3 pr-3 hover:[animation-play-state:paused] sm:gap-4 sm:pr-4">
               {row.map((stat, i) => (
                 <StatCard key={`${stat.label}-${i}`} stat={stat} hidden={i >= stats.length} />
@@ -246,14 +251,15 @@ function PlusMark({ className = "" }: { className?: string }) {
  * Largeur FIXE : dans une piste en `w-max`, une tuile dimensionnée par son texte donnerait
  * une piste de largeur imprévisible — « la moitié » de la boucle ne tomberait plus au pixel.
  * La hauteur, elle, est commune à toute la rangée (`items-stretch` sur la piste). La tuile
- * est plus opaque que celle des services (`bg-ink/35` + `backdrop-blur-md`) : elle passe sur
+ * est plus opaque que celle des services (`bg-ink/35` + `backdrop-blur-sm`, flou d'origine
+ * fortement réduit) : elle passe sur
  * une VIDÉO qui bouge, et doit rester lisible image par image.
  */
 function StatCard({ stat, hidden = false }: { stat: Stat; hidden?: boolean }) {
   return (
     <li
       aria-hidden={hidden}
-      className="relative flex min-h-[10.5rem] w-[15rem] shrink-0 flex-col justify-between gap-6 rounded-2xl border border-white/15 bg-ink/35 p-5 backdrop-blur-md sm:min-h-[12rem] sm:w-[18rem] sm:p-6"
+      className="relative flex min-h-[10.5rem] w-[15rem] shrink-0 flex-col justify-between gap-6 border border-white/15 bg-ink/35 p-5 backdrop-blur-sm sm:min-h-[12rem] sm:w-[18rem] sm:p-6"
     >
       <PlusMark className="absolute left-2 top-2 h-3 w-3 text-white/30" />
       <PlusMark className="absolute right-2 top-2 h-3 w-3 text-white/30" />
@@ -438,7 +444,7 @@ export function TestimonialsSection() {
             <Reveal as="li" key={t.name} delay={i * 80} className="relative">
               {/* Une seule carte, opaque : c'est le papier du site posé sur le navy, avec
                   un filet — ni relief ni doublure décalée. */}
-              <figure className="relative flex h-full flex-col gap-5 rounded-card bg-paper p-7 ring-1 ring-navy/10">
+              <figure className="relative flex h-full flex-col gap-5 bg-paper p-7 ring-1 ring-navy/10">
                 <div className="flex items-start justify-between gap-3">
                   <Image
                     src={t.image}

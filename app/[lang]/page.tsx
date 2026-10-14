@@ -56,11 +56,9 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
 
       <ProjectCommunity />
 
-      {/* Section « Nos Clients » : le titre au centre, les logos des clients posés autour
-          comme des vignettes, reliés par de fins arcs. Le titre et le lien lui sont passés
-          pour qu'ils prennent place DANS le champ. */}
+      {/* Section « Nos Clients » : le titre dans la marge de gauche, le tableau de
+          logotypes à droite. Le titre et le lien lui sont passés pour la colonne de gauche. */}
       <ClientsWall
-        eyebrow={ui.references}
         title={ui.clientsTitle}
         linkHref={href("/realisations")}
         linkLabel={ui.clientsLink}

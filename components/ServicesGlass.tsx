@@ -375,7 +375,7 @@ function ServiceCard({
     <Link
       href={href}
       aria-label={`${service.title} — ${label}`}
-      className="group relative flex h-full flex-col rounded-2xl border border-white/15 bg-white/[0.06] p-5 backdrop-blur-sm transition-colors duration-300 hover:border-white/35 hover:bg-white/[0.11] sm:p-6"
+      className="group relative flex h-full flex-col border border-white/15 bg-white/[0.06] p-5 backdrop-blur-sm transition-colors duration-300 hover:border-white/35 hover:bg-white/[0.11] sm:p-6"
     >
       <ArrowUpRight className="absolute right-5 top-5 h-4 w-4 text-white/45 transition-all duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-white" />
 

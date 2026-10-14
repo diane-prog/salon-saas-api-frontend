@@ -4,7 +4,6 @@ import Image from "next/image";
 import Link from "next/link";
 import Reveal from "@/components/Reveal";
 import { ArrowUpRight } from "@/components/Icons";
-import { Eyebrow } from "@/components/ui";
 import { clientLogos } from "@/lib/clients";
 
 /**
@@ -35,12 +34,10 @@ import { clientLogos } from "@/lib/clients";
  * beige.
  */
 export default function ClientsWall({
-  eyebrow,
   title,
   linkHref,
   linkLabel,
 }: {
-  eyebrow: string;
   title: string;
   linkHref: string;
   linkLabel: string;
@@ -49,12 +46,11 @@ export default function ClientsWall({
     <section className="bg-beige/25">
       <div className="mx-auto w-full max-w-[80rem] border-x border-navy/10 px-5 py-20 sm:px-8 sm:py-24">
         <div className="grid items-center gap-10 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.5fr)] lg:gap-16">
-          {/* Marge de gauche : sur-titre, titre, et le lien vers les réalisations — les
-              projets des mêmes clients. Rien d'autre : c'est le tableau qui porte la
+          {/* Marge de gauche : titre et lien vers les réalisations — les projets des
+              mêmes clients. Pas de sur-titre : c'est le tableau qui porte la
               démonstration. */}
           <Reveal className="max-w-sm">
-            <Eyebrow>{eyebrow}</Eyebrow>
-            <h2 className="mt-5 text-3xl leading-[1.08] text-navy sm:text-4xl lg:text-[2.6rem]">
+            <h2 className="text-3xl leading-[1.08] text-navy sm:text-4xl lg:text-[2.6rem]">
               {title}
             </h2>
             <Link

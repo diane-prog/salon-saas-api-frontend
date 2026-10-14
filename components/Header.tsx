@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -8,8 +8,11 @@ import { Close, Menu, ChevronDown, ArrowRight } from "@/components/Icons";
 import { switchLocalePath, type Locale } from "@/lib/dictionaries";
 import { useDictionary } from "@/components/DictionaryProvider";
 import HeaderSearch from "@/components/HeaderSearch";
+import FullScreenPanel from "@/components/FullScreenPanel";
+import { TextLink } from "@/components/ui";
 import { usePageTransition } from "@/components/PageTransition";
 import { lockScroll } from "@/lib/scroll";
+import { LABEL } from "@/lib/editorial";
 
 const switchLabels: Record<Locale, { fr: string; en: string }> = {
   fr: { fr: "FR", en: "EN" },
@@ -19,12 +22,10 @@ const switchLabels: Record<Locale, { fr: string; en: string }> = {
 /**
  * Retire le focus de tout élément du header.
  *
- * Le mega menu Services n'a AUCUN état React : il s'ouvre et se ferme en CSS, par
- * `group-hover` et `group-focus-within` (voir le `div.group` de la navigation). Un clic sur
- * une entrée laissait donc le focus sur le lien cliqué : `focus-within` restait vrai, et le
- * panneau restait affiché par-dessus la page d'arrivée. On relâche le focus quand la route
- * change — et aussi au clic dans le panneau, pour le lien qui mène à la page où l'on est
- * déjà : là, la route ne change pas, donc l'effet de navigation ne se déclenche pas.
+ * Un clic sur un lien de la barre laissait le focus posé dessus après la navigation — l'entrée
+ * active restait focalisée sur la page d'arrivée. On relâche le focus quand la route change.
+ * (Le mega menu Services n'est plus en CSS `group-hover` : c'est un panneau plein écran avec
+ * état et retour de focus à lui — voir plus bas.)
  */
 function blurHeaderFocus() {
   const active = document.activeElement;
@@ -36,6 +37,12 @@ export default function Header() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [servicesOpen, setServicesOpen] = useState(false);
+  /* Mega menu Services : un VRAI dialogue plein écran (même `FullScreenPanel` que la
+     recherche), plus un panneau CSS survolé. L'état vit ici, avec le déclencheur qui
+     reprend le focus à la fermeture. */
+  const [servicesPanel, setServicesPanel] = useState(false);
+  const servicesTriggerRef = useRef<HTMLButtonElement>(null);
+  const closeServicesPanel = useCallback(() => setServicesPanel(false), []);
   const pathname = usePathname();
   const { navigate } = usePageTransition();
 
@@ -110,75 +117,33 @@ export default function Header() {
           <nav className="hidden items-center gap-1 lg:flex" aria-label="Navigation principale">
             {dict.nav.map((item) =>
               item.href === "/services" ? (
-                <div key={item.href} className="group text-lg font-normal">
-                  <Link
-                    href={href(item.href)}
-                    aria-haspopup="true"
-                    className={`flex items-center gap-1 rounded-full px-4 py-2 text-sm font-medium transition-colors text-lg font-normal ${
-                      scrolled ? "text-navy hover:text-brand text-lg font-normal" : "text-white/85 hover:text-white text-lg font-normal"
+                /* L'entrée Services n'est plus un lien survolé : c'est le déclencheur du
+                   panneau plein écran (même objet que la recherche — fond encre, logo, croix
+                   cerclée, Échap, Tab contenu, page figée). La vue d'ensemble des services
+                   et le devis vivent DANS le panneau, en tête de sa liste. */
+                <button
+                  key={item.href}
+                  ref={servicesTriggerRef}
+                  type="button"
+                  aria-haspopup="dialog"
+                  aria-expanded={servicesPanel}
+                  onClick={() => setServicesPanel(true)}
+                  className={`flex items-center gap-1 rounded-full px-4 py-2 transition-colors ${
+                    scrolled ? "text-navy hover:text-brand" : "text-white/85 hover:text-white"
+                  }`}
+                >
+                  <span className="text-md font-light">{item.label}</span>
+                  <ChevronDown
+                    className={`h-3.5 w-3.5 transition-transform duration-300 ${
+                      servicesPanel ? "rotate-180" : ""
                     }`}
-                  >
-                    <span className="text-lg font-light">{item.label}</span>
-                    <ChevronDown className="h-3.5 w-3.5 transition-transform duration-300 group-hover:rotate-180" />
-                  </Link>
-
-                  {/* Mega menu Services : bandeau pleine largeur sous le header. */}
-                  <div
-                    onClick={blurHeaderFocus}
-                    className="invisible absolute inset-x-0 top-full translate-y-2 pt-4 opacity-0 transition-all duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100"
-                  >
-                    <div className="container-x">
-                      <div className="grid gap-6 rounded-2xl border border-navy/8 bg-white p-6 shadow-lift lg:grid-cols-[1.6fr_1fr]">
-                        <div className="grid content-start gap-1 sm:grid-cols-2">
-                          {dict.services.map((s) => (
-                            <Link
-                              key={s.slug}
-                              href={href(`/services/${s.slug}`)}
-                              className="group/item rounded-xl px-4 py-3 transition-colors text-lg font-normal hover:bg-brand/[0.06]"
-                            >
-                              <span className="flex items-center justify-between gap-2 text-sm font-light text-navy">
-                                {s.title}
-                                <ArrowRight className="h-3.5 w-3.5 -translate-x-1 text-brand opacity-0 transition-all group-hover/item:translate-x-0 group-hover/item:opacity-100" />
-                              </span>
-                              <span className="mt-1 block line-clamp-2 text-xs leading-relaxed text-muted">
-                                {s.short}
-                              </span>
-                            </Link>
-                          ))}
-                        </div>
-
-                        <div className="relative hidden overflow-hidden rounded-xl lg:block">
-                          <Image
-                            src="/img/partenaires.jpg"
-                            alt=""
-                            fill
-                            sizes="(max-width: 1024px) 0px, 360px"
-                            className="object-cover"
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-navy-deep/90 via-navy-deep/45 to-navy-deep/10" />
-                          <div className="relative flex h-full min-h-[13rem] flex-col justify-end gap-3 p-5">
-                            <span className="text-[0.68rem] font-medium uppercase tracking-[0.16em] text-turquoise">
-                              {dict.ui.expertise}
-                            </span>
-                            <p className="text-lg font-light leading-snug text-white">{dict.ui.talkToUs}</p>
-                            <Link
-                              href={href("/devis")}
-                              className="inline-flex w-fit items-center gap-2 rounded-full bg-white px-4 py-2 text-xs font-light text-navy transition-transform duration-300 hover:-translate-y-0.5"
-                            >
-                              {dict.ui.freeQuote}
-                              <ArrowRight className="h-3.5 w-3.5" />
-                            </Link>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                  />
+                </button>
               ) : (
                 <Link
                   key={item.href}
                   href={href(item.href)}
-                  className={`rounded-full px-4 py-2 text-lg font-light transition-colors ${
+                  className={`rounded-full px-4 py-2 text-md font-light transition-colors ${
                     scrolled ? "text-navy hover:text-brand" : "text-white/85 hover:text-white"
                   }`}
                 >
@@ -209,6 +174,115 @@ export default function Header() {
           </div>
         </div>
       </header>
+
+      {/* Mega menu Services : PLEIN ÉCRAN, comme la recherche — même `FullScreenPanel`
+          (logo, croix cerclée, Échap, Tab contenu, page figée, entrée en cascade), mais sur
+          une surface VERRE (`tone="glass"`) : encre translucide et flou d'arrière-plan, la
+          page restant lisible en filigrane derrière le menu.
+
+          MAIS c'est un MÉGA MENU, pas une page : la grille classique du genre — colonnes de
+          liens à GAUCHE (titre + description par case, filets entre les cases, survol qui
+          éclaire la case), et à DROITE le bloc IMAGE mis en avant avec l'action y étant
+          (le devis), celui de l'ancien bandeau survolé. Au-dessus, la rangée de titre : l'étiquette,
+          le grand libellé, et l'action « vue d'ensemble » à droite. */}
+      {servicesPanel && (
+        <FullScreenPanel
+          label={dict.nav.find((n) => n.href === "/services")?.label ?? "Services"}
+          closeLabel={locale === "fr" ? "Fermer le menu" : "Close menu"}
+          onClose={closeServicesPanel}
+          returnFocusTo={servicesTriggerRef}
+          /* Surface VERRE : encre translucide + flou d'arrière-plan — la page reste devinée
+             derrière le menu, là où la recherche et le contact restent sur l'encre pleine. */
+          tone="glass"
+          footer={
+            <>
+              <span>{dict.ui.panelHint}</span>
+              <a href={`mailto:${dict.site.email}`} className="transition-colors hover:text-paper">
+                {dict.site.email}
+              </a>
+            </>
+          }
+        >
+          {/* `data-lenis-prevent` : Lenis écoute la molette sur tout le document — sans
+              cette marque, le menu ne défilerait pas à la molette. */}
+          <div
+            data-lenis-prevent
+            className="container-x no-scrollbar flex min-h-0 flex-1 flex-col gap-9 overflow-y-auto overscroll-contain py-8 [justify-content:safe_center]"
+          >
+            {/* Rangée de titre : étiquette + libellé à gauche, vue d'ensemble à droite. */}
+            <div data-panel-in className="flex flex-wrap items-end justify-between gap-x-8 gap-y-5">
+              <div>
+                <span className={`${LABEL} text-paper/45`}>{dict.ui.ourOffer}</span>
+                <h2 className="mt-4 font-light text-4xl leading-[1.05] tracking-tight text-paper sm:text-5xl">
+                  {dict.nav.find((n) => n.href === "/services")?.label}
+                </h2>
+              </div>
+
+              <TextLink href={href("/services")} tone="navy" strong>
+                {dict.ui.viewAllServices}
+              </TextLink>
+            </div>
+
+            {/* Les colonnes : le sommaire des services (deux colonnes de cases séparées
+                par un filet, comme le tableau des clients) + le bloc image mis en avant. */}
+            <div data-panel-in className="grid gap-8 lg:grid-cols-[1.7fr_1fr] lg:gap-12">
+              <ul className="grid content-start border-t border-paper/10 sm:grid-cols-2">
+                {dict.services.map((s, i) => (
+                  <li key={s.slug} className="border-b border-paper/10 sm:odd:border-r">
+                    <Link
+                      href={href(`/services/${s.slug}`)}
+                      onClick={closeServicesPanel}
+                      data-panel-autofocus={i === 0 ? "" : undefined}
+                      className="group flex h-full flex-col gap-2 px-1 py-5 transition-colors duration-300 hover:bg-paper/[0.05] sm:px-5"
+                    >
+                      <span className="flex items-baseline gap-3">
+                        <span
+                          className={`${LABEL} shrink-0 tabular-nums text-paper/30 transition-colors duration-300 group-hover:text-brand`}
+                        >
+                          {String(i + 1).padStart(2, "0")}
+                        </span>
+                        <span className="font-light text-xl leading-snug text-paper transition-transform duration-500 group-hover:translate-x-1 sm:text-2xl">
+                          {s.title}
+                        </span>
+                        <ArrowRight className="ml-auto h-4 w-4 shrink-0 -translate-x-1 self-center text-brand opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100" />
+                      </span>
+                      <span className="line-clamp-2 text-sm leading-relaxed text-paper/45">
+                        {s.short}
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+
+              {/* Le bloc image de l'ancien bandeau, gardé tel quel : photo, dégradé navy,
+                  étiquette d'expertise, accroche, action « Devis gratuit ». Il referme le
+                  panneau au clic, comme tout lien du menu. */}
+              <div className="relative hidden overflow-hidden lg:block">
+                <Image
+                  src="/img/partenaires.jpg"
+                  alt=""
+                  fill
+                  sizes="360px"
+                  className="object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-navy-deep/90 via-navy-deep/45 to-navy-deep/10" />
+                <div className="relative flex h-full min-h-[20rem] flex-col justify-end gap-3 p-6">
+                  <span className={`${LABEL} text-turquoise`}>{dict.ui.expertise}</span>
+                  <p className="text-xl font-light leading-snug text-white">{dict.ui.talkToUs}</p>
+                  <Link
+                    href={href("/devis")}
+                    onClick={closeServicesPanel}
+                    className="group inline-flex w-fit items-center gap-2 rounded-full bg-white px-4 py-2 text-xs font-light text-navy transition-transform duration-300 hover:-translate-y-0.5"
+                  >
+                    {dict.ui.freeQuote}
+                    <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-0.5" />
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+        </FullScreenPanel>
+      )}
 
       {open && (
         <div className="fixed inset-0 z-60 flex flex-col bg-ink text-paper grain lg:hidden">

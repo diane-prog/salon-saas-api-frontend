@@ -17,7 +17,7 @@ export default function Footer() {
           <div className="lg:col-span-4">
             {/* Variante claire : la version foncée (`logo-navy.png`) ne se lit que sur du
                 papier, et le pied de page referme la page sur l'encre. */}
-            <Image src="/img/logo.png" alt="LEEGI Group" width={160} height={64} className="h-11 w-auto" />
+            <Image src="/img/logo.png" alt="LEEGI Group" width={180} height={84} className="h-16 -ml-10 w-auto" />
             <p className="mt-5 max-w-sm text-sm leading-relaxed text-paper/60">{dict.site.tagline}</p>
             <div className="mt-6 flex flex-wrap gap-2">
               {dict.site.socials.map((s) => (

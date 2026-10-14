@@ -9,9 +9,11 @@ import { lockScroll } from "@/lib/scroll";
 import { prefersReducedMotion } from "@/lib/motion";
 
 /**
- * Panneau plein écran, sur le noir neutre du site (`ink`), ouvert par l'icône du header ou
- * par un bouton de page. La recherche et le formulaire de contact partagent le même objet :
- * la mécanique vit ici une seule fois, les contenus arrivent en enfants.
+ * Panneau plein écran ouvert par l'icône du header ou par un bouton de page. La recherche et
+ * le formulaire de contact partagent le même objet : la mécanique vit ici une seule fois, les
+ * contenus arrivent en enfants. La surface se choisit par `tone` : l'encre pleine du site
+ * (`ink`, le défaut) ou le verre (`glass` — encre translucide + flou d'arrière-plan, pour le
+ * méga menu Services, qui laisse deviner la page derrière lui).
  *
  * Ce que la mécanique garantit :
  * - la page est figée derrière (`lockScroll`, qui met aussi Lenis en pause) ;
@@ -40,6 +42,7 @@ export default function FullScreenPanel({
   onClose,
   returnFocusTo,
   footer,
+  tone = "ink",
   children,
 }: {
   /** Nom du dialogue (le titre que lira un lecteur d'écran). */
@@ -51,6 +54,13 @@ export default function FullScreenPanel({
   returnFocusTo?: React.RefObject<HTMLElement | null>;
   /** Ligne de pied du panneau (rappel clavier, coordonnées…). */
   footer?: ReactNode;
+  /**
+   * Surface du panneau. `ink` (défaut) : l'encre pleine des panneaux plein écran.
+   * `glass` : encre translucide + flou d'arrière-plan — la page reste devinée derrière
+   * le panneau. On y garde une base encre assez dense pour que le texte clair tienne son
+   * contraste même si le navigateur ignore `backdrop-filter`.
+   */
+  tone?: "ink" | "glass";
   children: ReactNode;
 }) {
   const panelRef = useRef<HTMLDivElement>(null);
@@ -138,7 +148,9 @@ export default function FullScreenPanel({
       role="dialog"
       aria-modal="true"
       aria-label={label}
-      className="grain fixed inset-0 z-70 flex flex-col bg-ink text-paper"
+      className={`grain fixed inset-0 z-70 flex flex-col text-paper ${
+        tone === "glass" ? "bg-ink/70 backdrop-blur-2xl" : "bg-ink"
+      }`}
     >
       {/* Barre haute : le logo clair, comme le menu mobile, et la fermeture cerclée. */}
       <div data-panel-in className="container-x flex items-center justify-between py-5">

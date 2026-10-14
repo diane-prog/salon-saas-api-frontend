@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import ProjectsGallery from "@/components/ProjectsGallery";
+import { TextLink } from "@/components/ui";
 import { useDictionary } from "@/components/DictionaryProvider";
 
 /**
@@ -19,7 +20,7 @@ import { useDictionary } from "@/components/DictionaryProvider";
  * se collerait plus (même convention que la section services).
  */
 export default function ProjectCommunity() {
-  const { dict } = useDictionary();
+  const { dict, locale } = useDictionary();
   const { projects, ui } = dict;
 
   const words = ui.projectsHeading.split(/\s+/).filter(Boolean);
@@ -72,10 +73,21 @@ export default function ProjectCommunity() {
             commencer 40 px plus bas. Même convention que la section services, dont le cadre
             encadre la colonne de haut en bas. */}
         <div className="relative px-6 pt-12 sm:pt-14">
-          <h2 className="text-4xl leading-[1.14] text-navy sm:text-5xl">
-            <span className="block">{words.slice(0, splitAt).join(" ")}</span>
-            <span className="block text-navy/50">{words.slice(splitAt).join(" ")}</span>
-          </h2>
+          {/* Titre à gauche, action « voir plus » à droite sur la même ligne : le lien
+              rejoint la page Réalisations, où tous les projets sont rassemblés. Il se pose
+              sur la dernière ligne du titre (baseline) pour ne pas flotter en haut de la
+              marge, et passe SOUS le titre sur un écran étroit (`wrap`) plutôt que de
+              le rognier. */}
+          <div className="flex flex-wrap items-end justify-between gap-x-8 gap-y-6">
+            <h2 className="text-4xl leading-[1.14] text-navy sm:text-5xl">
+              <span className="block">{words.slice(0, splitAt).join(" ")}</span>
+              <span className="block text-navy/50">{words.slice(splitAt).join(" ")}</span>
+            </h2>
+
+            <TextLink href={`/${locale}/realisations`} strong className="mb-2 shrink-0">
+              {ui.viewAllProjects}
+            </TextLink>
+          </div>
 
           <span className="mt-8 inline-block text-[0.68rem] font-medium uppercase tracking-[0.24em] text-navy/45">
             {ui.portfolio}

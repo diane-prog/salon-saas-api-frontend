@@ -117,7 +117,7 @@ export default async function ContactPage({ params }: PageProps<"/[lang]/contact
               </dl>
 
               <Reveal delay={120} className="mt-14">
-                <div className="relative aspect-[16/11] overflow-hidden rounded-card sm:aspect-[16/9]">
+                <div className="relative aspect-[16/11] overflow-hidden  sm:aspect-[10/9]">
                   {/* Cadre fermé : l'échelle couvre le débattement (±4 % → 1,09). */}
                   <Parallax className="absolute inset-0" amount={4} scale={1.09}>
                     <Image
