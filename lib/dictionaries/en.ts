@@ -505,6 +505,20 @@ export const devisPage = {
   submit: "Get my quote",
   formTitle: "Your project in a few fields",
   formBody: "The more precise your information, the more tailored our proposal.",
+  successTitle: "Request sent",
+  successBody: "Thank you! Your quote request is on its way. We'll get back to you within 48 business hours.",
+  /* Field labels live here and not in the page: both the page AND the quote panel render
+     them — one source, no divergence. */
+  fields: {
+    firstName: "First name",
+    lastName: "Last name",
+    email: "Email",
+    phone: "Phone",
+    service: "Service required",
+    timeline: "Desired timeline",
+    description: "Project description",
+    descriptionPlaceholder: "Tell us about your project…",
+  },
   includeTitle: "What's included",
   includes: [
     "A response within 48 business hours",

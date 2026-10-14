@@ -504,6 +504,20 @@ export const devisPage = {
   submit: "Recevoir mon devis",
   formTitle: "Votre projet en quelques champs",
   formBody: "Plus vos informations sont précises, plus notre proposition sera adaptée.",
+  successTitle: "Demande envoyée",
+  successBody: "Merci ! Votre demande de devis est partie. Nous revenons vers vous sous 48 h ouvrées.",
+  /* Libellés des champs : ils vivent ici et non dans la page, parce que la page ET le
+     panneau du devis les affichent — une seule source, aucune divergence. */
+  fields: {
+    firstName: "Prénom",
+    lastName: "Nom",
+    email: "E-mail",
+    phone: "Téléphone",
+    service: "Service souhaité",
+    timeline: "Délais souhaités",
+    description: "Description du projet",
+    descriptionPlaceholder: "Parlez-nous de votre projet…",
+  },
   includeTitle: "Ce que nous includons",
   includes: [
     "Une réponse sous 48h ouvrées",

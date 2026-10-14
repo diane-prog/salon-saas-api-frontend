@@ -1,12 +1,16 @@
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import type { Metadata } from "next";
+import DevisSheet from "@/components/DevisSheet";
+import Parallax from "@/components/Parallax";
 import Reveal from "@/components/Reveal";
-import { Field, FormShell, Select, TextArea } from "@/components/Form";
+import SocialLinks from "@/components/SocialLinks";
 import { HeroSection } from "@/components/sections";
 import { ArrowRight, Check } from "@/components/Icons";
 import { isLocale, getDictionary, localePath } from "@/lib/dictionaries";
 
-export async function generateMetadata({ params }: PageProps<"/[lang]/devis">) {
+export async function generateMetadata({ params }: PageProps<"/[lang]/devis">): Promise<Metadata> {
   const { lang } = await params;
   if (!isLocale(lang)) return {};
   const dict = await getDictionary(lang);
@@ -17,92 +21,112 @@ export async function generateMetadata({ params }: PageProps<"/[lang]/devis">) {
   };
 }
 
+/* Les valeurs cliquables (réseaux) : même survol que le reste du site. */
+const valueLinkCls =
+  "transition-colors duration-300 hover:text-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand";
+
+/**
+ * Page devis. C'est la MÊME page que le contact — même hero clair, même grille en deux
+ * colonnes, mêmes blocs d'informations à droite, même photo en bas à droite : un visiteur qui
+ * passe de l'une à l'autre ne change pas de site. Seul le CONTENU change : ici l'accroche dit
+ * le devis, l'action ouvre le formulaire de devis (les champs de projet : service, délais,
+ * description), et la colonne de droite liste ce que la proposition inclut puis les services.
+ *
+ * La page devis ne portait pas le formulaire dans ses champs texte libres : elle le tient
+ * maintenant dans le même panneau que partout ailleurs (`DevisSheet`), donc les champs y sont
+ * écrits une seule fois — page, barre d'actions et pied de page ouvrent le même formulaire.
+ */
 export default async function DevisPage({ params }: PageProps<"/[lang]/devis">) {
   const { lang } = await params;
   if (!isLocale(lang)) notFound();
   const dict = await getDictionary(lang);
-  const { devisPage, ui } = dict;
-  const href = (p: string) => `/${lang}${p === "/" ? "" : p}`;
+  const { devisPage, site, ui } = dict;
+  const href = (path: string) => `/${lang}${path === "/" ? "" : path}`;
 
   return (
     <>
       <HeroSection eyebrow={ui.freeQuote} title={devisPage.title} body={devisPage.lead} />
 
       <section className="py-24 sm:py-28">
-        <div className="container-x grid gap-10 lg:grid-cols-[1.35fr_1fr] lg:gap-14">
-          <Reveal>
-            <div className="rounded-card border border-navy/8 bg-white p-7 shadow-soft sm:p-10">
-              <h2 className="text-2xl font-light text-navy sm:text-3xl">{devisPage.formTitle}</h2>
-              <p className="mt-2 text-sm text-muted">{devisPage.formBody}</p>
+        <div className="container-x">
+          <div className="grid gap-16 lg:grid-cols-[0.85fr_1.15fr] lg:gap-24">
+            {/* Colonne gauche — l'accroche en haut, l'action et les réseaux en bas, alignés sur
+                le bas de la colonne de droite (`justify-between`). */}
+            <div className="order-2 flex flex-col justify-between gap-16 lg:order-1">
+              <Reveal>
+                <h2 className="max-w-sm font-light text-2xl leading-[1.15] text-navy/80 sm:text-[1.75rem] lg:text-[2.25rem]">
+                  {devisPage.formTitle}
+                </h2>
+                <p className="mt-5 max-w-xs text-sm leading-relaxed text-muted">{devisPage.formBody}</p>
+              </Reveal>
 
-              <div className="mt-8">
-                <FormShell note={devisPage.jsNote} submitLabel={devisPage.submit}>
-                  <div className="grid gap-5 sm:grid-cols-2">
-                    <Field label={lang === "fr" ? "Nom" : "Last name"} name="lastname" required autoComplete="family-name" />
-                    <Field label={lang === "fr" ? "Prénom Nom" : "First name"} name="firstname" required autoComplete="given-name" />
-                    <Field label={lang === "fr" ? "Email" : "Email"} name="email" type="email" required autoComplete="email" />
-                    <Field label={lang === "fr" ? "Téléphone" : "Phone"} name="phone" type="tel" required autoComplete="tel" />
-                  </div>
+              <div>
+                <Reveal delay={80}>
+                  <DevisSheet triggerLabel={devisPage.submit} />
+                </Reveal>
 
-                  <div className="grid gap-5 sm:grid-cols-2">
-                    <Select
-                      label={lang === "fr" ? "Service souhaité" : "Service required"}
-                      name="service"
-                      options={devisPage.serviceOptions}
-                      placeholder={devisPage.servicePlaceholder}
-                      required
-                    />
-                    <Field label={lang === "fr" ? "Délais souhaités" : "Desired timeline"} name="delai" />
-                  </div>
-
-                  <TextArea
-                    label={lang === "fr" ? "Description du projet" : "Project description"}
-                    name="description"
-                    placeholder={lang === "fr" ? "Parlez-nous de votre projet…" : "Tell us about your project…"}
-                  />
-                </FormShell>
+                {/* Réseaux : logos officiels + intitulé, WhatsApp compris — la même ligne
+                    que la page contact. */}
+                <Reveal delay={160} className="mt-10">
+                  <SocialLinks site={site} />
+                </Reveal>
               </div>
             </div>
-          </Reveal>
 
-          <Reveal delay={120}>
-            <div className="flex flex-col gap-6 lg:sticky lg:top-28">
-              <div className="rounded-card border border-navy/8 bg-navy/[0.03] p-7">
-                <h3 className="text-xs font-medium uppercase tracking-[0.16em] text-brand">
-                  {devisPage.includeTitle}
-                </h3>
-                <ul className="mt-5 grid gap-4">
-                  {devisPage.includes.map((item) => (
-                    <li key={item} className="flex items-start gap-3 text-sm text-navy">
-                      <span className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full bg-gradient-to-br from-brand to-turquoise text-white">
-                        <Check className="h-3 w-3" />
-                      </span>
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div className="rounded-card border border-navy/8 bg-white p-7 shadow-soft">
-                <h3 className="text-xs font-medium uppercase tracking-[0.16em] text-muted">
-                  {ui.footerService}
-                </h3>
-                <ul className="mt-5 grid gap-3">
-                  {dict.services.map((s) => (
-                    <li key={s.slug}>
-                      <Link
-                        href={href(`/services/${s.slug}`)}
-                        className="group flex items-center justify-between gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-navy transition-colors hover:bg-brand/[0.06] hover:text-brand"
+            {/* Colonne droite — ce que la proposition inclut, puis les services, puis la photo :
+                la même descente que la page contact (blocs d'informations, photo). */}
+            <div className="order-1 lg:order-2">
+              <dl className="grid gap-x-10 gap-y-12 sm:grid-cols-2">
+                <div>
+                  <dt className="text-sm text-muted">{devisPage.includeTitle}</dt>
+                  <dd className="mt-2 grid gap-3">
+                    {devisPage.includes.map((item) => (
+                      <span
+                        key={item}
+                        className="flex items-start gap-3 text-[0.95rem] font-medium text-navy"
                       >
-                        {s.title}
-                        <ArrowRight className="h-4 w-4 text-brand opacity-0 transition-all duration-300 group-hover:translate-x-0.5 group-hover:opacity-100" />
+                        <span className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full bg-gradient-to-br from-brand to-turquoise text-white">
+                          <Check className="h-3 w-3" />
+                        </span>
+                        {item}
+                      </span>
+                    ))}
+                  </dd>
+                </div>
+
+                <div>
+                  <dt className="text-sm text-muted">{ui.footerService}</dt>
+                  <dd className="mt-2 grid gap-2">
+                    {dict.services.map((service) => (
+                      <Link
+                        key={service.slug}
+                        href={href(`/services/${service.slug}`)}
+                        className={`group inline-flex items-center gap-1.5 text-[0.95rem] font-medium text-navy ${valueLinkCls}`}
+                      >
+                        {service.title}
+                        <ArrowRight className="h-3.5 w-3.5 -translate-x-1 opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100" />
                       </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+                    ))}
+                  </dd>
+                </div>
+              </dl>
+
+              <Reveal delay={120} className="mt-14">
+                <div className="relative aspect-[16/11] overflow-hidden sm:aspect-[10/9]">
+                  {/* Cadre fermé : l'échelle couvre le débattement (±4 % → 1,09). */}
+                  <Parallax className="absolute inset-0" amount={4} scale={1.09}>
+                    <Image
+                      src="/img/partenaires.jpg"
+                      alt=""
+                      fill
+                      sizes="(min-width: 1024px) 55vw, 100vw"
+                      className="object-cover"
+                    />
+                  </Parallax>
+                </div>
+              </Reveal>
             </div>
-          </Reveal>
+          </div>
         </div>
       </section>
     </>

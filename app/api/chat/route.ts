@@ -1,4 +1,5 @@
 import { getDictionary, isLocale, type Dictionary } from "@/lib/dictionaries";
+import { handoffAnswer, predefinedAnswer } from "@/lib/assistant";
 
 /**
  * Assistant conversationnel du site.
@@ -14,6 +15,14 @@ import { getDictionary, isLocale, type Dictionary } from "@/lib/dictionaries";
  * construit ici, jamais reçu du navigateur ; seuls des tours `user`/`assistant` sont lus, et
  * l'historique est borné (nombre de tours ET longueur des messages).
  *
+ * DEUX ÉTAGES, dans cet ordre :
+ * 1. les réponses PRÉDÉFINIES (`lib/assistant.ts`) — services, prix, délais, contact, devis,
+ *    réalisations… Réponse immédiate, exacte (elle vient du dictionnaire), gratuite, et qui
+ *    fonctionne SANS clé ni fournisseur ;
+ * 2. le modèle, pour les questions ouvertes uniquement. S'il n'est pas configuré — ou si
+ *    l'appel échoue — on ne renvoie pas une erreur : on répond ce qu'on sait et on donne les
+ *    coordonnées de l'équipe. Le visiteur n'a jamais de mur.
+ *
  * FOURNISSEUR : le premier configuré gagne, tous parlent la même API (structure OpenAI), donc
  * le code d'appel est unique et le choix se fait dans `.env.local`, pas dans le code :
  *   1. Mistral (`MISTRAL_API_KEY`) — palier GRATUIT « Free mode » de La Plateforme, et son API
@@ -22,8 +31,8 @@ import { getDictionary, isLocale, type Dictionary } from "@/lib/dictionaries";
  *   3. OpenAI en direct (`OPENAI_API_KEY`).
  * `CHAT_MODEL` surcharge le modèle : le bon rapport qualité/prix bouge plus vite que ce site.
  *
- * Sans clé configurée, la route répond 503 — un état explicite, que la fenêtre de chat
- * traduit par les coordonnées de l'équipe — plutôt qu'une erreur opaque.
+ * Seule une requête MAL FORMÉE (aucun tour, ou rien qui vienne du visiteur) est refusée en
+ * 400 : le reste du temps, la route finit toujours par une réponse utile.
  */
 
 /** Nombre de tours gardés ET longueur maximale d'un message : borne le coût d'un appel. */
@@ -160,12 +169,18 @@ function sseToText(source: ReadableStream<Uint8Array>): ReadableStream<Uint8Arra
   });
 }
 
-export async function POST(request: Request) {
-  const upstream = provider();
-  if (!upstream) {
-    return Response.json({ error: "unconfigured" }, { status: 503 });
-  }
+/** Le texte arrive au client comme un flux, même quand il tient en une phrase : le client
+    n'a ainsi qu'un seul cas à lire, et la réponse s'affiche dès qu'elle est prête. */
+function textStream(text: string): Response {
+  return new Response(text, {
+    headers: {
+      "Content-Type": "text/plain; charset=utf-8",
+      "Cache-Control": "no-store",
+    },
+  });
+}
 
+export async function POST(request: Request) {
   let body: { messages?: unknown; locale?: unknown };
   try {
     body = (await request.json()) as { messages?: unknown; locale?: unknown };
@@ -188,6 +203,17 @@ export async function POST(request: Request) {
   }
 
   const dict = await getDictionary(locale);
+  const context = { dict, locale };
+
+  /* ÉTAGE 1 — la question est déjà connue : on répond sans appeler personne. */
+  const question = history[history.length - 1].content;
+  const predefined = predefinedAnswer(question, context);
+  if (predefined) return textStream(predefined.text);
+
+  /* ÉTAGE 2 — question ouverte : le modèle, s'il est configuré. Sinon, on passe la main à
+     l'équipe plutôt que de laisser le visiteur devant une panne. */
+  const upstream = provider();
+  if (!upstream) return textStream(handoffAnswer(context));
 
   let response: Response;
   try {
@@ -207,11 +233,11 @@ export async function POST(request: Request) {
       }),
     });
   } catch {
-    return Response.json({ error: "upstream_unreachable" }, { status: 502 });
+    return textStream(handoffAnswer(context));
   }
 
   if (!response.ok || !response.body) {
-    return Response.json({ error: "upstream_error" }, { status: 502 });
+    return textStream(handoffAnswer(context));
   }
 
   return new Response(sseToText(response.body), {

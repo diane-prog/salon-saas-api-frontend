@@ -46,7 +46,7 @@ export default function FullScreenPanel({
   onClose,
   returnFocusTo,
   footer,
-  tone = "ink",
+  tone = "glass",
   children,
 }: {
   /** Nom du dialogue (le titre que lira un lecteur d'écran). */
@@ -59,10 +59,11 @@ export default function FullScreenPanel({
   /** Ligne de pied du panneau (rappel clavier, coordonnées…). */
   footer?: ReactNode;
   /**
-   * Surface du panneau. `ink` (défaut) : l'encre pleine des panneaux plein écran.
-   * `glass` : encre translucide + flou d'arrière-plan — la page reste devinée derrière
-   * le panneau. On y garde une base encre assez dense pour que le texte clair tienne son
-   * contraste même si le navigateur ignore `backdrop-filter`.
+   * Surface du panneau. `glass` (DÉFAUT) : encre translucide + flou d'arrière-plan — la page
+   * reste devinée derrière le panneau, tous les méga menus du site se ressemblent. On y garde
+   * une base encre assez dense pour que le texte clair tienne son contraste même si le
+   * navigateur ignore `backdrop-filter`. `ink` : l'encre pleine, pour un panneau qui doit
+   * vraiment fermer la vue (le rideau de transition s'en sert).
    */
   tone?: "ink" | "glass";
   children: ReactNode;

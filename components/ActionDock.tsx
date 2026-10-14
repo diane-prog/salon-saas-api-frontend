@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import Link from "next/link";
 import { ArrowUpRight, Close, Mail, Share, Spark } from "@/components/Icons";
 import { useDictionary } from "@/components/DictionaryProvider";
 import { socialIcon, socialLinks } from "@/components/SocialIcons";
 import ContactSheet from "@/components/ContactSheet";
+import DevisSheet from "@/components/DevisSheet";
 import Chatbot from "@/components/Chatbot";
 
 /**
@@ -13,29 +13,44 @@ import Chatbot from "@/components/Chatbot";
  *
  * Pourquoi au scroll et pas d'emblée : en haut de page, le visiteur lit ; un pavé de boutons
  * posé sur le hero ne fait que masquer la photo. Dès qu'il descend — donc dès qu'il cherche
- * quelque chose — les trois issues du site se mettent à portée : le devis, le contact, et
- * l'assistant. Elle repart au retour en haut, par la même transition.
+ * quelque chose — les issues du site se mettent à portée. Elle repart au retour en haut, par
+ * la même transition.
  *
- * Les trois actions ne sont pas de même nature, et l'objet le dit :
- * - `devis` est un LIEN (une page, celle du formulaire long) — c'est l'action principale, elle
- *   porte donc l'accent dégradé du site ;
- * - `contacter` ouvre le panneau de contact existant (`ContactSheet`, formulaire court) ;
- * - `assistant` ouvre la fenêtre de chat (`Chatbot`).
+ * QUATRE actions de MÊME POIDS visuel : une seule couleur, une seule hauteur, une seule
+ * écriture — le métier de chacune est dit par son icône et son mot, pas par un dégradé. La
+ * hiérarchie se fait à l'intérieur des panneaux (le devis a l'action pleine, le contact la
+ * page), pas dans la barre.
  *
- * L'ÉVENTAIL de réseaux : un bouton rond ouvre les logos officiels en demi-cercle AU-DESSUS de
- * lui, WhatsApp compris. La disposition est calculée : les icônes sont posées sur un arc de
- * 180° (de gauche à droite, jamais en bas), centré sur le bouton — donc aucune ne sort de
- * l'écran, aucune ne recouvre la barre d'actions, et l'écart angulaire constant (36° pour six
- * réseaux) garantit qu'elles ne se chevauchent pas. Réduire l'animation laisse le même
- * arrangement, sans les 500 ms de trajet.
+ * - `devis` ouvre le formulaire de devis (`DevisSheet`) ;
+ * - `contacter` ouvre celui du contact (`ContactSheet`) ;
+ * - `assistant` ouvre la fenêtre de chat (`Chatbot`) ;
+ * - `réseaux` déploie l'éventail.
+ *
+ * L'ÉVENTAIL : six logos officiels, WhatsApp compris, en DEMI-CERCLE centré au-dessus de la
+ * barre — de la gauche vers la droite en passant par le haut, jamais vers le bas.
+ *
+ * Deux réglages comptent plus que le reste :
+ *
+ * 1. l'arc est centré sur la BARRE, pas sur le bouton. Un éventail centré sur le bouton
+ *    envoyait toutes les icônes d'un seul côté et l'ensemble partait sur la droite ; centré
+ *    sur la barre, il est symétrique et tient dans l'écran dès 320 px de large
+ *    (2 × (120 + 22) = 284 px) ;
+ * 2. l'arc est surélevé de 56 px (`LIFT`). Sans cette garde, ses deux extrémités retombaient
+ *    au niveau de la barre, et le bouton — devenu une croix à l'ouverture — se retrouvait
+ *    enfermé AU MILIEU de l'arc. Surélevé, l'arc flotte nettement au-dessus : la barre est
+ *    entièrement dehors, et la croix reste un bouton de la barre, sous l'extrémité droite de
+ *    l'arc.
+ *
+ * Rayon de 120 px : 2 × 120 × sin(18°) = 74 px entre deux icônes de 44 px — largement de
+ * quoi respirer.
  */
 
-/** Rayon de l'éventail (px). Assez large pour six logos de 44 px, assez court pour tenir sur
-    320 px de large : 2 × (104 + 22) = 252 px. */
-const RADIUS = 104;
+/** Rayon de l'éventail (px) et garde au-dessus de la barre. */
+const RADIUS = 120;
+const LIFT = 56;
 
 export default function ActionDock() {
-  const { dict, locale } = useDictionary();
+  const { dict } = useDictionary();
   const [shown, setShown] = useState(false);
   const [fan, setFan] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
@@ -43,7 +58,6 @@ export default function ActionDock() {
   const [chatReady, setChatReady] = useState(false);
   const dockRef = useRef<HTMLDivElement>(null);
 
-  const href = (path: string) => `/${locale}${path === "/" ? "" : path}`;
   const networks = socialLinks(dict.site);
 
   useEffect(() => {
@@ -88,27 +102,30 @@ export default function ActionDock() {
     },
   };
 
-  const actionButton =
-    "flex items-center gap-2 px-3.5 py-2.5 text-sm font-light transition-colors duration-300";
+  /* UNE seule écriture pour toute la barre : même hauteur, même graisse, même couleur. */
+  const item =
+    "flex h-11 items-center gap-2 px-3.5 text-sm font-light text-paper/75 transition-colors duration-300 hover:text-turquoise focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-turquoise";
+  /* Le mot s'efface sous `sm` : sur téléphone, la barre reste une rangée compacte d'icônes
+     (chaque bouton garde son intitulé en `aria-label`). */
+  const word = "hidden sm:inline";
 
   return (
     <>
       <div
-        ref={dockRef}
-        className={`pointer-events-none fixed inset-x-0 bottom-4 z-60 flex flex-col items-center gap-3 px-4 transition-[opacity,transform] duration-500 ease-out motion-reduce:transition-none ${
+        className={`pointer-events-none fixed inset-x-0 bottom-4 z-60 flex justify-center px-4 transition-[opacity,transform] duration-500 ease-out motion-reduce:transition-none ${
           shown ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"
         }`}
       >
-        {/* Éventail + déclencheur. Le bouton est CENTRÉ au-dessus de la barre : l'arc se déploie
-            dans l'espace libre, sans jamais passer sous les actions. */}
-        <div className="relative pointer-events-auto">
+        {/* Le repère de l'éventail est le bord SUPÉRIEUR de la barre, EN SON MILIEU : les
+            icônes partent de là, en absolu — donc sans agrandir la barre ni pousser la page. */}
+        <div ref={dockRef} className="relative pointer-events-auto">
           {networks.map((network, i) => {
             const Icon = socialIcon(network.label);
-            /* Arc de 180° partant de la GAUCHE (π) pour finir à la DROITE (2π) : en coordonnées
-               d'écran, `sin` est alors négatif, donc les icônes montent. */
+            /* Demi-cercle : de π (gauche) à 2π (droite). En coordonnées d'écran, `sin` est
+               alors négatif — les icônes montent. */
             const angle = Math.PI + (Math.PI / (networks.length - 1)) * i;
             const x = Math.cos(angle) * RADIUS;
-            const y = Math.sin(angle) * RADIUS;
+            const y = Math.sin(angle) * RADIUS - LIFT;
             return (
               <a
                 key={network.label}
@@ -117,17 +134,19 @@ export default function ActionDock() {
                 rel="noopener noreferrer"
                 aria-label={network.label}
                 title={network.label}
-                /* Hors de l'éventail, les liens sont retirés du parcours clavier : ils sont
-                   invisibles, donc invisibles pour un lecteur d'écran aussi. */
+                /* Hors de l'éventail, le lien sort du parcours clavier ET des technologies
+                   d'assistance : il est invisible, donc il doit l'être pour tout le monde. */
                 tabIndex={fan ? undefined : -1}
                 aria-hidden={!fan}
                 style={{
                   transform: fan
                     ? `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`
-                    : "translate(-50%, -50%)",
+                    : "translate(-50%, calc(-50% + 12px))",
                   transitionDelay: fan ? `${i * 45}ms` : "0ms",
                 }}
-                className={`absolute left-1/2 top-1/2 grid h-11 w-11 place-items-center bg-ink/90 text-paper/75 ring-1 ring-paper/15 backdrop-blur-md transition-[transform,opacity] duration-500 ease-out hover:text-turquoise hover:ring-turquoise/40 motion-reduce:transition-none ${
+                /* `left-1/2` : l'ancre est le MILIEU de la barre — c'est ce qui garde l'arc
+                   symétrique et entièrement dans l'écran. */
+                className={`absolute left-1/2 top-0 grid h-11 w-11 place-items-center bg-ink/90 text-paper/75 ring-1 ring-paper/15 backdrop-blur-md transition-[transform,opacity] duration-500 ease-out hover:text-turquoise hover:ring-turquoise/40 motion-reduce:transition-none ${
                   fan ? "opacity-100" : "pointer-events-none opacity-0"
                 }`}
               >
@@ -136,58 +155,63 @@ export default function ActionDock() {
             );
           })}
 
-          <button
-            type="button"
-            onClick={() => setFan((open) => !open)}
-            aria-expanded={fan}
-            aria-label={fan ? dict.ui.dock.closeSocials : dict.ui.dock.openSocials}
-            title={dict.ui.dock.socials}
-            className="grid h-11 w-11 place-items-center bg-ink/85 text-paper/80 ring-1 ring-paper/15 backdrop-blur-md transition-colors duration-300 hover:text-turquoise hover:ring-turquoise/40"
+          <div
+            role="group"
+            aria-label={dict.ui.dock.title}
+            className="flex items-center gap-1 bg-ink/85 p-1.5 text-paper ring-1 ring-paper/15 backdrop-blur-md shadow-lift"
           >
-            {fan ? <Close className="h-5 w-5" /> : <Share className="h-5 w-5" />}
-          </button>
-        </div>
+            {/* Les quatre actions du site, dans l'ordre où un visiteur les veut : devis,
+                contact, assistant, réseaux. */}
+            <DevisSheet
+              triggerClassName={item}
+              triggerContent={
+                <>
+                  <ArrowUpRight className="h-4 w-4 shrink-0" />
+                  <span className={word}>{dict.ui.dock.quote}</span>
+                </>
+              }
+            />
 
-        {/* Les trois issues du site. */}
-        <div
-          role="group"
-          aria-label={dict.ui.dock.title}
-          className="flex items-center gap-1 bg-ink/85 p-1.5 text-paper ring-1 ring-paper/15 backdrop-blur-md shadow-lift"
-        >
-          <Link
-            href={href("/devis")}
-            className={`${actionButton} bg-gradient-to-r from-brand to-turquoise text-white hover:opacity-90`}
-          >
-            {dict.ui.dock.quote}
-            <ArrowUpRight className="h-4 w-4" />
-          </Link>
+            <ContactSheet
+              labels={contactLabels}
+              triggerClassName={item}
+              triggerContent={
+                <>
+                  <Mail className="h-4 w-4 shrink-0" />
+                  <span className={word}>{dict.ui.dock.contact}</span>
+                </>
+              }
+            />
 
-          {/* MÊME panneau de contact que la page contact : seule la pastille change. */}
-          <ContactSheet
-            labels={contactLabels}
-            triggerClassName={`${actionButton} text-paper/75 hover:text-turquoise`}
-            triggerContent={
-              <>
-                <Mail className="h-4 w-4" />
-                {dict.ui.dock.contact}
-              </>
-            }
-          />
+            <button
+              type="button"
+              onClick={() => {
+                setChatReady(true);
+                setChatOpen(true);
+                setFan(false);
+              }}
+              aria-expanded={chatOpen}
+              aria-controls="leegi-chat"
+              aria-label={dict.ui.dock.chat}
+              className={item}
+            >
+              <Spark className="h-4 w-4 shrink-0" />
+              <span className={word}>{dict.ui.dock.chat}</span>
+            </button>
 
-          <button
-            type="button"
-            onClick={() => {
-              setChatReady(true);
-              setChatOpen(true);
-              setFan(false);
-            }}
-            aria-expanded={chatOpen}
-            aria-controls="leegi-chat"
-            className={`${actionButton} text-paper/75 hover:text-turquoise`}
-          >
-            <Spark className="h-4 w-4" />
-            {dict.ui.dock.chat}
-          </button>
+            <button
+              type="button"
+              onClick={() => setFan((open) => !open)}
+              aria-expanded={fan}
+              aria-label={fan ? dict.ui.dock.closeSocials : dict.ui.dock.openSocials}
+              title={dict.ui.dock.socials}
+              className={`grid h-11 w-11 shrink-0 place-items-center text-paper/75 transition-colors duration-300 hover:text-turquoise focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-turquoise ${
+                fan ? "text-turquoise" : ""
+              }`}
+            >
+              {fan ? <Close className="h-5 w-5" /> : <Share className="h-5 w-5" />}
+            </button>
+          </div>
         </div>
       </div>
 

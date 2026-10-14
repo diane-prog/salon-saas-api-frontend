@@ -2,10 +2,10 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import ContactSheet from "@/components/ContactSheet";
+import SocialLinks from "@/components/SocialLinks";
 import Reveal from "@/components/Reveal";
 import Parallax from "@/components/Parallax";
 import { HeroSection } from "@/components/sections";
-import { ArrowUpRight } from "@/components/Icons";
 import { isLocale, getDictionary, localePath } from "@/lib/dictionaries";
 
 export async function generateMetadata({ params }: PageProps<"/[lang]/contact">): Promise<Metadata> {
@@ -76,22 +76,9 @@ export default async function ContactPage({ params }: PageProps<"/[lang]/contact
                   />
                 </Reveal>
 
+                {/* Réseaux : logos officiels + intitulé, WhatsApp compris. */}
                 <Reveal delay={160} className="mt-10">
-                  <ul className="flex flex-wrap gap-x-8 gap-y-2">
-                    {site.socials.map((social) => (
-                      <li key={social.label}>
-                        <a
-                          href={social.href}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className={`group inline-flex items-center gap-1 text-sm text-navy ${valueLinkCls}`}
-                        >
-                          {social.label}
-                          <ArrowUpRight className="h-3.5 w-3.5 -translate-x-1 opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100" />
-                        </a>
-                      </li>
-                    ))}
-                  </ul>
+                  <SocialLinks site={site} />
                 </Reveal>
               </div>
             </div>
