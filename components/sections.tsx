@@ -82,7 +82,7 @@ export function HeroSection({
 
       <div className="container-x relative">
         <div className="flex max-w-3xl flex-col items-start gap-6">
-          <span className="inline-flex items-center gap-1.5 text-[0.7rem] font-medium uppercase tracking-[0.18em] text-gray-700">
+          <span className="inline-flex items-center gap-1.5 text-[0.7rem]  font-medium uppercase tracking-[0.18em] text-gray-700">
             {eyebrow}
             <ArrowUpRight className="h-3.5 w-3.5" />
           </span>
