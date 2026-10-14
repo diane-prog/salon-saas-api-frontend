@@ -64,7 +64,7 @@ export default function FormSheet({
   /** Flèche du déclencheur par défaut (on la retire quand le contenu porte déjà une icône). */
   iconArrow?: boolean;
 }) {
-  const { dict, locale } = useDictionary();
+  const { dict } = useDictionary();
   const [open, setOpen] = useState(false);
   const [desktop, setDesktop] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -107,7 +107,7 @@ export default function FormSheet({
         {open && (
           <FullScreenPanel
             label={labels.title}
-            closeLabel={locale === "fr" ? "Fermer le formulaire" : "Close the form"}
+            closeLabel={dict.ui.formCloseLabel}
             onClose={() => setOpen(false)}
             returnFocusTo={triggerRef}
             footer={

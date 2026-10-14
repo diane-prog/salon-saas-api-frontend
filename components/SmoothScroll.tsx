@@ -29,8 +29,26 @@ export default function SmoothScroll() {
 
     registerPlugin();
 
+    /*
+     * RÉGLAGES DE FLUIDITÉ. Lenis lisse de deux façons, et le choix compte :
+     *   - `lerp` : on se rapproche de la cible d'un pourcentage fixe À CHAQUE FRAME. La durée
+     *     réelle dépend donc de la cadence d'affichage — la même molette produit une glisse
+     *     plus courte sur un écran 144 Hz que sur un 60 Hz, et la course s'arrête sur un
+     *     arrondi au pixel, pas sur une durée.
+     *   - `duration` + `easing` : la course dure un TEMPS FIXE, quelle que soit la machine.
+     *     C'est ce modèle qu'on garde : un geste = un temps de glisse, toujours le même.
+     *
+     * La courbe est une exponentielle sortante (celle que Lenis applique par défaut quand on
+     * donne une durée) : le déplacement part franchement puis ralentit longuement. C'est ce
+     * long ralentissement qui se lit comme de l'inertie, et non comme un à-coup.
+     * 1,15 s est le point où ça reste vif : au-delà, la page semble répondre en retard.
+     *
+     * Le toucher reste NATIF (`syncTouch` à faux) : sur téléphone, piloter le défilement en
+     * JavaScript casse l'inertie du système, qui est meilleure que la nôtre.
+     */
     const lenis = new Lenis({
-      lerp: 0.11,
+      duration: 1.15,
+      easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       wheelMultiplier: 1.05,
       touchMultiplier: 1.4,
       anchors: true,

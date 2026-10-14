@@ -128,7 +128,7 @@ export default function Header() {
             />
           </Link>
 
-          <nav className="hidden items-center gap-1 lg:flex" aria-label="Navigation principale">
+          <nav className="hidden items-center gap-1 lg:flex" aria-label={dict.ui.navLabel}>
             {dict.nav.map((item) =>
               item.href === "/services" ? (
                 /* L'entrée Services n'est plus un lien survolé : c'est le déclencheur du
@@ -180,7 +180,7 @@ export default function Header() {
             <button
               type="button"
               onClick={() => setOpen(true)}
-              aria-label="Ouvrir le menu"
+              aria-label={dict.ui.menuOpenLabel}
               className="grid h-11 w-11 place-items-center rounded-full text-white transition-colors hover:bg-white/10 lg:hidden"
             >
               <Menu />
@@ -203,7 +203,7 @@ export default function Header() {
       {servicesPanel && (
         <FullScreenPanel
           label={dict.nav.find((n) => n.href === "/services")?.label ?? "Services"}
-          closeLabel={locale === "fr" ? "Fermer le menu" : "Close menu"}
+          closeLabel={dict.ui.menuCloseLabel}
           onClose={closeServicesPanel}
           returnFocusTo={servicesTriggerRef}
           /* Surface VERRE : encre translucide + flou d'arrière-plan — la page reste devinée
@@ -309,7 +309,7 @@ export default function Header() {
             <button
               type="button"
               onClick={() => setOpen(false)}
-              aria-label="Fermer le menu"
+              aria-label={dict.ui.menuCloseLabel}
               className="grid h-11 w-11 place-items-center rounded-full text-paper/70 ring-1 ring-paper/20 transition-colors hover:text-paper hover:ring-paper/50"
             >
               <Close />
@@ -322,7 +322,7 @@ export default function Header() {
               se numérote et se souligne, comme une page de sommaire. */}
           <nav
             className="no-scrollbar container-x flex-1 overflow-y-auto pb-12"
-            aria-label="Navigation mobile"
+            aria-label={dict.ui.menuNavLabel}
           >
             <ul className="mt-2 border-t border-paper/10">
               {dict.nav
@@ -395,7 +395,7 @@ export default function Header() {
                 onClick={() => setOpen(false)}
                 className="inline-flex flex-1 items-center justify-center rounded-full bg-gradient-to-r from-brand to-turquoise px-6 py-4 text-sm font-light text-white"
               >
-                {locale === "fr" ? "Demander un devis" : "Get a quote"}
+                {dict.ui.dock.quote}
               </Link>
             </div>
 

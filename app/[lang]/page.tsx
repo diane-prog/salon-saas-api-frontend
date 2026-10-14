@@ -25,29 +25,14 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
           insérées dans le flux. */}
       <WhyStatements />
 
-      <ServicesGlass
-        title={lang === "fr" ? "Nos Services" : "Our Services"}
-        body={
-          lang === "fr"
-            ? "Nous accompagnons les entreprises africaines et leurs partenaires à chaque étape de leur développement digital."
-            : "We support African companies and their partners at every stage of their digital development."
-        }
-      >
+      <ServicesGlass title={ui.servicesTitle} body={ui.servicesBody}>
         {/* Les résultats sont passés en ENFANT (et non posés en voisin) pour rester dans la
             section : c'est la boîte de la section qui sert de repère à la vidéo collée, donc
             le bloc défile par-dessus le média — et le plan de ce média vire progressivement
             au sien pendant qu'il monte (voir `ServicesGlass`). */}
         <StatsSection
-          title={
-            lang === "fr"
-              ? "Des résultats concrets, pas des promesses."
-              : "Proven results, not promises."
-          }
-          body={
-            lang === "fr"
-              ? "Une décennie de campagnes, de sites et d'identités de marque pour des entreprises africaines et leurs partenaires. Voici ce que cela donne, chiffres en main."
-              : "A decade of campaigns, websites and brand identities for African companies and their partners. Here is what that looks like, in numbers."
-          }
+          title={ui.statsTitle}
+          body={ui.statsBody}
           linkHref={href("/realisations")}
           linkLabel={ui.viewAllProjects}
           stats={stats}

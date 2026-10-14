@@ -131,7 +131,7 @@ export default function ServicePageTemplate({ service }: { service: Service }) {
         <section className={`border-t ${RULE}`}>
           <div className="container-x py-20 sm:py-24">
             <span className={`${LABEL} text-ink/45`}>
-              {locale === "fr" ? "Autres services" : "Other services"}
+              {ui.otherServices}
             </span>
             <ul className={`mt-8 border-t ${RULE}`}>
               {others.map((other) => (

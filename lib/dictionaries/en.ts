@@ -257,42 +257,102 @@ export const about = {
   ],
 };
 
+/**
+ * Projects. Each one carries three levels of reading: `body` (a single line, for the tile and
+ * the search index), then `summary` + `scope` (the story and the scope), shown by the
+ * full-screen sheet — see `components/ProjectModal.tsx`.
+ *
+ * Everything here is DERIVED from the project, never invented: the `client` comes from the
+ * title or the body, the rest restates the work already described. No date, no figure, no
+ * measured outcome was added — a sheet that invents a number is worse than a short sheet. If
+ * a figure ever belongs here, it comes from the client, not from us.
+ */
 export const projects = [
   {
     title: "ESCDA 2025 event visual identity",
     body: "Design and production of visual assets to strengthen the event's impact.",
     category: "Events",
     image: "/img/projet-escda.jpg",
+    client: "ESCDA",
+    summary:
+      "A yearly gathering of students, teachers and partners: the visual system had to hold up for a whole day without ever losing the school's thread. Signage, stage screens, print pieces and social media adaptations were drawn as one graphic family, produced and delivered within the tight deadlines of the event.",
+    scope: [
+      "Art direction of the visual system",
+      "Signage and printed materials",
+      "Stage screen graphics",
+      "Social media adaptations",
+    ],
   },
   {
     title: "EMF website design",
     body: "A modern, well-structured website to strengthen EMF's digital presence.",
     category: "Websites",
     image: "/img/projet-emf.jpg",
+    client: "EMF Consulting",
+    summary:
+      "A digital presence worthy of a consulting firm: the site had to explain a demanding offer in seconds and earn trust before the first conversation. The architecture was tightened around three entry points — expertise, references, contact — and every page ends on a clear way out.",
+    scope: [
+      "Site structure and visitor journey",
+      "Design and responsive build",
+      "Content hierarchy",
+      "Go-live and search basics",
+    ],
   },
   {
     title: "Comprint ad mockups",
     body: "Visuals created to capture attention and maximise campaign impact.",
     category: "Digital content",
     image: "/img/projet-comprint.jpg",
+    client: "Comprint",
+    summary:
+      "Visuals built for a feed: catch the eye in the first second, say one thing, stay readable on a phone screen. The series applies a single compositional principle across several formats, so future campaigns only have to change the message.",
+    scope: [
+      "Design of the visual series",
+      "Multi-format adaptations",
+      "Usage rules for upcoming campaigns",
+    ],
   },
   {
     title: "Setna Services",
     body: "Logo presented in real-world settings through professional mockups.",
     category: "Branding",
     image: "/img/projet-setna.jpg",
+    client: "Setna Services",
+    summary:
+      "A logo on its own convinces no one: what wins the decision is seeing it in real life. The brand was presented in context — stationery, vehicles, uniforms, signage — so the team could picture it before signing off, and so the rules of use were set from the start.",
+    scope: [
+      "Real-world mockups",
+      "High-fidelity renders",
+      "Brand application rules",
+    ],
   },
   {
     title: "Social media content",
     body: "Visual created for the 8 March digital campaign for Étincelles des Marques.",
     category: "Digital content",
     image: "/img/projet-etincelles.jpg",
+    client: "Étincelles des Marques",
+    summary:
+      "A campaign for International Women's Day: a visual that asserts without caricature, made to travel from one screen to the next. The message fits in a single image, the typography carries the tone, and the palette stays the brand's own.",
+    scope: [
+      "Campaign visual design",
+      "Social media format adaptations",
+      "Publication support",
+    ],
   },
   {
     title: "ESCDA first edition coverage",
     body: "Photo and video coverage to showcase the event's key moments.",
     category: "Events",
     image: "/img/projet-emf.jpg",
+    client: "ESCDA",
+    summary:
+      "A first edition: the images had to keep working long after the event. Photo and video coverage on the day, then editing into a short film and a selection of stills, delivered within the week to feed the school's communication.",
+    scope: [
+      "Photo and video coverage",
+      "Editing of the recap film",
+      "Photo selection and retouching",
+    ],
   },
 ];
 
@@ -587,6 +647,35 @@ export const ui = {
   notFoundBody: "It looks like nothing was found here. Head back home to keep browsing.",
   backHome: "Back to home",
   languageLabel: "Language",
+  /* Navigation landmarks: never visible, they name the regions and buttons for screen
+     readers. They live here with the other labels because they change with the locale —
+     hard-written, they stayed French on the English site. */
+  navLabel: "Main navigation",
+  menuOpenLabel: "Open menu",
+  menuCloseLabel: "Close menu",
+  menuNavLabel: "Mobile navigation",
+  searchCloseLabel: "Close search",
+  formCloseLabel: "Close form",
+  otherServices: "Other services",
+  /* Full-screen sheet for a project (`components/ProjectModal.tsx`). `projectDetailLabel`
+     names the dialog for screen readers, the others are visible. */
+  projectDetailLabel: "Project details",
+  projectCloseLabel: "Close project details",
+  projectDeliverables: "What we delivered",
+  projectClient: "Client",
+  projectCategory: "Category",
+  projectCta: "A project like this?",
+  /* Label of the blue flower in the testimonials section: two lines, so two entries — the
+     break is a layout decision, not an accident. */
+  clientStories: ["Client", "Stories"],
+  /* Home Services section: both sentences were written in clear in the page, doubled by a
+     ternary on the locale. */
+  servicesTitle: "Our Services",
+  servicesBody:
+    "We support African companies and their partners at every stage of their digital development.",
+  statsTitle: "Proven results, not promises.",
+  statsBody:
+    "A decade of campaigns, websites and brand identities for African companies and their partners. Here is what that looks like, in numbers.",
   searchLabel: "Search the site",
   searchPlaceholder: "Search a service, a project…",
   searchNoResults: "No results",

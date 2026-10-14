@@ -8,6 +8,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ArrowRight, ChevronDown } from "@/components/Icons";
 import Parallax from "@/components/Parallax";
 import { useDictionary } from "@/components/DictionaryProvider";
+import ProjectModal from "@/components/ProjectModal";
 import { prefersReducedMotion } from "@/lib/motion";
 import { BODY, LABEL, RULE } from "@/lib/editorial";
 
@@ -43,11 +44,23 @@ export type GalleryView = "grid" | "list" | "feed";
 
 export const ALL_VIEWS: GalleryView[] = ["grid", "list", "feed"];
 
+/**
+ * Un projet, tel que la galerie le reçoit. `body` suffit à la vignette et à la recherche ;
+ * `client`, `summary` et `scope` ne servent qu'à la fiche plein écran — ils sont REQUIS ici,
+ * et non facultatifs : une fiche sans récit ni périmètre n'aurait rien à montrer, et un
+ * champ optionnel laisserait passer ce cas sans rien dire.
+ */
 export type GalleryProject = {
   title: string;
   body: string;
   category: string;
   image: string;
+  /** Nom du client, tel qu'il figure au dictionnaire. */
+  client: string;
+  /** Le projet raconté en quelques phrases : le problème, la réponse. */
+  summary: string;
+  /** Ce qui a été livré, ligne par ligne. */
+  scope: string[];
 };
 
 /**
@@ -250,6 +263,21 @@ export default function ProjectsGallery({
   const view = controlledView ?? views[0];
   const stackRef = useRef<HTMLUListElement>(null);
 
+  /*
+   * FICHE OUVERTE. On garde le PROJET et non son index : la liste peut être filtrée pendant
+   * que la galerie est montée (la barre d'outils de la page Réalisations), et un index
+   * survivrait mal à un changement de liste — on ouvrirait un autre projet que celui cliqué.
+   *
+   * `openerRef` retient la carte cliquée : le panneau y renvoie le focus à la fermeture, donc
+   * le clavier revient exactement là où il était.
+   */
+  const [selected, setSelected] = useState<GalleryProject | null>(null);
+  const openerRef = useRef<HTMLElement | null>(null);
+  const openProject = (project: GalleryProject, element: HTMLElement | null) => {
+    openerRef.current = element;
+    setSelected(project);
+  };
+
   /**
    * L'effet de la pile : la fiche recouverte se rétrécit et disparaît pendant que la
    * suivante monte sur elle. Il est piloté par GSAP/ScrollTrigger plutôt que par les
@@ -315,7 +343,13 @@ export default function ProjectsGallery({
           <ul className="grid gap-x-5 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
             {projects.map((project) => (
               <li key={project.title}>
-                <Plate href={`/${locale}/realisations`} project={project} ratio="aspect-[4/5]" sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" />
+                <Plate
+                  href={`/${locale}/realisations`}
+                  project={project}
+                  onOpen={openProject}
+                  ratio="aspect-[4/5]"
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                />
               </li>
             ))}
           </ul>
@@ -328,6 +362,12 @@ export default function ProjectsGallery({
               <li key={project.title} className={`border-b ${RULE}`}>
                 <Link
                   href={`/${locale}/realisations`}
+                  data-no-transition
+                  aria-haspopup="dialog"
+                  onClick={(event) => {
+                    event.preventDefault();
+                    openProject(project, event.currentTarget);
+                  }}
                   className="group flex items-center gap-5 py-4 transition-colors duration-300 hover:bg-ink/[0.03] sm:gap-8"
                 >
                   <span className={`w-6 shrink-0 ${LABEL} tabular-nums text-ink/35`}>
@@ -385,6 +425,12 @@ export default function ProjectsGallery({
                       géométrie de la pile (ou de la suite) ne bouge donc jamais. */}
                   <Link
                     href={`/${locale}/realisations`}
+                    data-no-transition
+                    aria-haspopup="dialog"
+                    onClick={(event) => {
+                      event.preventDefault();
+                      openProject(project, event.currentTarget);
+                    }}
                     className="group flex h-[77svh] w-full flex-col overflow-hidden bg-white"
                   >
                     <span className="relative block flex-1 overflow-hidden bg-ink/[0.06]">
@@ -412,6 +458,17 @@ export default function ProjectsGallery({
           </ul>
         ) : null}
       </div>
+
+      {/* La fiche est montée PAR-DESSUS la galerie, à la demande : `FullScreenPanel` la
+          place en portail à la fin de `<body>`, donc elle échappe à tout contexte
+          d'empilement de la page. */}
+      {selected && (
+        <ProjectModal
+          project={selected}
+          onClose={() => setSelected(null)}
+          returnFocusTo={openerRef}
+        />
+      )}
     </>
   );
 }
@@ -420,20 +477,38 @@ export default function ProjectsGallery({
  * Vignette « planche » : image nue (aucun cadre, aucun arrondi, aucune ombre) et sa
  * légende en dessous. Le survol — ou la prise de focus, pour le clavier — resserre très
  * légèrement l'image et fait glisser la flèche ; rien d'autre ne s'anime.
+ *
+ * C'EST UN LIEN, ET IL LE RESTE, même si le clic ouvre une fiche au lieu de naviguer :
+ * `href` reste le chemin vers la page des réalisations, donc sans JavaScript la carte
+ * continue de mener quelque part d'utile. `data-no-transition` retire la carte du rideau de
+ * transition (voir `PageTransition`) : sans lui, le rideau se baisserait avant que notre
+ * `preventDefault` n'ait pu annuler la navigation. C'est aussi ce qui rend le clic au clavier
+ * identique au clic à la souris — la touche Entrée active le lien.
  */
 function Plate({
   href,
   project,
+  onOpen,
   ratio,
   sizes,
 }: {
   href: string;
   project: GalleryProject;
+  onOpen: (project: GalleryProject, element: HTMLElement | null) => void;
   ratio: string;
   sizes: string;
 }) {
   return (
-    <Link href={href} className="group block">
+    <Link
+      href={href}
+      data-no-transition
+      aria-haspopup="dialog"
+      onClick={(event) => {
+        event.preventDefault();
+        onOpen(project, event.currentTarget);
+      }}
+      className="group block"
+    >
       <span className={`relative block overflow-hidden bg-ink/[0.06] ${ratio}`}>
         <Parallax className="absolute inset-0" amount={4} scale={1.09}>
           <Image

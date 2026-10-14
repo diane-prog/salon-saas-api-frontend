@@ -257,42 +257,102 @@ export const about = {
   ],
 };
 
+/**
+ * Réalisations. Chaque projet porte trois niveaux de lecture : `body` (une ligne, pour la
+ * vignette et la recherche), puis `summary` + `scope` (le récit et le périmètre), affichés
+ * par la fiche plein écran — voir `components/ProjectModal.tsx`.
+ *
+ * Ce qui est écrit là est DÉDUIT du projet, jamais inventé : le `client` vient du titre ou
+ * du corps, le reste reformule le travail déjà décrit. Aucune date, aucun chiffre, aucun
+ * résultat chiffré n'a été ajouté — une fiche qui invente une donnée est pire qu'une fiche
+ * courte. Si un chiffre doit y figurer un jour, il vient du client, pas de nous.
+ */
 export const projects = [
   {
     title: "Dispositif visuel événementiel ESCDA 2025",
     body: "Conception et production de supports visuels pour renforcer l’impact de l’événement.",
     category: "Événementiel",
     image: "/img/projet-escda.jpg",
+    client: "ESCDA",
+    summary:
+      "Un rendez-vous annuel qui réunit étudiants, enseignants et partenaires : le dispositif visuel devait tenir toute une journée sans jamais perdre le fil de l’école. Signalétique, écrans de scène, imprimés et déclinaisons réseaux sociaux ont été dessinés comme une seule famille graphique, puis produits et livrés dans les délais serrés de l’événement.",
+    scope: [
+      "Direction artistique du dispositif",
+      "Signalétique et supports imprimés",
+      "Habillage des écrans de scène",
+      "Adaptations réseaux sociaux",
+    ],
   },
   {
     title: "Conception du site web EMF",
     body: "Création d’un site web moderne et structuré pour renforcer la présence digitale de EMF.",
     category: "Sites web",
     image: "/img/projet-emf.jpg",
+    client: "EMF Consulting",
+    summary:
+      "Une présence digitale à la hauteur d’un cabinet de conseil : le site devait expliquer une offre exigeante en quelques secondes et inspirer confiance avant le premier échange. L’architecture a été resserrée autour de trois entrées — l’expertise, les références, le contact — et chaque page se termine sur une porte de sortie claire.",
+    scope: [
+      "Arborescence et parcours de visite",
+      "Design et intégration responsive",
+      "Hiérarchisation des contenus",
+      "Mise en ligne et bases du référencement",
+    ],
   },
   {
     title: "Comprint Maquette Ads",
     body: "Visuels créés pour capter l’attention et maximiser l’impact des campagnes publicitaires.",
     category: "Contenu digital",
     image: "/img/projet-comprint.jpg",
+    client: "Comprint",
+    summary:
+      "Des visuels pensés pour un flux : capter l’attention dans la première seconde, dire une seule chose, rester lisibles sur un écran de téléphone. La série décline un même principe de composition sur plusieurs formats, pour que les campagnes suivantes n’aient plus qu’à changer le message.",
+    scope: [
+      "Conception de la série de visuels",
+      "Déclinaisons multi-formats",
+      "Règles d’usage pour les campagnes à venir",
+    ],
   },
   {
     title: "Setna Services",
     body: "Logo présenté en situation à travers des mockups professionnels.",
     category: "Branding",
     image: "/img/projet-setna.jpg",
+    client: "Setna Services",
+    summary:
+      "Un logo seul ne convainc personne : ce qui emporte la décision, c’est de le voir dans la vraie vie. La marque a été présentée en situation — papeterie, véhicules, tenues, signalétique — pour que l’équipe se projette avant de valider, et pour fixer dès le départ les règles d’application.",
+    scope: [
+      "Mise en situation sur supports réels",
+      "Rendus haute fidélité",
+      "Règles d’application de la marque",
+    ],
   },
   {
     title: "Création de contenu social media",
     body: "Visuel conçu pour la campagne digitale du 8 mars pour Étincelles des Marques.",
     category: "Contenu digital",
     image: "/img/projet-etincelles.jpg",
+    client: "Étincelles des Marques",
+    summary:
+      "Une campagne pour la Journée internationale des droits des femmes : un visuel qui affirme sans caricaturer, pensé pour circuler d’un écran à l’autre. Le message tient dans une seule image, la typographie porte le ton, et la palette reste celle de la marque.",
+    scope: [
+      "Création du visuel de campagne",
+      "Adaptations aux formats réseaux sociaux",
+      "Accompagnement de la publication",
+    ],
   },
   {
     title: "Couverture 1ᵉ édition de ESCDA",
     body: "Captation image et vidéo pour valoriser les moments forts de l’événement.",
     category: "Événementiel",
     image: "/img/projet-emf.jpg",
+    client: "ESCDA",
+    summary:
+      "Une première édition : il fallait produire des images qui serviraient encore longtemps après l’événement. Captation photo et vidéo pendant la journée, puis montage d’un film court et d’une sélection d’images, livrés dans la semaine pour nourrir la communication de l’école.",
+    scope: [
+      "Captation photo et vidéo",
+      "Montage du film de restitution",
+      "Sélection et retouche des images",
+    ],
   },
 ];
 
@@ -588,8 +648,8 @@ export const ui = {
   backHome: "Retour à l'accueil",
   languageLabel: "Langue",
   /* Repères de navigation : jamais visibles, ils nomment les régions et les boutons pour les
-     lecteurs d'écran. Ils vivent ici, avec les autres libellés, parce qu'ils chan{
-     gent avec la langue doublée — écrits en dur, ils restaient français sur le site anglais. */
+     lecteurs d'écran. Ils vivent ici, avec les autres libellés, parce qu'ils changent avec
+     la langue doublée — écrits en dur, ils restaient français sur le site anglais. */
   navLabel: "Navigation principale",
   menuOpenLabel: "Ouvrir le menu",
   menuCloseLabel: "Fermer le menu",
@@ -597,6 +657,14 @@ export const ui = {
   searchCloseLabel: "Fermer la recherche",
   formCloseLabel: "Fermer le formulaire",
   otherServices: "Autres services",
+  /* Fiche plein écran d'une réalisation (`components/ProjectModal.tsx`). `projectDetailLabel`
+     nomme le dialogue pour les lecteurs d'écran, les autres sont visibles. */
+  projectDetailLabel: "Détail du projet",
+  projectCloseLabel: "Fermer la fiche projet",
+  projectDeliverables: "Ce que nous avons livré",
+  projectClient: "Client",
+  projectCategory: "Catégorie",
+  projectCta: "Un projet comme celui-ci ?",
   /* Libellé de la fleur bleue de la section témoignages : deux lignes, donc deux entrées —
      la coupure est une décision de mise en page, pas un effet du hasard. */
   clientStories: ["Histoires", "Clients"],

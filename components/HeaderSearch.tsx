@@ -120,7 +120,7 @@ export default function HeaderSearch({ scrolled }: { scrolled: boolean }) {
       {open && (
         <FullScreenPanel
           label={ui.searchLabel}
-          closeLabel={locale === "fr" ? "Fermer la recherche" : "Close search"}
+          closeLabel={ui.searchCloseLabel}
           onClose={close}
           returnFocusTo={triggerRef}
           footer={
