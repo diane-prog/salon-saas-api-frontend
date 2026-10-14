@@ -537,6 +537,28 @@ html[data-intro] .intro-video {
   animation: intro-welcome 2000ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
+/* Mobile uniquement : agrandit la vidéo pour que le logo soit lisible. */
+@media (max-width: 767px) and (max-aspect-ratio: 1 / 1) {
+  .intro-video {
+    overflow: hidden;
+  }
+
+  .intro-video video {
+    transform: scale(3);
+    transform-origin: center;
+  }
+}
+
+/* Téléphone en portrait : la vidéo (dézoomée, logo ~14 % du cadre) tient dans la LARGEUR
+   de l'écran en `contain`, donc le logo ne ferait qu'~55 px. On l'agrandit autour du
+   centre : le surplus ne tombe que dans le fond uni #070707, invisible. */
+@media (max-aspect-ratio: 1 / 1) {
+  .intro-video video {
+    transform: scale(3);
+    transform-origin: center;
+  }
+}
+
 @keyframes intro-welcome {
   0% {
     opacity: 0;
