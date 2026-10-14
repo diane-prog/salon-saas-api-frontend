@@ -6,6 +6,7 @@ import Link from "next/link";
 import { ArrowUpRight } from "@/components/Icons";
 import Reveal from "@/components/Reveal";
 import Parallax from "@/components/Parallax";
+import RotatingWord from "@/components/RotatingWord";
 import SplitText from "@/components/SplitText";
 import { ButtonLink } from "@/components/ui";
 import HeroSearch from "@/components/HeroSearch";
@@ -100,15 +101,32 @@ export default function HomeHero() {
               {ui.agency}
             </span>
 
-            {/* `breakAfter={2}` : le titre tient sur DEUX lignes, coupé après le deuxième
-                mot, quelle que soit la largeur de l'écran — « Faites briller / votre
-                marque. » en français, « Make your / brand shine. » en anglais. */}
+            {/* Titre sur DEUX lignes, coupé au même endroit sur tous les écrans : le saut
+                vient du `<br />` posé au début du contenu qui suit les mots, pas d'un
+                `breakAfter` dépendant de la longueur — la phrase reste donc
+                « Faites briller votre / marque. » en français, « Make your brand / shine. »
+                en anglais.
+
+                Le dernier mot est MOUVANT et en couleur de marque : il tourne sur plusieurs
+                propositions (`RotatingWord`), ce qui donne au titre une seconde lecture à
+                chaque passage. `label` sert la phrase entière aux lecteurs d'écran et à
+                l'indexation, parce que le mot qui tourne est décoratif : c'est la première
+                proposition du dictionnaire que voient les robots, et elle est complète. */}
             <SplitText
               as="h1"
-              text={hero.lead}
-              breakAfter={2}
+              text={hero.leadStatic}
+              label={hero.lead}
+              trailing={
+                <>
+                  <br />
+                  <RotatingWord words={hero.leadRotating} className="text-brand" />
+                </>
+              }
               delay={0.12}
               stagger={0.06}
+              /* L'ombre portée du titre est héritée par le mot qui tourne : elle le tient
+                 lisible sur n'importe quel plan de la vidéo, y compris en couleur de marque
+                 (`text-brand`, posé sur `RotatingWord` juste au-dessus). */
               className="max-w-3xl font-light text-4xl leading-[1.06] text-white [text-shadow:0_1px_2px_rgb(0_9_42_/_0.45),0_6px_24px_rgb(0_9_42_/_0.35)] sm:text-5xl lg:text-[3.25rem] lg:leading-[1.02]"
             />
 

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { ArrowRight, Close, Mail, Spark } from "@/components/Icons";
+import ChatAnswer from "@/components/ChatAnswer";
 import { useDictionary } from "@/components/DictionaryProvider";
 import { LABEL } from "@/lib/editorial";
 
@@ -140,9 +141,9 @@ export default function Chatbot({ open, onClose }: { open: boolean; onClose: () 
         aria-live="polite"
         className="no-scrollbar flex flex-1 flex-col gap-3 overflow-y-auto overscroll-contain px-5 py-4"
       >
-        <p className="max-w-[92%] self-start bg-paper/[0.07] px-4 py-3 text-sm leading-relaxed text-paper/85 ring-1 ring-paper/10">
-          {dict.ui.chat.greeting}
-        </p>
+        <div className="max-w-[92%] self-start bg-paper/[0.07] px-4 py-3 text-sm leading-relaxed text-paper/85 ring-1 ring-paper/10">
+          <ChatAnswer text={dict.ui.chat.greeting} />
+        </div>
 
         {turns.length === 0 &&
           dict.ui.chat.suggestions.map((suggestion) => (
@@ -158,29 +159,31 @@ export default function Chatbot({ open, onClose }: { open: boolean; onClose: () 
           ))}
 
         {turns.map((turn, i) => (
-          <p
+          /* Question du visiteur : son texte tel quel. Réponse de l'assistant : mise en forme
+             (paragraphes, puces, liens nommés) — voir `ChatAnswer`. */
+          <div
             key={i}
             className={`max-w-[92%] px-4 py-3 text-sm leading-relaxed ${
               turn.role === "user"
-                ? "self-end bg-gradient-to-r from-brand to-turquoise text-white"
+                ? "self-end whitespace-pre-line bg-gradient-to-r from-brand to-turquoise text-white"
                 : "self-start bg-paper/[0.07] text-paper/85 ring-1 ring-paper/10"
             }`}
           >
-            {turn.content}
+            {turn.role === "user" ? turn.content : <ChatAnswer text={turn.content} />}
             {/* Curseur d'écriture : la réponse n'est pas finie. */}
             {pending && turn.role === "assistant" && i === turns.length - 1 && (
               <span className="ml-0.5 inline-block h-3.5 w-[2px] translate-y-0.5 animate-pulse bg-turquoise align-middle" />
             )}
-          </p>
+          </div>
         ))}
 
         {failed && (
-          <p className="max-w-[92%] self-start border-l-2 border-orange/70 bg-paper/[0.05] px-4 py-3 text-sm leading-relaxed text-paper/70">
+          <div className="max-w-[92%] self-start border-l-2 border-orange/70 bg-paper/[0.05] px-4 py-3 text-sm leading-relaxed text-paper/70">
             {dict.ui.chat.error}{" "}
             <a href={`mailto:${dict.site.email}`} className="text-turquoise underline-offset-4 hover:underline">
               {dict.site.email}
             </a>
-          </p>
+          </div>
         )}
       </div>
 

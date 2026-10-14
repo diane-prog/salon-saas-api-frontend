@@ -90,18 +90,14 @@ export function socialIcon(label: string): NetworkIcon | null {
   return null;
 }
 
-/** `tel:+221781229305` → lien WhatsApp (`wa.me` veut les chiffres nus). */
-export function whatsappHref(phoneRaw: string): string {
-  return `https://wa.me/${phoneRaw.replace(/[^\d]/g, "")}`;
-}
-
 /**
  * Les réseaux du site, WhatsApp compris.
  *
  * WhatsApp n'est pas dans `site.socials` — c'est un numéro, pas un profil — mais c'est un
- * canal de contact à part entière, et le seul où un client écrit dans la minute. On le déduit
- * donc du téléphone et on l'ajoute, une seule fois, pour le footer comme pour l'éventail.
+ * canal de contact à part entière, et le seul où un client écrit dans la minute. On l'ajoute
+ * donc, une seule fois, pour le footer, les pages contact/devis et l'éventail. Son adresse
+ * vient du dictionnaire (`site.whatsapp`) : une seule source dans tout le site.
  */
 export function socialLinks(site: Dictionary["site"]): { label: string; href: string }[] {
-  return [...site.socials, { label: "WhatsApp", href: whatsappHref(site.phoneRaw) }];
+  return [...site.socials, { label: "WhatsApp", href: site.whatsapp }];
 }

@@ -1,6 +1,14 @@
 "use client";
 
-import { Fragment, useEffect, useRef, useState, type CSSProperties, type ElementType } from "react";
+import {
+  Fragment,
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type ElementType,
+  type ReactNode,
+} from "react";
 import { observeReveal } from "@/lib/reveal";
 
 type SplitTextProps = {
@@ -31,6 +39,18 @@ type SplitTextProps = {
    * au même endroit sur tous les écrans (et dans les deux langues, un `<br>` par ligne).
    */
   breakAfter?: number;
+  /**
+   * Contenu posé APRÈS les mots, dans le même flux (un mot qui tourne, par exemple).
+   * Il vit avec les mots dans la partie `aria-hidden`, donc il ne double pas le texte lu
+   * par les technologies d'assistance ; un `<br />` placé au début fait le saut de ligne.
+   */
+  trailing?: ReactNode;
+  /**
+   * Phrase entière lue par les technologies d'assistance et indexée, quand elle diffère des
+   * mots affichés — cas d'un titre dont une partie tourne (`text` n'est alors que la partie
+   * fixe). Par défaut : `text` (+ `accent`).
+   */
+  label?: string;
 };
 
 /**
@@ -53,6 +73,8 @@ export default function SplitText({
   mode = "in-view",
   reveal = "mask",
   breakAfter,
+  trailing,
+  label,
 }: SplitTextProps) {
   const fade = reveal === "color";
   const ref = useRef<HTMLElement>(null);
@@ -72,7 +94,7 @@ export default function SplitText({
     ...text.split(/\s+/).filter(Boolean).map((value) => ({ value, accent: false })),
     ...(accent ?? "").split(/\s+/).filter(Boolean).map((value) => ({ value, accent: true })),
   ];
-  const full = accent ? `${text} ${accent}` : text;
+  const full = label ?? (accent ? `${text} ${accent}` : text);
 
   return (
     <Tag
@@ -106,6 +128,7 @@ export default function SplitText({
             </Fragment>
           );
         })}
+        {trailing}
       </span>
     </Tag>
   );

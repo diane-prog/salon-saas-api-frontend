@@ -3,6 +3,9 @@ export const site = {
   tagline: "Agence de communication digitale basée à Dakar. Nous transformons vos ambitions en succès numériques.",
   phone: "+221 78 122 93 05",
   phoneRaw: "tel:+221781229305",
+  /* WhatsApp : une seule adresse dans tout le site (footer, éventail, assistant), déduite du
+     numéro — pour qu'un changement de numéro ne se fasse qu'ici. */
+  whatsapp: "https://wa.me/221781229305",
   email: "contact@leegigroup.com",
   address: "Dakar, Sénégal",
   hours: "Lun-Ven, 9h-18h",
@@ -224,7 +227,13 @@ export const services: Service[] = [
 
 export const hero = {
   keywords: ["Branding", "SEO", "Sites web", "Contenu", "Événementiel", "Spots pub"],
+  /* Le titre du hero est coupé en DEUX morceaux : `leadStatic` ne bouge pas, `leadRotating`
+     tourne en couleur de marque (voir components/HomeHero.tsx). `lead` reste la phrase
+     entière — c'est elle que lisent les lecteurs d'écran, les moteurs de recherche et les
+     aperçus de partage, donc elle doit toujours se lire d'un trait. */
   lead: "Faites briller votre marque.",
+  leadStatic: "Faites briller votre",
+  leadRotating: ["marque.", "image.", "présence.", "notoriété."],
   body: "LEEGI GROUP transforme votre visibilité en clients, en crédibilité et en croissance. Grâce à la stratégie, la créativité et l’expertise digitale, votre communication devient un levier puissant pour attirer, convaincre et fidéliser vos clients.",
 };
 
@@ -599,6 +608,17 @@ export const ui = {
     openSocials: "Afficher les réseaux sociaux",
     closeSocials: "Masquer les réseaux sociaux",
     whatsapp: "WhatsApp",
+    /* État replié : un seul bouton, avec une accroche. C'est lui qu'on voit au scroll —
+       pas la barre entière. L'accroche est une SÉQUENCE de phrases courtes : une phrase
+       figée se lit une fois et disparaît, une séquence donne plusieurs portes d'entrée. */
+    phrases: [
+      "Un projet en tête ?",
+      "Besoin d'un site web ?",
+      "Une marque à bâtir ?",
+      "Un devis, sans engagement",
+      "Parlons de votre projet",
+    ],
+    openActions: "Ouvrir les actions rapides",
   },
   /* Assistant conversationnel : libellés de la fenêtre de discussion. */
   chat: {

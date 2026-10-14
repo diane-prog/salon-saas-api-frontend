@@ -3,6 +3,9 @@ export const site = {
   tagline: "Digital communication agency based in Dakar. We turn your ambitions into digital success.",
   phone: "+221 78 122 93 05",
   phoneRaw: "tel:+221781229305",
+  /* WhatsApp: a single address across the whole site (footer, fan, assistant), derived from
+     the phone number — so changing the number happens in one place only. */
+  whatsapp: "https://wa.me/221781229305",
   email: "contact@leegigroup.com",
   address: "Dakar, Senegal",
   hours: "Mon–Fri, 9am–6pm",
@@ -225,7 +228,12 @@ export const services: Service[] = [
 
 export const hero = {
   keywords: ["Branding", "SEO", "Websites", "Content", "Events", "Ad Spots"],
+  /* The hero title is split in TWO: `leadStatic` stays put, `leadRotating` cycles in the
+     brand colour (see components/HomeHero.tsx). `lead` keeps the whole sentence — it is what
+     screen readers, search engines and share previews read, so it must stand on its own. */
   lead: "Make your brand shine.",
+  leadStatic: "Make your brand",
+  leadRotating: ["shine.", "glow.", "soar.", "stand out."],
   body: "LEEGI GROUP turns your visibility into customers, credibility and growth. Through strategy, creativity and digital expertise, your communication becomes a powerful lever to attract, convince and retain your customers.",
 };
 
@@ -600,6 +608,17 @@ export const ui = {
     openSocials: "Show social networks",
     closeSocials: "Hide social networks",
     whatsapp: "WhatsApp",
+    /* Collapsed state: a single button with a hook. That's what appears on scroll — not the
+       whole bar. The hook is a SEQUENCE of short phrases: a frozen phrase is read once and
+       forgotten, a sequence opens several doors. */
+    phrases: [
+      "Got a project in mind?",
+      "Need a new website?",
+      "A brand to build?",
+      "A quote, no strings",
+      "Let's talk about it",
+    ],
+    openActions: "Open quick actions",
   },
   /* Conversational assistant: the chat window labels. */
   chat: {
