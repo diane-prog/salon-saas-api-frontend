@@ -596,6 +596,14 @@ export const ui = {
   searchSuggestions: "Suggestions",
   /* Rappel de clavier en pied de panneau plein écran (recherche, formulaire de contact). */
   panelHint: "Échap pour fermer",
+  /* Ouverture du site : la vidéo de logo, jouée une fois par session (voir
+     `components/VideoIntro.tsx`). Le libellé nomme la région pour les lecteurs d'écran — la
+     vidéo est décorative (pas de son, pas de sous-titres), donc rien d'autre à annoncer. */
+  intro: {
+    /* Un seul intitulé : celui de l'écran d'ouverture, lu par les lecteurs d'écran. Il n'y a
+       plus de libellé de bouton « passer » — cette sortie passe désormais par le geste. */
+    label: "Animation de bienvenue",
+  },
   /* Barre d'actions flottante (bas d'écran, après le premier scroll) et l'éventail de
      réseaux qu'elle ouvre. Les intitulés servent aussi d'`aria-label` : un seul mot, pour ce
      qu'on voit et pour ce qu'un lecteur d'écran annonce. */

@@ -74,7 +74,14 @@ export default function Header() {
     setServicesOpen(false);
     setServicesPanel(false);
     document.cookie = `leegi-locale=${next};path=/;max-age=31536000;samesite=lax`;
-    navigate(switchLocalePath(next, pathname), next === "fr" ? "Français" : "English");
+    /* `hard: true` : navigation PLEINE PAGE sous le rideau, et non `router.push`. Un
+       changement de langue remonte tout `app/[lang]` — donc le rideau lui-même. En doux,
+       l'ancienne instance partait en laissant son rideau posé, et l'écran restait couvert
+       sur l'ancienne langue jusqu'à actualisation. En pleine page, l'ancien document (rideau
+       baissé inclus) est détruit avec la navigation : rien ne peut rester coincé. */
+    navigate(switchLocalePath(next, pathname), next === "fr" ? "Français" : "English", {
+      hard: true,
+    });
   };
 
   return (
@@ -135,7 +142,7 @@ export default function Header() {
                   aria-haspopup="dialog"
                   aria-expanded={servicesPanel}
                   onClick={() => setServicesPanel(true)}
-                  className={`flex items-center gap-1 rounded-full px-4 py-2 transition-colors ${
+                  className={`flex items-center cursor-pointer gap-1 rounded-full px-4 py-2 transition-colors ${
                     scrolled ? "text-navy hover:text-brand" : "text-white/85 hover:text-white"
                   }`}
                 >

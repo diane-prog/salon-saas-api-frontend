@@ -18,7 +18,10 @@ import { CURTAIN, prefersReducedMotion } from "@/lib/motion";
 import { scrollToTop } from "@/lib/scroll";
 
 type Phase = "idle" | "intro" | "cover" | "reveal";
-type TransitionApi = { navigate: (href: string, label?: string) => void };
+type TransitionApi = {
+  /** `hard: true` ⇒ navigation pleine page sous le rideau (cf. `start`). */
+  navigate: (href: string, label?: string, options?: { hard?: boolean }) => void;
+};
 
 // Repli sûr si le fournisseur n'est pas monté : navigation classique plutôt qu'un clic sans effet.
 const TransitionContext = createContext<TransitionApi>({
@@ -128,11 +131,27 @@ export default function PageTransition({ children }: { children: ReactNode }) {
   const labelForRef = useRef(labelFor);
   useEffect(() => {
     labelForRef.current = labelFor;
-  }, [labelFor]);
-
-  /** Lance le rideau puis navigue pendant qu'il couvre l'écran. */
+  }, [labelFor]);  /**
+   * Lance le rideau puis navigue pendant qu'il couvre l'écran.
+   *
+   * `hard` CHANGE DE NAVIGATEUR, pas d'apparence : au lieu de `router.push` (navigation
+   * douce), on appelle `window.location.assign` — une navigation pleine page. Le rideau est
+   * posé AVANT, et le navigateur continue de peindre l'ancien document pendant que le nouveau
+   * se charge : visuellement, c'est la même transition.
+   *
+   * POURQUOI LE CHANGEMENT DE LANGUE PASSE PAR LÀ. Un changement de langue remonte tout le
+   * sous-arbre `app/[lang]` — donc `PageTransition` — alors que le rideau est baissé. Mesuré :
+   * l'ancienne instance disparaissait avec son rideau resté posé (aucune instance vivante pour
+   * le retirer, ses minuteurs de secours étant démontés avec elle), et la nouvelle instance
+   * arrivait déjà « idle », donc ne le voyait pas. Résultat : l'écran restait couvert sur
+   * l'ancienne langue jusqu'à ce qu'on actualise — exactement le blocage signalé.
+   *
+   * En navigation pleine page, il n'y a plus de sous-arbre qui survit : le rideau de l'ancien
+   * document est détruit avec lui, et le nouveau document se peint dans la bonne langue. Aucun
+   * état à rattraper, donc rien qui puisse rester coincé.
+   */
   const start = useCallback(
-    (href: string, nextLabel: string) => {
+    (href: string, nextLabel: string, hard = false) => {
       clearTimers();
       coverStartedAt.current = performance.now();
       pending.current = href.split("?")[0].split("#")[0];
@@ -141,12 +160,20 @@ export default function PageTransition({ children }: { children: ReactNode }) {
 
       timers.current.push(
         window.setTimeout(() => {
+          if (hard) {
+            window.location.assign(href);
+            return;
+          }
           router.push(href);
-          // Filet de sécurité : la navigation n'a pas abouti, on retire le rideau quand même.
+          /* Stop-loss — et non « délai d'attente » : la sortie NORMALE du rideau est
+             l'arrivée de la page, plus bas (l'effet sur le changement de route attend sa
+             peinture). Ce minuteur n'existe que pour ne jamais laisser l'écran couvert :
+             il doit donc couvrir le pire des cas réels (route non préchargée, compilée à
+             la volée), pas la durée habituelle. */
           timers.current.push(
             window.setTimeout(() => {
               if (phaseRef.current === "cover") setPhase("reveal");
-            }, CURTAIN.maxWaitMs),
+            }, CURTAIN.stopLossMs),
           );
         }, CURTAIN.coverMs),
       );
@@ -155,7 +182,7 @@ export default function PageTransition({ children }: { children: ReactNode }) {
   );
 
   const navigate = useCallback(
-    (href: string, nextLabel?: string) => {
+    (href: string, nextLabel?: string, options?: { hard?: boolean }) => {
       if (typeof window === "undefined") return;
       /* Un rideau est déjà en vol ? Le clic n'est PAS avalé pour autant : on part en
          navigation pleine page, qui repart d'un état propre. C'est ce qui évite le bouton
@@ -166,12 +193,16 @@ export default function PageTransition({ children }: { children: ReactNode }) {
         window.location.assign(href);
         return;
       }
+      /* Sans animation, on navigue directement — mais la demande de navigation pleine page
+         (`hard`) reste honorée : c'est elle qui garantit qu'un changement de langue ne
+         laisse pas un sous-arbre remonté derrière lui (voir `start`). */
       if (prefersReducedMotion()) {
-        router.push(href);
+        if (options?.hard) window.location.assign(href);
+        else router.push(href);
         return;
       }
       const path = href.split("?")[0].split("#")[0];
-      start(href, nextLabel ?? routeLabels[path] ?? "");
+      start(href, nextLabel ?? routeLabels[path] ?? "", options?.hard);
     },
     [routeLabels, router, start],
   );
@@ -224,14 +255,30 @@ export default function PageTransition({ children }: { children: ReactNode }) {
   useEffect(() => {
     const previous = lastPath.current;
     lastPath.current = pathname;
+
     if (previous === pathname) return;
 
     if (phaseRef.current === "cover") {
       if (pending.current === pathname) {
-        // On laisse le panneau finir de se déployer, puis on marque une courte pause sur le libellé.
+        /* La route est ARRIVÉE : on laisse le panneau finir de se déployer, puis on marque
+           une courte pause sur le libellé — et seulement LÀ le rideau s'en va.
+
+           Le retrait est repoussé de deux frames : la première demande la peinture de la
+           nouvelle page, la seconde la confirme. Sans cela, le panneau partait à la fin de
+           son déploiement (2,2 s), alors que la page non préchargée n'était pas encore
+           rendue : on découvrait l'ANCIENNE page le temps qu'elle arrive, puis la nouvelle
+           repassait sous un rideau de courtoisie — le glitch vu au changement de langue. */
         const elapsed = performance.now() - coverStartedAt.current;
         const wait = Math.max(0, CURTAIN.coverMs - elapsed) + CURTAIN.holdMs;
-        timers.current.push(window.setTimeout(() => setPhase("reveal"), wait));
+        timers.current.push(
+          window.setTimeout(() => {
+            window.requestAnimationFrame(() =>
+              window.requestAnimationFrame(() => {
+                if (phaseRef.current === "cover") setPhase("reveal");
+              }),
+            );
+          }, wait),
+        );
       }
       return;
     }
@@ -324,7 +371,7 @@ export default function PageTransition({ children }: { children: ReactNode }) {
       setPhase("idle");
       pending.current = null;
       setLabel("");
-    }, CURTAIN.maxWaitMs + CURTAIN.revealMs + 500);
+    }, CURTAIN.stopLossMs + CURTAIN.revealMs + 500);
     return () => window.clearTimeout(id);
   }, [phase]);
 

@@ -29,7 +29,15 @@ import { handoffAnswer, predefinedAnswer } from "@/lib/assistant";
  *      Chat Completions suit exactement la structure d'OpenAI (`api.mistral.ai/v1`) ;
  *   2. passerelle OpenLLM (`OPENLLM_API_KEY` + `OPENLLM_ENDPOINT`) ;
  *   3. OpenAI en direct (`OPENAI_API_KEY`).
- * `CHAT_MODEL` surcharge le modèle : le bon rapport qualité/prix bouge plus vite que ce site.
+ *
+ * LE MODÈLE : `MISTRAL_MODEL` (c'est le nom de la variable que porte la configuration Mistral),
+ * sinon `CHAT_MODEL` — les deux marchent, donc un seul réglage à connaître. LE MODÈLE PAR DÉFAUT
+ * EST CELUI DU PALIER GRATUIT : sur un compte gratuit, `mistral-small-latest` et
+ * `mistral-medium-latest` répondent `429 Rate limit exceeded` (code 1300) alors que
+ * `ministral-8b-latest`, `ministral-3b-latest` et `open-mistral-nemo` passent. Un défaut
+ * inatteignable rendait l'assistant muet sans le dire : on préfère donc un défaut qui répond.
+ * Sur un plan payant, mettez `MISTRAL_MODEL=mistral-small-latest` — meilleur en français, et
+ * compris dans l'abonnement.
  *
  * Seule une requête MAL FORMÉE (aucun tour, ou rien qui vienne du visiteur) est refusée en
  * 400 : le reste du temps, la route finit toujours par une réponse utile.
@@ -44,16 +52,17 @@ type Provider = { endpoint: string; key: string; model: string };
 
 /** Le fournisseur configuré, ou `null` (la route le dit alors explicitement). */
 function provider(): Provider | null {
-  const model = process.env.CHAT_MODEL;
-
-  /* Mistral en premier : c'est le seul à offrir un palier gratuit, et `mistral-small-latest`
-     suffit largement pour répondre sur des services et des coordonnées. */
+  /* Mistral en premier : c'est le seul à offrir un palier gratuit, et un petit modèle suffit
+     largement pour répondre sur des services, des coordonnées et un ordre de budget. */
   if (process.env.MISTRAL_API_KEY) {
     const base = process.env.MISTRAL_BASE_URL ?? "https://api.mistral.ai/v1";
     return {
       endpoint: `${base.replace(/\/+$/, "")}/chat/completions`,
       key: process.env.MISTRAL_API_KEY,
-      model: model ?? "mistral-small-latest",
+      /* `MISTRAL_MODEL` AVANT `CHAT_MODEL` : le premier est le nom que porte la configuration
+         Mistral, le second reste accepté (c'était le seul lu avant, une clé posée sous ce nom
+         ne sert donc plus à rien). Défaut = modèle du palier gratuit, voir l'en-tête. */
+      model: process.env.MISTRAL_MODEL ?? process.env.CHAT_MODEL ?? "ministral-8b-latest",
     };
   }
 
@@ -64,7 +73,7 @@ function provider(): Provider | null {
   return {
     endpoint: `${base.replace(/\/+$/, "")}/chat/completions`,
     key,
-    model: model ?? "gpt-4o-mini",
+    model: process.env.CHAT_MODEL ?? "gpt-4o-mini",
   };
 }
 
@@ -238,11 +247,25 @@ export async function POST(request: Request) {
         messages: [{ role: "system", content: buildSystem(locale, dict) }, ...history],
       }),
     });
-  } catch {
+  } catch (error) {
+    /* Le visiteur reçoit la même réponse de repli — mais le journal, lui, dit POURQUOI. Sans
+       lui, une clé refusée ou un modèle absent du palier se présentaient comme un assistant
+       qui « ne marche pas », sans trace nulle part. */
+    console.error(`[chat] appel ${upstream.model} impossible :`, error);
     return textStream(handoffAnswer(context));
   }
 
-  if (!response.ok || !response.body) {
+  if (!response.ok) {
+    /* Le corps de l'erreur du fournisseur est la seule source utile ici : « 429 Rate limit
+       exceeded » et « 401 Unauthorized » demandent deux corrections opposées (changer de
+       modèle, ou changer de clé). On lit d'abord, on répond ensuite. */
+    const detail = await response.text().catch(() => "");
+    console.error(`[chat] ${upstream.model} → ${response.status} ${detail.slice(0, 300)}`);
+    return textStream(handoffAnswer(context));
+  }
+
+  if (!response.body) {
+    console.error(`[chat] ${upstream.model} → 200 sans corps de réponse`);
     return textStream(handoffAnswer(context));
   }
 

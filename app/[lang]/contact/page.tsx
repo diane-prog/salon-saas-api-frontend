@@ -76,7 +76,8 @@ export default async function ContactPage({ params }: PageProps<"/[lang]/contact
                   />
                 </Reveal>
 
-                {/* Réseaux : logos officiels + intitulé, WhatsApp compris. */}
+                {/* Réseaux : icônes seules, WhatsApp compris (l'intitulé reste dans
+                    `aria-label`, cf. `SocialLinks`). */}
                 <Reveal delay={160} className="mt-10">
                   <SocialLinks site={site} />
                 </Reveal>

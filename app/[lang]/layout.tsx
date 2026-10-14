@@ -6,16 +6,23 @@ import { JsonLd } from "@/components/JsonLd";
 import PageFade from "@/components/PageFade";
 import PageTransition from "@/components/PageTransition";
 import SmoothScroll from "@/components/SmoothScroll";
+import VideoIntro from "@/components/VideoIntro";
 import { getDictionary, isLocale, localePath, locales, localeTags } from "@/lib/dictionaries";
+import { INTRO_SCRIPT } from "@/lib/intro";
 import { SITE_URL } from "@/lib/seo";
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans, Sora, Space_Grotesk, Unbounded } from "next/font/google";
+import { Sora } from "next/font/google";
 import { notFound } from "next/navigation";
 import "../globals.css";
 
-/* Police du site : Plus Jakarta Sans, servie en self-hosted par Next (aucune requête vers
-   Google depuis le navigateur). Variable 200 → 800, donc un seul fichier qui couvre toutes
-   les graisses du site, `font-light` jusqu'à `font-light` compris. */
+/* Police du site : Sora, servie en self-hosted par Next (aucune requête vers Google depuis
+   le navigateur — le téléchargement n'a lieu qu'à la COMPILATION). Variable 100 → 800, donc
+   un seul fichier qui couvre toutes les graisses du site. Le nom de la variable CSS reste
+   `--font-jakarta` pour ne pas toucher au jeton `--font-sans` de `globals.css`.
+
+   Si la compilation affiche « Failed to download Sora from Google Fonts », c'est que la
+   machine qui compile n'atteint pas fonts.googleapis.com : le repli système prend le relais
+   sans casser la mise en page, et un simple rebuild une fois le réseau revenu suffit. */
 const jakarta = Sora({
   variable: "--font-jakarta",
   subsets: ["latin"],
@@ -67,13 +74,18 @@ export async function generateMetadata({ params }: LayoutProps<"/[lang]">): Prom
       url: localePath(lang),
       title: `${dict.site.name} — Agence de communication digitale à Dakar`,
       description: dict.site.tagline,
-      images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: dict.site.name }],
+      /* Pas d'`images` ici : l'image de partage vient du FICHIER `app/opengraph-image.png`
+         (convention de Next), qui pose aussi son type et ses dimensions réels — et son texte
+         de remplacement via `opengraph-image.alt.txt`. La déclarer en plus, c'était deux
+         sources pour une seule image : celle du code (`/opengraph-image`, qui n'est pas une
+         route — elle redirigeait vers l'accueil) écrasait celle du fichier. */
     },
     twitter: {
       card: "summary_large_image",
       title: dict.site.name,
       description: dict.site.tagline,
-      images: ["/opengraph-image"],
+      /* Twitter retombe sur l'image Open Graph quand la sienne n'est pas donnée : même
+         fichier, même adresse, rien à maintenir en double. */
     },
     robots: {
       index: true,
@@ -126,6 +138,9 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[la
     <html lang={localeTags[lang]} className={`${jakarta.variable} h-full antialiased`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: jsFlag }} />
+        {/* Ouverture vidéo : décidée ici, AVANT la première peinture, plutôt qu'après
+            hydratation — sinon on voit la page une à deux frames avant la vidéo. */}
+        <script dangerouslySetInnerHTML={{ __html: INTRO_SCRIPT }} />
         <link rel="alternate" hrefLang="x-default" href={`${SITE_URL}${localePath(defaultLang)}`} />
         {locales.map((l) => (
           <link
@@ -139,6 +154,11 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[la
       <body className="flex min-h-full flex-col">
         <JsonLd data={jsonLd} />
         <DictionaryProvider dict={dict as never} locale={lang}>
+          {/* Rendue AVANT le reste : tant que l'ouverture est à l'écran, son bouton « Passer »
+              est le premier arrêt de tabulation — et le seul élément atteignable qui fasse
+              quelque chose, puisque l'écran couvre le site. Elle se monte sur toutes les
+              routes : ce qui décide, c'est la session, pas la page d'arrivée. */}
+          <VideoIntro />
           <SmoothScroll />
           <PageTransition>
             <Header />

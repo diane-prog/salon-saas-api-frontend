@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "icons": "python3 scripts/make-icons.py"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.3.0",

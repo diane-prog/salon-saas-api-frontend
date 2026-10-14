@@ -178,7 +178,7 @@ export default function FullScreenPanel({
           width={150}
           height={60}
           priority
-          className="h-9 w-auto"
+          className="h-16 -ml-9 w-auto"
         />
         <button
           type="button"

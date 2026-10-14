@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ArrowUpRight, ChevronUp, Mail, Share, Spark } from "@/components/Icons";
+import { ArrowUpRight, Mail, Share, Spark } from "@/components/Icons";
 import { useDictionary } from "@/components/DictionaryProvider";
 import { prefersReducedMotion } from "@/lib/motion";
 import { socialIcon, socialLinks } from "@/components/SocialIcons";
@@ -141,7 +141,7 @@ export default function ActionDock() {
 
   /* UNE seule écriture pour tous les boutons de la barre. */
   const item =
-    "flex h-11 items-center gap-2 px-3.5 text-sm font-light text-paper/75 transition-colors duration-300 hover:text-turquoise focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-turquoise";
+    "flex h-11 items-center cursor-pointer gap-2 px-3.5 text-sm font-light text-paper/75 transition-colors duration-300 hover:text-turquoise focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-turquoise";
   /* Le mot s'efface sous `sm` : sur téléphone, la barre reste une rangée compacte d'icônes
      (chaque bouton garde son intitulé en `aria-label`). */
   const word = "hidden sm:inline";
@@ -156,7 +156,7 @@ export default function ActionDock() {
         {/* Le repère est le bord SUPÉRIEUR de la barre, EN SON MILIEU : l'éventail part de là,
             et le bouton d'accroche se pose au bas du même repère (donc à la place exacte de la
             barre, sans que rien ne bouge à l'écran au moment du remplacement). */}
-        <div ref={dockRef} className="relative pointer-events-auto">
+        <div ref={dockRef} className="relative cursor-pointer pointer-events-auto">
           <div
             inert={!expanded}
             style={{ transitionDelay: expanded ? "0ms" : "150ms" }}
@@ -208,7 +208,7 @@ export default function ActionDock() {
             <div
               role="group"
               aria-label={dict.ui.dock.title}
-              className="flex items-center gap-1 bg-ink/85 p-1.5 text-paper ring-1 ring-paper/15 backdrop-blur-md shadow-lift"
+              className="flex items-center cursor-pointer gap-1 bg-ink/85 p-1.5 text-paper ring-1 ring-paper/15 backdrop-blur-md shadow-lift"
             >
               <DevisSheet
                 triggerClassName={item}
@@ -256,7 +256,7 @@ export default function ActionDock() {
                 aria-expanded={fan}
                 aria-label={fan ? dict.ui.dock.closeSocials : dict.ui.dock.openSocials}
                 title={dict.ui.dock.socials}
-                className={`grid h-11 w-11 shrink-0 place-items-center transition-colors duration-300 hover:text-turquoise focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-turquoise ${
+                className={`grid h-11 cursor-pointer w-11 shrink-0 place-items-center transition-colors duration-300 hover:text-turquoise focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-turquoise ${
                   fan ? "text-turquoise" : "text-paper/75"
                 }`}
               >
@@ -278,13 +278,13 @@ export default function ActionDock() {
             /* Au repli, l'accroche revient en DERNIER : 150 ms d'attente + 420 ms de barre,
                donc après 570 ms. */
             style={{ transitionDelay: expanded ? "0ms" : "720ms" }}
-            className={`absolute bottom-0 left-1/2 flex h-11 -translate-x-1/2 items-center gap-2 bg-ink/85 px-4 text-sm font-light text-paper ring-1 ring-paper/15 backdrop-blur-md shadow-lift transition-[opacity,scale] duration-300 ease-out hover:text-turquoise motion-reduce:transition-none ${
+            className={`absolute cursor-pointer bottom-0 left-1/2 flex h-11 -translate-x-1/2 items-center gap-2 bg-ink/85 px-4 text-sm font-light text-paper ring-1 ring-paper/15 backdrop-blur-md shadow-lift transition-[opacity,scale] duration-300 ease-out hover:text-turquoise motion-reduce:transition-none ${
               expanded ? "pointer-events-none scale-90 opacity-0" : "scale-100 opacity-100"
             }`}
           >
-            {/* Le chevron dit ce qui va se passer, sans le dire en mots : la barre monte
-                d'ici. Le `+` promettait une action, il ne disait pas laquelle. */}
-            <ChevronUp className="shrink-0 text-turquoise" />
+            {/* AUCUNE icône : l'accroche qui tourne dit déjà ce que la barre ouvre, et une
+                pastille de plus ne ferait que répéter. Le bouton reste un bouton — son
+                `aria-label` le nomme pour l'assistance. */}
             {/* Les phrases sont TOUTES dans la même cellule de grille : le bouton prend la
                 largeur de la plus longue, et la relève se fait par transition — inutile de
                 mesurer, de deviner une largeur, ni de faire clignoter le bouton. Décoratif

@@ -189,14 +189,6 @@ export function Plus({ className = "" }: IconProps) {
   );
 }
 
-export function ChevronUp({ className = "" }: IconProps) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" className={`h-4 w-4 ${className}`} aria-hidden>
-      <path d="m6 15 6-6 6 6" />
-    </svg>
-  );
-}
-
 export function Share({ className = "" }: IconProps) {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" className={`${base} ${className}`} aria-hidden>

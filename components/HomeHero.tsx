@@ -70,7 +70,7 @@ export default function HomeHero() {
             l'image reste lisible. Il se place SOUS l'ensemble blanc du bas (le fondu
             vers la section suivante est un frère plus loin dans le DOM) donc celui-ci
             reste intact. */}
-        <div className="absolute inset-0 bg-black/30" />
+        <div className="absolute inset-0 bg-black/40" />
       </div>
 
       {/* Voile blanc — ANGLES BAS-DROIT seulement, et LÉGER.
@@ -119,7 +119,7 @@ export default function HomeHero() {
               trailing={
                 <>
                   <br />
-                  <RotatingWord words={hero.leadRotating} className="text-brand" />
+                  <RotatingWord words={hero.leadRotating} className="text-[#50B4D8]" />
                 </>
               }
               delay={0.12}

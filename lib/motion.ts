@@ -17,8 +17,19 @@ export const CURTAIN = {
   coverMs: 520,
   holdMs: 340,
   revealMs: 620,
-  /** Délai maximal accordé à la navigation avant de retirer le rideau quoi qu'il arrive. */
-  maxWaitMs: 2200,
+  /**
+   * Délai MAXIMAL accordé à la navigation avant de retirer le rideau quoi qu'il arrive.
+   *
+   * Ce n'est PAS la sortie normale : le rideau se lève quand la page d'arrivée est réellement
+   * peinte (voir PageTransition). Ce minuteur n'existe que pour ne jamais laisser l'écran
+   * couvert — il doit donc couvrir le pire des cas RÉEL : une route non préchargée, compilée
+   * à la volée en développement ou servie lentement. Les 2,2 s d'origine suffisaient à un
+   * changement de page à chaud ; sur une page non préchargée, le rideau se levait avant que
+   * la nouvelle page n'existe et découvrait l'ANCIENNE (le glitch « le rideau affiche la page
+   * en anglais avant de disparaître »). 8 s est le plafond qu'on s'autorise, pas une durée
+   * d'attente.
+   */
+  stopLossMs: 8000,
 } as const;
 
 export const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";

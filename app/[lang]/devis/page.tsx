@@ -7,7 +7,7 @@ import Parallax from "@/components/Parallax";
 import Reveal from "@/components/Reveal";
 import SocialLinks from "@/components/SocialLinks";
 import { HeroSection } from "@/components/sections";
-import { ArrowRight, Check } from "@/components/Icons";
+import { ArrowRight } from "@/components/Icons";
 import { isLocale, getDictionary, localePath } from "@/lib/dictionaries";
 
 export async function generateMetadata({ params }: PageProps<"/[lang]/devis">): Promise<Metadata> {
@@ -65,8 +65,8 @@ export default async function DevisPage({ params }: PageProps<"/[lang]/devis">) 
                   <DevisSheet triggerLabel={devisPage.submit} />
                 </Reveal>
 
-                {/* Réseaux : logos officiels + intitulé, WhatsApp compris — la même ligne
-                    que la page contact. */}
+                {/* Réseaux : icônes seules, WhatsApp compris — la même ligne que la page
+                    contact (l'intitulé reste dans `aria-label`, cf. `SocialLinks`). */}
                 <Reveal delay={160} className="mt-10">
                   <SocialLinks site={site} />
                 </Reveal>
@@ -77,16 +77,21 @@ export default async function DevisPage({ params }: PageProps<"/[lang]/devis">) 
                 la même descente que la page contact (blocs d'informations, photo). */}
             <div className="order-1 lg:order-2">
               <dl className="grid gap-x-10 gap-y-12 sm:grid-cols-2">
+                {/* Ce que la proposition inclut : une TABLE de lignes séparées par des filets,
+                    sans icône. Les pastilles cochées disaient « liste de courses » ; ici, il
+                    s'agit d'engagements — donc des lignes numérotées comme un sommaire, dans
+                    l'ordre où ils arrivent réellement dans la relation. Le numéro tient le
+                    rythme et remplace l'icône : il ne décore pas, il ordonne. */}
                 <div>
                   <dt className="text-sm text-muted">{devisPage.includeTitle}</dt>
-                  <dd className="mt-2 grid gap-3">
-                    {devisPage.includes.map((item) => (
+                  <dd className="mt-3 border-t border-navy/12">
+                    {devisPage.includes.map((item, index) => (
                       <span
                         key={item}
-                        className="flex items-start gap-3 text-[0.95rem] font-medium text-navy"
+                        className="flex items-baseline gap-4 border-b border-navy/12 py-3.5 text-[0.95rem] font-medium text-navy"
                       >
-                        <span className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full bg-gradient-to-br from-brand to-turquoise text-white">
-                          <Check className="h-3 w-3" />
+                        <span className="w-5 shrink-0 text-xs tabular-nums text-navy/35">
+                          {String(index + 1).padStart(2, "0")}
                         </span>
                         {item}
                       </span>
