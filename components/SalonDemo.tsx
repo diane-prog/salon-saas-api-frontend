@@ -9,26 +9,39 @@ import { useSalonInfo, useSalonServices, useSalonStaff } from "@/features/public
 /**
  * Section « En direct » de l'accueil (`#demo`).
  *
- * CE QU'ELLE MONTRE, ET COMMENT : les données réelles du salon de démonstration,
- * lues sur l'API pendant que la page s'affiche — le nom, les trois couleurs de sa
- * vitrine, ses prestations avec leur durée et leur prix, son équipe. Rien n'est
- * écrit à la main, rien n'est mis en scène.
+ * LA COMPOSITION : deux moitiés, bord à bord. À GAUCHE, un média vertical (une VIDÉO),
+ * le texte à sa droite, puis les lignes de données ; à DROITE, un grand champ plein
+ * cadre, à la couleur primaire du salon. Rien n'est encadré, rien n'est arrondi : les
+ * filets d'un pixel et le blanc font tout le travail.
  *
- * CE QUI A ÉTÉ RETIRÉ : la maquette d'écran de la colonne de droite (un cadre, un
- * en-tête peint aux couleurs du salon, une pastille « réservation ouverte », des
- * listes à l'intérieur). Elle ressemblait à une capture du logiciel — donc à une
- * promesse — alors que la section doit montrer une donnée. Ici, pas de cadre et
- * pas de faux écran : du papier, des filets d'un pixel, de la typographie. La
- * personnalisation se lit dans trois traits de couleur posés à côté du nom, et le
- * nom mène à la vraie page du salon.
+ * CE QUE LA SECTION MONTRE : les données réelles du salon de démonstration, lues sur
+ * l'API pendant que la page s'affiche — ses prestations, son équipe, l'état de sa
+ * réservation. Le champ de droite prend la couleur de sa vitrine : la personnalisation
+ * se voit sans qu'on ait à l'écrire.
  *
- * TROIS ÉTATS, dits franchement : chargement (une ligne, pas de valeur inventée),
- * échec (une phrase honnête, aucune valeur d'exemple), réponse (les vraies lignes).
+ * LES MÉDIAS sont fournis par l'exploitant, en variables d'environnement :
+ *   - `NEXT_PUBLIC_DEMO_VIDEO`  : la vidéo de gauche (mp4/webm). Lecture en boucle,
+ *     sans son, sans commandes — un plan, pas un lecteur ;
+ *   - `NEXT_PUBLIC_DEMO_IMAGE`  : l'image du champ de droite.
+ * Sans elles, le cadre garde un champ dessiné (dégradé chaud + grain) : on ne pose
+ * jamais une balise média vide, qui afficherait un rectangle noir.
  *
- * Les requêtes sont les mêmes que `LiveStats`, donc partagées par le cache : un
- * seul aller-retour par ressource pour toute la page.
+ * TROIS ÉTATS, dits franchement : chargement (un tiret, pas de valeur inventée), échec
+ * (une phrase honnête, aucune valeur d'exemple), réponse (les vraies lignes).
  */
 const SLUG = process.env.NEXT_PUBLIC_DEMO_SALON_SLUG ?? "";
+const VIDEO = process.env.NEXT_PUBLIC_DEMO_VIDEO;
+const IMAGE = process.env.NEXT_PUBLIC_DEMO_IMAGE;
+
+/** Champ de repli : le dégradé chaud du site, jamais un rectangle noir. */
+function FallbackField() {
+  return (
+    <>
+      <div className="absolute inset-0 bg-[linear-gradient(150deg,#e8cda4_0%,#cfa271_42%,#96693e_78%,#5d422b_100%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(58%_58%_at_68%_18%,rgba(255,242,216,0.8),transparent_72%)]" />
+    </>
+  );
+}
 
 export default function SalonDemo() {
   const { dict, locale } = useDictionary();
@@ -45,161 +58,123 @@ export default function SalonDemo() {
   const serviceList = services.data?.data ?? [];
   const teamList = staff.data?.data ?? [];
 
-  /** Les couleurs réelles de la vitrine, réduites à trois traits. */
-  const swatches = salon
-    ? [salon.colors.primary, salon.colors.secondary, salon.colors.accent]
-    : [];
+  /** Une ligne = une étiquette et sa valeur, lue sur l'API. */
+  const rows = [
+    {
+      label: demo.servicesLabel,
+      value: serviceList.map((service) => service.name).join(" · ") || demo.empty,
+    },
+    {
+      label: demo.teamLabel,
+      value: teamList.map((member) => member.firstName).join(" · ") || demo.empty,
+    },
+    {
+      label: demo.bookingLabel,
+      value: salon?.publicBooking ? demo.bookingOpen : demo.bookingClosed,
+    },
+  ];
 
   return (
     <section id="demo" className="bg-white text-ink">
-      <div className="container-x py-20 sm:py-24 lg:py-28">
-        {/* ——— Ligne haute : l'état du direct à gauche, la provenance à droite. */}
-        <div className="flex flex-wrap items-baseline justify-between gap-x-8 gap-y-2 border-b border-ink/10 pb-5">
-          <span className={`${LABEL} flex items-center gap-2 text-ink/45`}>
-            <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-brand" />[ {demo.eyebrow} ]
-          </span>
-          <span className={`${LABEL} text-ink/25`}>[ API · {dict.site.name} ]</span>
-        </div>
-
-        {/* ——— Le titre, puis la phrase qui dit d'où viennent les données. */}
-        <div className="mt-10 grid gap-8 lg:grid-cols-12 lg:items-end lg:gap-12">
-          <h2 className="max-w-[22ch] font-display text-[clamp(1.9rem,3.6vw,3rem)] font-light leading-[1.04] tracking-[-0.02em] lg:col-span-7">
-            {demo.title}
-          </h2>
-
-          <p className={`max-w-md text-ink/55 lg:col-span-5 ${BODY}`}>{demo.body}</p>
-        </div>
-
-        {/* ——— API muette : une phrase, et rien d'autre. Une valeur d'exemple serait une
-                donnée inventée. */}
-        {failed && (
-          <p className="mt-12 max-w-xl border-t border-ink/10 pt-6 text-sm text-ink/50">
-            {demo.unavailable}
-          </p>
-        )}
-
-        {/* ——— Le salon, en deux colonnes : les prestations à gauche, l'équipe à droite.
-                Aucune maquette d'écran, seulement des lignes et un filet vertical. */}
-        {!failed && (
-          <div className="mt-14 grid gap-12 lg:grid-cols-12 lg:gap-0">
-            <div className="lg:col-span-7 lg:pr-12">
-              {/* Le nom — cliquable vers la vraie page du salon — et ses couleurs. */}
-              <div className="flex flex-wrap items-end justify-between gap-x-8 gap-y-3 border-b border-ink/10 pb-4">
-                <div>
-                  <span className={`${LABEL} block text-ink/35`}>{demo.salonLabel}</span>
-
-                  {salon ? (
-                    <Link
-                      href={`/${locale}/s/${salon.slug}`}
-                      className="mt-2 block w-fit font-display text-[clamp(1.7rem,3.2vw,2.6rem)] font-light leading-none tracking-[-0.02em] transition-colors hover:text-brand"
-                    >
-                      {salon.name}
-                    </Link>
-                  ) : (
-                    <span className="mt-2 block font-display text-[clamp(1.7rem,3.2vw,2.6rem)] font-light leading-none tracking-[-0.02em] text-ink/25">
-                      —
-                    </span>
-                  )}
-                </div>
-
-                {swatches.length > 0 && (
-                  <span aria-hidden className="flex items-end gap-1 pb-1">
-                    {swatches.map((color, index) => (
-                      <span
-                        key={`${color}-${index}`}
-                        className="block w-1.5 rounded-full"
-                        style={{ background: color, height: `${1.6 + index * 0.5}rem` }}
-                      />
-                    ))}
-                  </span>
-                )}
-              </div>
-
-              {/* Les prestations : numéro, nom, durée, prix — les vraies lignes du salon. */}
-              <div className="mt-8">
-                <span className={`${LABEL} text-ink/35`}>{demo.servicesLabel}</span>
-
-                <ul className="mt-4">
-                  {loading && (
-                    <li className="border-b border-ink/10 py-4 text-sm text-ink/40">
-                      {dict.ui.dashboard.loading}
-                    </li>
-                  )}
-
-                  {!loading && serviceList.length === 0 && (
-                    <li className="border-b border-ink/10 py-4 text-sm text-ink/50">{demo.empty}</li>
-                  )}
-
-                  {!loading &&
-                    serviceList.map((service, index) => (
-                      <li
-                        key={`${service.name}-${index}`}
-                        className="flex items-baseline gap-4 border-b border-ink/10 py-3.5"
-                      >
-                        <span className={`${LABEL} shrink-0 tabular-nums text-ink/25`}>
-                          {String(index + 1).padStart(2, "0")}
-                        </span>
-                        <span className="min-w-0 flex-1 truncate text-[0.95rem]">{service.name}</span>
-                        <span className="shrink-0 tabular-nums text-[0.78rem] text-ink/40">
-                          {service.durationMinutes} {demo.min}
-                        </span>
-                        <span className="w-16 shrink-0 text-right tabular-nums text-[0.95rem]">
-                          {service.price} €
-                        </span>
-                      </li>
-                    ))}
-                </ul>
-              </div>
+      <div className="grid lg:grid-cols-2">
+        {/* ———————————————— Moitié gauche : média, texte, données. */}
+        <div className="flex flex-col px-5 py-16 sm:px-8 sm:py-20 lg:px-12 lg:py-24">
+          <div className="grid gap-8 sm:grid-cols-2 sm:items-start sm:gap-8 lg:gap-10">
+            {/* Le média vertical — une vidéo muette, en boucle, sans commandes. */}
+            <div className="relative aspect-[4/5] overflow-hidden bg-ink/5 sm:col-start-1 sm:row-start-1">
+              {VIDEO ? (
+                <video
+                  className="absolute inset-0 h-full w-full object-cover"
+                  src={VIDEO}
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  preload="metadata"
+                />
+              ) : (
+                <FallbackField />
+              )}
             </div>
 
-            {/* ——— L'équipe et la sortie, dans la colonne de droite. */}
-            <div className="lg:col-span-5 lg:border-l lg:border-ink/10 lg:pl-12">
-              <span className={`${LABEL} text-ink/35`}>{demo.teamLabel}</span>
+            {/* Le texte : l'état du direct, le titre, la provenance, la sortie. */}
+            <div className="sm:col-start-2 sm:row-start-1">
+              <span className={`${LABEL} flex items-center gap-2 text-ink/45`}>
+                <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-brand" />[ {demo.eyebrow} ]
+              </span>
 
-              <ul className="mt-4">
-                {loading && (
-                  <li className="border-b border-ink/10 py-3.5 text-sm text-ink/40">
-                    {dict.ui.dashboard.loading}
-                  </li>
-                )}
+              <h2 className="mt-5 font-display text-[clamp(1.6rem,2.6vw,2.15rem)] font-light leading-[1.08] tracking-[-0.02em]">
+                {demo.title}
+              </h2>
 
-                {!loading && teamList.length === 0 && (
-                  <li className="border-b border-ink/10 py-3.5 text-sm text-ink/50">{demo.empty}</li>
-                )}
-
-                {!loading &&
-                  teamList.map((member, index) => (
-                    <li
-                      key={`${member.firstName}-${member.lastName}-${index}`}
-                      className="border-b border-ink/10 py-3.5"
-                    >
-                      <span className="block truncate font-light text-[1.05rem] leading-tight">
-                        {member.firstName} {member.lastName}
-                      </span>
-                      {member.title && (
-                        <span className="mt-1 block text-[0.72rem] uppercase tracking-[0.14em] text-ink/35">
-                          {member.title}
-                        </span>
-                      )}
-                    </li>
-                  ))}
-              </ul>
+              <p className={`mt-4 text-ink/55 ${BODY}`}>
+                {failed ? demo.unavailable : demo.body}
+              </p>
 
               <Link
                 href={`/${locale}/register`}
-                className="mt-8 inline-flex w-fit items-center gap-2 bg-ink px-6 py-3.5 text-[0.7rem] font-medium uppercase tracking-[0.16em] text-paper transition-colors hover:bg-brand"
+                className="group mt-6 inline-flex items-center gap-2 border-b border-ink/25 pb-1 text-[0.8rem] transition-colors hover:border-ink"
               >
                 {demo.cta}
+                <span aria-hidden className="transition-transform group-hover:translate-x-1">
+                  →
+                </span>
               </Link>
-
-              {salon && (
-                <p className={`${LABEL} mt-8 block text-ink/25`}>
-                  [ {salon.publicBooking ? demo.bookingOpen : demo.bookingClosed} ]
-                </p>
-              )}
             </div>
           </div>
-        )}
+
+          {/* Les lignes de données : étiquette à gauche, valeur de l'API à droite. */}
+          {!failed && (
+            <dl className="mt-12 sm:mt-16 lg:mt-auto lg:pt-16">
+              {rows.map((row) => (
+                <div
+                  key={row.label}
+                  className="grid grid-cols-[6.5rem_1fr] items-baseline gap-4 border-t border-ink/10 py-4 sm:grid-cols-[8rem_1fr] sm:gap-8"
+                >
+                  <dt className={`${LABEL} text-ink/35`}>{row.label}</dt>
+                  <dd className="min-w-0 text-[0.88rem] leading-[1.6] text-ink/70">
+                    {loading ? <span className="text-ink/25">—</span> : row.value}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          )}
+        </div>
+
+        {/* ———————————————— Moitié droite : le champ plein cadre, aux couleurs du salon.
+                          Une image si elle est fournie, sinon la couleur primaire du
+                          salon et le grain — la personnalisation se voit. */}
+        <div
+          className="relative min-h-[24rem] overflow-hidden lg:min-h-[38rem]"
+          style={salon ? { background: salon.colors.primary } : undefined}
+        >
+          {IMAGE ? (
+            // eslint-disable-next-line @next/next/no-img-element -- image fournie par l'exploitant (chemin local ou URL), hors liste blanche de `next/image`
+            <img src={IMAGE} alt="" className="absolute inset-0 h-full w-full object-cover" />
+          ) : (
+            !salon && <FallbackField />
+          )}
+
+          {/* Le grain dans son propre cadre : `grain` pose `position: relative`. */}
+          <div className="absolute inset-0">
+            <div className="grain h-full w-full" />
+          </div>
+
+          {salon && (
+            <div className="absolute inset-x-6 bottom-6 flex items-end justify-between gap-6 sm:inset-x-10 sm:bottom-10">
+              <span className={`${LABEL} text-white/70`}>{salon.name}</span>
+              <span aria-hidden className="flex items-end gap-1">
+                {[salon.colors.secondary, salon.colors.accent].map((color, index) => (
+                  <span
+                    key={`${color}-${index}`}
+                    className="block w-1.5 rounded-full"
+                    style={{ background: color, height: `${1.5 + index * 0.6}rem` }}
+                  />
+                ))}
+              </span>
+            </div>
+          )}
+        </div>
       </div>
     </section>
   );

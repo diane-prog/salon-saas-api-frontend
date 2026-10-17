@@ -352,7 +352,7 @@ export default function BookingPanel({
               type="button"
               disabled={!serviceId}
               onClick={() => setStep(2)}
-              className="rounded-full px-6 py-3 text-sm font-light text-white transition-opacity disabled:opacity-40"
+              className="px-6 py-3 text-sm font-light text-white transition-opacity disabled:opacity-40"
               style={{ background: primary }}
             >
               {t.next}
@@ -381,7 +381,7 @@ export default function BookingPanel({
                           setSlotAlert(null);
                         }}
                         aria-pressed={selected}
-                        className={`rounded-full border px-4 py-2 text-xs transition-colors ${
+                        className={`border px-4 py-2 text-xs transition-colors ${
                           selected
                             ? "border-transparent text-white"
                             : "border-ink/15 text-ink/70 hover:border-ink/30"
@@ -416,7 +416,7 @@ export default function BookingPanel({
                     }}
                     aria-pressed={selected}
                     aria-label={longDay(iso, intlLocale)}
-                    className={`flex min-w-[4.5rem] flex-col items-center gap-1 rounded-xl border px-3 py-2.5 transition-colors ${
+                    className={`flex min-w-[4.5rem] flex-col items-center gap-1 border px-3 py-2.5 transition-colors ${
                       selected
                         ? "border-transparent text-white"
                         : "border-ink/10 bg-paper text-ink/70 hover:border-ink/25"
@@ -454,7 +454,7 @@ export default function BookingPanel({
                   <button
                     type="button"
                     onClick={() => slots.refetch()}
-                    className="rounded-full border border-ink/15 px-4 py-2 text-xs text-ink/70 transition-colors hover:border-ink/35"
+                    className="border border-ink/15 px-4 py-2 text-xs text-ink/70 transition-colors hover:border-ink/35"
                   >
                     {labels.retry}
                   </button>
@@ -479,7 +479,7 @@ export default function BookingPanel({
                             setSlotAlert(null);
                           }}
                           aria-pressed={selected}
-                          className={`rounded-lg border px-4 py-2 text-sm tabular-nums transition-colors ${
+                          className={`border px-4 py-2 text-sm tabular-nums transition-colors ${
                             selected
                               ? "border-transparent text-white"
                               : "border-ink/15 text-ink hover:border-ink/35"
@@ -509,7 +509,7 @@ export default function BookingPanel({
               type="button"
               disabled={!time}
               onClick={() => setStep(3)}
-              className="rounded-full px-6 py-3 text-sm font-light text-white transition-opacity disabled:opacity-40"
+              className="px-6 py-3 text-sm font-light text-white transition-opacity disabled:opacity-40"
               style={{ background: primary }}
             >
               {t.next}
@@ -603,7 +603,7 @@ export default function BookingPanel({
             <button
               type="submit"
               disabled={booking.isPending}
-              className="rounded-full px-6 py-3 text-sm font-light text-white transition-opacity disabled:opacity-60"
+              className="px-6 py-3 text-sm font-light text-white transition-opacity disabled:opacity-60"
               style={{ background: primary }}
             >
               {booking.isPending ? t.sending : t.confirm}
@@ -640,7 +640,7 @@ export default function BookingPanel({
           <button
             type="button"
             onClick={reset}
-            className="mt-6 rounded-full border border-ink/15 px-5 py-2.5 text-xs text-ink/70 transition-colors hover:border-ink/35"
+            className="mt-6 border border-ink/15 px-5 py-2.5 text-xs text-ink/70 transition-colors hover:border-ink/35"
           >
             {t.newBooking}
           </button>

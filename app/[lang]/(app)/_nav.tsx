@@ -98,7 +98,7 @@ export default function WorkspaceNav({ groups }: { readonly groups: readonly Wor
         </span>
         <span
           aria-hidden
-          className="mt-1 hidden h-6 w-6 shrink-0 place-items-center rounded-full border border-paper/15 text-[0.6rem] text-paper/40 transition-colors group-hover:border-turquoise/50 group-hover:text-turquoise lg:grid"
+          className="mt-1 hidden h-6 w-6 shrink-0 place-items-center border border-paper/15 text-[0.6rem] text-paper/40 transition-colors group-hover:border-turquoise/50 group-hover:text-turquoise lg:grid"
         >
           ↗
         </span>
@@ -126,7 +126,7 @@ export default function WorkspaceNav({ groups }: { readonly groups: readonly Wor
                   key={section.key}
                   href={href}
                   aria-current={current ? "page" : undefined}
-                  className={`flex shrink-0 items-center gap-2.5 whitespace-nowrap rounded-sm px-3 py-2 text-sm transition-colors ${
+                  className={`flex shrink-0 items-center gap-2.5 whitespace-nowrap px-3 py-2 text-sm transition-colors ${
                     current
                       ? "bg-paper/[0.08] text-paper"
                       : "text-paper/55 hover:bg-paper/[0.05] hover:text-paper"
@@ -158,7 +158,7 @@ export default function WorkspaceNav({ groups }: { readonly groups: readonly Wor
           type="button"
           onClick={signOut}
           disabled={logout.isPending}
-          className="rounded-sm px-3 py-1.5 text-left text-paper/50 transition-colors hover:text-turquoise disabled:opacity-60"
+          className="px-3 py-1.5 text-left text-paper/50 transition-colors hover:text-turquoise disabled:opacity-60"
         >
           {dict.ui.dashboard.logout}
         </button>

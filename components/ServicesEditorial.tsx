@@ -64,7 +64,7 @@ export default function ServicesEditorial() {
                   </span>
                 </span>
 
-                <span className="mt-1 grid h-9 w-9 place-items-center rounded-full border border-ink/15 text-ink/50 transition-all duration-300 group-hover:border-brand group-hover:bg-brand group-hover:text-paper">
+                <span className="mt-1 grid h-9 w-9 place-items-center border border-ink/15 text-ink/50 transition-all duration-300 group-hover:border-brand group-hover:bg-brand group-hover:text-paper">
                   <ArrowUpRight className="h-4 w-4" />
                 </span>
               </Link>

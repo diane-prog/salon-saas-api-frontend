@@ -34,7 +34,7 @@ export default function Footer() {
                     rel="noopener noreferrer"
                     aria-label={s.label}
                     title={s.label}
-                    className="grid h-10 w-10 place-items-center rounded-full text-paper/70 ring-1 ring-paper/15 transition-colors duration-300 hover:text-turquoise hover:ring-turquoise/40"
+                    className="grid h-10 w-10 place-items-center text-paper/70 ring-1 ring-paper/15 transition-colors duration-300 hover:text-turquoise hover:ring-turquoise/40"
                   >
                     {Icon ? <Icon className="h-[1.1rem] w-[1.1rem]" /> : s.label.slice(0, 2)}
                   </a>

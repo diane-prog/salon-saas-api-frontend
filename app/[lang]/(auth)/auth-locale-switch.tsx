@@ -45,7 +45,7 @@ export default function AuthLocaleSwitch({ current }: { current: Locale }) {
           onClick={() => change(locale)}
           aria-current={locale === current ? "true" : undefined}
           title={localeNames[locale]}
-          className={`rounded-full px-2.5 py-1 transition-colors ${
+          className={`px-2.5 py-1 transition-colors ${
             locale === current ? "text-ink" : "text-ink/40 hover:text-ink"
           }`}
         >

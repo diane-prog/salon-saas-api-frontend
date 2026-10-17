@@ -115,7 +115,7 @@ export default function WhyStatements() {
 
                 <Link
                   href={`/${locale}/register`}
-                  className="absolute bottom-4 right-4 inline-flex items-center gap-2 rounded-full bg-turquoise px-4 py-2 text-[0.56rem] font-medium uppercase tracking-[0.14em] text-ink transition-colors hover:bg-paper"
+                  className="absolute bottom-4 right-4 inline-flex items-center gap-2 bg-turquoise px-4 py-2.5 text-[0.56rem] font-medium uppercase tracking-[0.14em] text-ink transition-colors hover:bg-paper"
                 >
                   {ui.freeQuote}
                   <span aria-hidden>→</span>

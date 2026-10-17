@@ -5,6 +5,7 @@ import type {
   PublicBooking,
   PublicBookingDto,
   SalonContactResponse,
+  SalonGalleryImage,
   SalonGalleryResponse,
   SalonInfoResponse,
   SalonReviewCreatedResponse,
@@ -48,8 +49,21 @@ export const getSalonStaff = async (slug: string) => {
 };
 
 export const getSalonGallery = async (slug: string) => {
-  const { data } = await api.get<SalonGalleryResponse>(`/public/${slug}/gallery`);
-  return data;
+  const { data } = await api.get<unknown>(`/public/${slug}/gallery`);
+
+  /* DEUX FORMES, et c'est mesuré : le Swagger décrit cette route comme renvoyant un
+     **tableau nu** (`type: array`), alors que l'instance interrogée l'enveloppe
+     (`{ success, statusCode, data }`) — vérifié le 2026-10-17. Une vitrine qui ne
+     comprendrait qu'une des deux afficherait « aucune photo publiée » alors que le
+     salon en a : le pire des bugs, parce qu'il ne casse rien. On les accepte toutes
+     les deux, comme pour `slots` et `booking`.
+
+     La forme enveloppée est rendue telle quelle : les consommateurs lisent
+     `response.data`, et ne changent pas selon la version du backend. */
+  const payload = unwrap<SalonGalleryImage[]>(data);
+  const images = Array.isArray(payload) ? payload : [];
+
+  return { success: true, statusCode: 200, data: images } satisfies SalonGalleryResponse;
 };
 
 export const getSalonReviews = async (slug: string) => {

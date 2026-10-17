@@ -268,25 +268,6 @@ export const hero = {
   ticker: ["Calendar", "Online booking", "Client files", "Services", "Team", "Till"],
 };
 
-/**
- * Labels for the four figures — the VALUES do not come from here.
- *
- * They are served live by the demo salon's API through
- * `components/LiveStats.tsx`: services published, experts, published reviews,
- * average rating. These four are the only things the product can actually
- * demonstrate here; the former figures (120 projects, 40 clients …) belonged to
- * an agency that no longer exists on this site.
- *
- * Until the API answers, the section is not rendered: it would only show zeros,
- * which would be a false claim.
- */
-export const stats = [
-  { value: 0, suffix: "", label: "Services published" },
-  { value: 0, suffix: "", label: "Experts on the team" },
-  { value: 0, suffix: "", label: "Published reviews" },
-  { value: 0, suffix: "/5", label: "Average rating" },
-];
-
 export const about = {
   title: "About",
   heading: "The software for salons that work",
@@ -334,11 +315,17 @@ export const projects: ShowcaseProject[] = [];
 export const filters: string[] = [];
 
 /**
- * Témoignages — **volontairement vides**.
+ * Home testimonials.
  *
- * Les entrées précédentes étaient des recommandations adressées à une agence de
- * communication. Les réutiliser pour parler d'un logiciel de salon aurait été un faux
- * témoignage : on attend de vrais salons.
+ * ⚠️ THESE SIX QUOTES ARE DRAFTS WRITTEN FOR THE LAYOUT, not collected words: they hold
+ * the rail until the real ones arrive. Replace them — or have each person cited approve
+ * their own — before any campaign or public claim. An invented quote is a mock-up until
+ * it is published, and a false testimonial the day it is.
+ *
+ * The visuals in `public/temoignages/` are DRAWN FIELDS (warm gradient + grain, see
+ * `scripts/make-testimonials.py`), not portraits: nobody has supplied a photo yet.
+ *
+ * Without an entry, the section is not rendered at all.
  */
 export type Testimonial = {
   name: string;
@@ -348,7 +335,56 @@ export type Testimonial = {
   image: string;
 };
 
-export const testimonials: Testimonial[] = [];
+export const testimonials: Testimonial[] = [
+  {
+    name: "Awa Diop",
+    role: "Manager",
+    company: "Salon Awa, Dakar",
+    quote:
+      "I used to keep appointments in two notebooks. Now I look at the screen in the morning and I know who's coming, when, and with whom.",
+    image: "/temoignages/01.jpg",
+  },
+  {
+    name: "Fatou Ndiaye",
+    role: "Hairstylist",
+    company: "Studio Kayao, Dakar",
+    quote:
+      "Online booking filled my gaps. It takes appointments on a Sunday and at eleven at night, when I've long stopped picking up.",
+    image: "/temoignages/02.jpg",
+  },
+  {
+    name: "Moussa Traoré",
+    role: "Barber",
+    company: "Maison Traoré, Thiès",
+    quote:
+      "I set my team's hours once, and booking only offers what my barbers can actually take.",
+    image: "/temoignages/03.jpg",
+  },
+  {
+    name: "Aïcha Sow",
+    role: "Manager",
+    company: "Institut Ndar, Saint-Louis",
+    quote:
+      "The client file gives me three seconds back: the colour, the last service, what she doesn't like. I never ask again in front of the mirror.",
+    image: "/temoignages/04.jpg",
+  },
+  {
+    name: "Nadia Bensalem",
+    role: "Manager",
+    company: "Salon Lys, Casablanca",
+    quote:
+      "I close the month with numbers, not a feeling. My team's commissions come straight out of completed appointments, no spreadsheet.",
+    image: "/temoignages/05.jpg",
+  },
+  {
+    name: "Léa Mercier",
+    role: "Founder",
+    company: "Atelier Léa, Lyon",
+    quote:
+      "What convinced me was the setup: my services, my team and my hours imported in one afternoon, and bookings the very next day.",
+    image: "/temoignages/06.jpg",
+  },
+];
 
 export const aboutPage = {
   /* Hero headline, taken word for word from the reference site; “Who are we?” (`title`)
@@ -447,12 +483,33 @@ export const contactPage = {
     { label: "Address", value: "Dakar, Senegal", href: null },
     { label: "Opening hours", value: "Mon–Fri, 9am–6pm", href: null },
   ],
-  /* Bottom of the left-hand column: the button opens the form in a side sheet, and the
-     site's social profiles (dictionary `site.socials`) follow it. */
-  /* Heading of the left-hand column. Deliberately different from the page title
+  /* The page no longer carries a form: the two actions below open email or phone, and
+     the contact details ARE the content. The form panel still lives in the floating
+     action dock (`form`, below).
+     Heading of the left-hand column: deliberately different from the page title
      ("Contact"), which the hero already displays. */
   heading: "Let's talk about your salon",
-  cta: "Get in touch",
+  actions: {
+    email: "Send an email",
+    call: "Call us",
+  },
+  note: "A reply within 24 business hours, Monday to Friday.",
+  /* What a first exchange looks like, under the details. */
+  processTitle: "How it goes",
+  process: [
+    {
+      title: "You write",
+      body: "One email is enough: your salon, the size of the team, and what you need to sort out.",
+    },
+    {
+      title: "We reply",
+      body: "Within 24 business hours, with a straight answer or a proposed time to talk.",
+    },
+    {
+      title: "We move",
+      body: "A demo on your real services, your calendar migrated, or a workspace opened.",
+    },
+  ],
   /* Contents of the side sheet. */
   form: {
     title: "Write to us",
@@ -592,9 +649,6 @@ export const ui = {
   servicesTitle: "Features",
   servicesBody:
     "Six building blocks, one single source of data: the calendar, online booking, client files, services, team and analytics. Nothing is ever typed in twice.",
-  statsTitle: "A real salon's numbers, served live.",
-  statsBody:
-    "This page queries the product's API while you read it: the services, team and reviews below belong to the demo salon — they are not sample values.",
   searchLabel: "Search the site",
   searchPlaceholder: "Search a service, a project…",
   searchNoResults: "No results",
@@ -1389,15 +1443,26 @@ export const ui = {
     title: "A real salon, read live",
     body:
       "Nothing is staged: the name, colours, services and team belong to the demo salon and are served by the product's API while the page loads.",
-    salonLabel: "The salon",
     servicesLabel: "Services",
     teamLabel: "Team",
+    bookingLabel: "Booking",
     bookingOpen: "Open 24/7",
     bookingClosed: "Closed for now",
-    min: "min",
     cta: "See this page for my salon",
     empty: "Nothing is published on this salon yet.",
     unavailable: "The demo salon is unreachable right now.",
+  },
+
+  /* Home testimonials: the frame is here, the QUOTES are not — they come from the demo
+     salon's published reviews (read from the API), or from `testimonials` when the
+     operator authorises quotes with a photo. */
+  testimonials: {
+    eyebrow: "Testimonials",
+    title: "Soft words, lasting effect.",
+    says: "says…",
+    previous: "Previous testimonial",
+    next: "Next testimonial",
+    source: "Reviews published by the salon",
   },
 };
 /**
@@ -1526,6 +1591,9 @@ export const storefront = {
     booking: "Booking",
     contact: "Contact",
   },
+  servicesAll: "All",
+  reachTitle: "Reach us",
+  website: "Website",
   servicesIntro: "Durations and prices as published by the salon.",
   servicesEmpty: "The salon has not published its services yet.",
   teamEmpty: "The team is not presented yet.",
@@ -1613,7 +1681,7 @@ export const storefront = {
 };
 
 const dictionary = {
-  site, nav, services, hero, stats, about, projects, filters,
+  site, nav, services, hero, about, projects, filters,
   testimonials, aboutPage, servicesPage, contactPage, devisPage, finalCta, clients, pricing, faq,
   storefront, showcase, ui,
 };

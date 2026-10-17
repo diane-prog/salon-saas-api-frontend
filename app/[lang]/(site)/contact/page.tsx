@@ -1,11 +1,9 @@
-import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import ContactSheet from "@/components/ContactSheet";
-import SocialLinks from "@/components/SocialLinks";
-import Reveal from "@/components/Reveal";
-import { ProductPanel } from "@/components/ProductPanel";
+import { notFound } from "next/navigation";
+
 import { HeroSection } from "@/components/sections";
 import { isLocale, getDictionary, localePath } from "@/lib/dictionaries";
+import { LABEL } from "@/lib/editorial";
 
 export async function generateMetadata({ params }: PageProps<"/[lang]/contact">): Promise<Metadata> {
   const { lang } = await params;
@@ -18,99 +16,132 @@ export async function generateMetadata({ params }: PageProps<"/[lang]/contact">)
   };
 }
 
-/* Les valeurs cliquables (e-mail, téléphone) : même survol que le reste du site, le texte
-   passe au bleu de marque. */
-const valueLinkCls =
-  "transition-colors duration-300 hover:text-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand";
-
+/**
+ * Page Contact — une FICHE, pas un formulaire.
+ *
+ * CE QUI A CHANGÉ, ET POURQUOI : la page ouvrait un panneau contenant un formulaire de
+ * six champs, précédé d'une gerbe d'icônes de réseaux. Les deux gênaient plus qu'ils
+ * n'aidaient : un visiteur qui veut joindre la maison a déjà son client de messagerie,
+ * et les réseaux du site n'existent pas encore (`site.socials` est vide). Ils sont donc
+ * retirés d'ICI. Le formulaire, lui, n'est pas perdu : il vit dans la barre d'actions
+ * flottante (`ActionDock`), accessible depuis toutes les pages.
+ *
+ * Ce qui reste tient en trois blocs, dans le vocabulaire du site :
+ *
+ *   1. le hero des pages internes — l'étiquette, le titre, le chapô ;
+ *   2. la FICHE : à gauche le titre d'échange et les deux actions réelles (courriel,
+ *      téléphone, liens natifs), à droite les coordonnées en lignes à filets — c'est le
+ *      contenu de la page, pas une illustration ;
+ *   3. le DÉROULÉ d'un premier échange, en trois cases numérotées.
+ *
+ * Aucun panneau produit, aucune photo d'ambiance : sur une page de contact, la preuve
+ * c'est la réponse qu'on obtient, pas un écran qu'on montre.
+ */
 export default async function ContactPage({ params }: PageProps<"/[lang]/contact">) {
   const { lang } = await params;
   if (!isLocale(lang)) notFound();
+
   const dict = await getDictionary(lang);
-  const { contactPage, site } = dict;
-  const form = contactPage.form;
+  const { contactPage, ui } = dict;
+
+  /* Les deux actions viennent des coordonnées déjà listées : une seule source, un
+     changement d'adresse ne se fait qu'à un endroit. */
+  const mailto = contactPage.info.find((item) => item.href?.startsWith("mailto:"))?.href;
+  const tel = contactPage.info.find((item) => item.href?.startsWith("tel:"))?.href;
 
   return (
     <>
-      {/* Hero clair habituel des pages internes, en tête de page. */}
-      <HeroSection eyebrow={dict.ui.talkToUs} title={contactPage.title} body={contactPage.lead} />
+      {/* Le hero des pages internes : étiquette, titre, chapô. */}
+      <HeroSection eyebrow={ui.talkToUs} title={contactPage.title} body={contactPage.lead} />
 
-      <section className="py-24 sm:py-28">
-        <div className="container-x">
-          <div className="grid gap-16 lg:grid-cols-[0.85fr_1.15fr] lg:gap-24">
-            {/* Colonne gauche — le titre et la phrase d'accroche en haut, le bouton et les
-                réseaux en bas, alignés sur le bas de la photo de la colonne de droite :
-                `justify-between` s'appuie sur la hauteur de la ligne de grille, donnée par
-                cette colonne de droite. Le titre est un `h2` et il dit autre chose que le
-                `h1` du hero, qui porte déjà « Contact » : pas de redite à l'écran. Il
-                reste un cran SOUS le titre du hero — plus petit, et dans un gris ardoise
-                (`navy/80`) plutôt que dans le bleu nuit plein, qui vire au noir. */}
-            <div className="order-2 flex flex-col justify-between gap-16 lg:order-1">
-              <Reveal>
-                <h2 className="max-w-sm font-light text-2xl leading-[1.15] text-navy/80 sm:text-[1.75rem] lg:text-[2.25rem]">
-                  {contactPage.heading}
-                </h2>
-                <p className="mt-5 max-w-xs text-sm leading-relaxed text-muted">{contactPage.lead}</p>
-              </Reveal>
+      {/* ——— La fiche : actions à gauche, coordonnées à droite. */}
+      <section className="bg-white text-ink">
+        <div className="container-x pb-16 pt-4 sm:pb-20 sm:pt-6 lg:pb-24">
+          <div className="grid gap-12 lg:grid-cols-12 lg:gap-16">
+            <div className="lg:col-span-5">
+              <h2 className="max-w-[16ch] font-display text-[clamp(1.6rem,2.6vw,2.2rem)] font-light leading-[1.08] tracking-[-0.02em]">
+                {contactPage.heading}
+              </h2>
 
-              <div>
-                <Reveal delay={80}>
-                  <ContactSheet
-                    labels={{
-                      trigger: contactPage.cta,
-                      title: form.title,
-                      body: form.body,
-                      note: form.jsNote,
-                      submit: form.submit,
-                      successTitle: form.successTitle,
-                      successBody: form.successBody,
-                      fields: {
-                        firstName: form.firstName,
-                        lastName: form.lastName,
-                        email: form.email,
-                        subject: form.subject,
-                        message: form.message,
-                      },
-                    }}
-                  />
-                </Reveal>
+              <div className="mt-8 flex flex-wrap gap-3">
+                {mailto && (
+                  <a
+                    href={mailto}
+                    className="inline-flex items-center gap-2 bg-ink px-6 py-3.5 text-[0.66rem] font-medium uppercase tracking-[0.16em] text-paper transition-colors hover:bg-brand"
+                  >
+                    {contactPage.actions.email}
+                    <span aria-hidden>→</span>
+                  </a>
+                )}
 
-                {/* Réseaux : icônes seules, WhatsApp compris (l'intitulé reste dans
-                    `aria-label`, cf. `SocialLinks`). */}
-                <Reveal delay={160} className="mt-10">
-                  <SocialLinks site={site} />
-                </Reveal>
+                {tel && (
+                  <a
+                    href={tel}
+                    className="inline-flex items-center gap-2 border border-ink/20 px-6 py-3.5 text-[0.66rem] font-medium uppercase tracking-[0.16em] text-ink/70 transition-colors hover:border-ink hover:text-ink"
+                  >
+                    {contactPage.actions.call}
+                  </a>
+                )}
               </div>
+
+              <p className={`${LABEL} mt-8 max-w-[26ch] leading-[2] text-ink/35`}>
+                {contactPage.note}
+              </p>
             </div>
 
-            {/* Colonne droite — coordonnées puis photo. Elle passe en premier sur mobile,
-                pour que les coordonnées se lisent avant les actions. */}
-            <div className="order-1 lg:order-2">
-              <dl className="grid gap-x-10 gap-y-12 sm:grid-cols-2">
-                {contactPage.info.map((item) => (
-                  <div key={item.label}>
-                    <dt className="text-sm text-muted">{item.label}</dt>
-                    <dd className="mt-2 text-[0.95rem] font-medium text-navy">
-                      {item.href ? (
-                        <a href={item.href} className={valueLinkCls}>
-                          {item.value}
-                        </a>
-                      ) : (
-                        item.value
-                      )}
-                    </dd>
-                  </div>
-                ))}
-              </dl>
-
-              {/* Un panneau produit plutôt qu'une photo de partenaires : ce que la
-                  personne est en train de lire (réserver, choisir une prestation) est
-                  montré, pas illustré par une image d'ambiance. */}
-              <Reveal delay={120} className="mt-14">
-                <ProductPanel variant="booking" />
-              </Reveal>
-            </div>
+            {/* Les coordonnées : une ligne par information, filet au-dessus, valeur en
+                grand corps clair — la même écriture que les listes de données du site. */}
+            <dl className="lg:col-span-7">
+              {contactPage.info.map((item) => (
+                <div
+                  key={item.label}
+                  className="grid grid-cols-[6.5rem_minmax(0,1fr)] items-baseline gap-5 border-t border-ink/10 py-5 sm:grid-cols-[9rem_minmax(0,1fr)] sm:gap-8"
+                >
+                  <dt className={`${LABEL} text-ink/35`}>{item.label}</dt>
+                  <dd className="min-w-0 font-display text-[clamp(1.05rem,1.7vw,1.45rem)] font-light leading-tight">
+                    {item.href ? (
+                      <a
+                        href={item.href}
+                        className="break-words transition-colors hover:text-brand"
+                      >
+                        {item.value}
+                      </a>
+                    ) : (
+                      item.value
+                    )}
+                  </dd>
+                </div>
+              ))}
+            </dl>
           </div>
+        </div>
+      </section>
+
+      {/* ——— Le déroulé d'un premier échange : trois cases numérotées, filet par case. */}
+      <section className="bg-white text-ink">
+        <div className="container-x pb-20 sm:pb-24">
+          <div className="flex flex-wrap items-baseline justify-between gap-x-8 gap-y-2 border-t border-ink/10 pt-6">
+            <h2 className={`${LABEL} text-ink/40`}>{contactPage.processTitle}</h2>
+            <span className={`${LABEL} text-ink/25`}>[ 01 — 03 ]</span>
+          </div>
+
+          <ol className="mt-8 grid gap-2.5 sm:grid-cols-3 sm:gap-3">
+            {contactPage.process.map((step, index) => (
+              <li key={step.title} className="border border-ink/12 p-6 sm:p-7">
+                <span className={`${LABEL} tabular-nums text-ink/25`}>
+                  [ {String(index + 1).padStart(2, "0")} ]
+                </span>
+
+                <h3 className="mt-4 font-display text-[1.15rem] font-light leading-tight">
+                  {step.title}
+                </h3>
+
+                <p className="mt-3 max-w-[34ch] text-[0.85rem] leading-[1.65] text-ink/55">
+                  {step.body}
+                </p>
+              </li>
+            ))}
+          </ol>
         </div>
       </section>
     </>

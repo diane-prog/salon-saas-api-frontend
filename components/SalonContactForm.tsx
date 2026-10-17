@@ -78,7 +78,7 @@ export default function SalonContactForm({
             setValues({ name: "", email: "", phone: "", subject: "", message: "" });
             setSent(false);
           }}
-          className="mt-6 rounded-full border border-ink/15 px-5 py-2.5 text-xs text-ink/70 transition-colors hover:border-ink/35"
+          className="mt-6 border border-ink/15 px-5 py-2.5 text-xs text-ink/70 transition-colors hover:border-ink/35"
         >
           {t.again}
         </button>
@@ -142,7 +142,7 @@ export default function SalonContactForm({
           onChange={(event) => set("message")(event.target.value)}
           disabled={contact.isPending}
           aria-invalid={Boolean(errors.message) || undefined}
-          className="w-full resize-y rounded-xl border border-navy/10 bg-white px-4 py-3 text-sm text-navy outline-none transition-all duration-200 placeholder:text-muted/60 focus:border-brand focus:ring-4 focus:ring-brand/10 disabled:opacity-60"
+          className="w-full resize-y border border-ink/15 bg-white px-4 py-3 text-sm text-ink outline-none transition-colors duration-200 placeholder:text-ink/35 focus:border-ink disabled:opacity-60"
         />
         {errors.message && <span className="text-xs text-destructive">{errors.message}</span>}
       </label>
@@ -150,7 +150,7 @@ export default function SalonContactForm({
       {contact.isError && (
         <p
           role="alert"
-          className="rounded-xl border border-destructive/30 bg-destructive/[0.06] px-4 py-3 text-xs leading-relaxed text-destructive"
+          className="border border-destructive/30 bg-destructive/[0.06] px-4 py-3 text-xs leading-relaxed text-destructive"
         >
           {apiErrorMessage(contact.error, t.error)}
         </p>
@@ -160,7 +160,7 @@ export default function SalonContactForm({
         <button
           type="submit"
           disabled={contact.isPending}
-          className="rounded-full px-6 py-3 text-sm font-light text-white transition-opacity disabled:opacity-60"
+          className="px-6 py-3 text-sm font-light text-white transition-opacity disabled:opacity-60"
           style={{ background: primary }}
         >
           {contact.isPending ? t.sending : t.submit}

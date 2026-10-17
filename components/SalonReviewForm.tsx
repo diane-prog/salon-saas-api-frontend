@@ -6,6 +6,7 @@ import { useDictionary } from "@/components/DictionaryProvider";
 import { Field } from "@/components/Form";
 import { useCreateSalonReview } from "@/features/public-salon/queries";
 import { apiErrorMessage } from "@/lib/api-error";
+import { LABEL } from "@/lib/editorial";
 
 /**
  * Dépôt d'un avis depuis la vitrine — `POST /public/{slug}/reviews`.
@@ -63,8 +64,10 @@ export default function SalonReviewForm({
 
   if (sent) {
     return (
-      <div aria-live="polite" className="border-t border-ink/10 pt-6">
-        <h3 className="font-light text-xl text-ink">{t.successTitle}</h3>
+      <div aria-live="polite">
+        <h3 className="font-display text-[1.5rem] font-light leading-tight text-ink">
+          {t.successTitle}
+        </h3>
         <p className="mt-2 max-w-md text-sm leading-relaxed text-ink/60">{t.successBody}</p>
         <button
           type="button"
@@ -74,7 +77,7 @@ export default function SalonReviewForm({
             setComment("");
             setSent(false);
           }}
-          className="mt-5 rounded-full border border-ink/15 px-5 py-2.5 text-xs text-ink/70 transition-colors hover:border-ink/35"
+          className="mt-5 border border-ink/15 px-5 py-2.5 text-xs text-ink/70 transition-colors hover:border-ink/35"
         >
           {t.again}
         </button>
@@ -83,15 +86,17 @@ export default function SalonReviewForm({
   }
 
   return (
-    <form noValidate onSubmit={submit} className="flex flex-col gap-5 border-t border-ink/10 pt-6">
+    <form noValidate onSubmit={submit} className="flex flex-col gap-6">
       <div>
-        <h3 className="font-light text-xl text-ink">{t.title}</h3>
-        <p className="mt-1 text-xs text-ink/50">{t.lead}</p>
+        <h3 className="font-display text-[1.5rem] font-light leading-tight text-ink">{t.title}</h3>
+        <p className="mt-2 max-w-md text-[0.85rem] leading-relaxed text-ink/55">{t.lead}</p>
       </div>
 
-      <fieldset className="flex flex-col gap-2">
-        <legend className="text-xs font-medium uppercase tracking-wider text-navy">{t.rating}</legend>
-        <div className="flex items-center gap-1.5">
+      {/* La note se donne en ÉTOILES, pas en chiffres : cinq cases carrées, comme tous les
+          boutons du site, et le glyphe dedans. `aria-label` porte la valeur. */}
+      <fieldset className="flex flex-col gap-3">
+        <legend className={`${LABEL} text-ink/45`}>{t.rating}</legend>
+        <div className="flex items-center gap-2">
           {[1, 2, 3, 4, 5].map((value) => {
             const active = value <= rating;
 
@@ -105,12 +110,14 @@ export default function SalonReviewForm({
                 }}
                 aria-pressed={rating === value}
                 aria-label={`${value}/5`}
-                className={`h-9 w-9 rounded-full border text-sm tabular-nums transition-colors ${
-                  active ? "border-transparent text-white" : "border-ink/15 text-ink/60 hover:border-ink/35"
+                className={`grid h-11 w-11 place-items-center border text-[1rem] leading-none transition-colors ${
+                  active
+                    ? "border-transparent text-white"
+                    : "border-ink/15 text-ink/35 hover:border-ink/40 hover:text-ink/70"
                 }`}
                 style={active ? { background: accent } : undefined}
               >
-                {value}
+                <span aria-hidden>★</span>
               </button>
             );
           })}
@@ -129,7 +136,7 @@ export default function SalonReviewForm({
       </div>
 
       <label className="flex flex-col gap-2">
-        <span className="text-xs font-medium uppercase tracking-wider text-navy">{t.comment}</span>
+        <span className={`${LABEL} text-ink/45`}>{t.comment}</span>
         <textarea
           name="review-comment"
           rows={4}
@@ -137,14 +144,14 @@ export default function SalonReviewForm({
           onChange={(event) => setComment(event.target.value)}
           disabled={create.isPending}
           placeholder={t.commentPlaceholder}
-          className="w-full resize-y rounded-xl border border-navy/10 bg-white px-4 py-3 text-sm text-navy outline-none transition-all duration-200 placeholder:text-muted/60 focus:border-brand focus:ring-4 focus:ring-brand/10 disabled:opacity-60"
+          className="w-full resize-y border border-ink/15 bg-white px-4 py-3 text-sm text-ink outline-none transition-colors duration-200 placeholder:text-ink/35 focus:border-ink disabled:opacity-60"
         />
       </label>
 
       {(error || create.isError) && (
         <p
           role="alert"
-          className="rounded-xl border border-destructive/30 bg-destructive/[0.06] px-4 py-3 text-xs leading-relaxed text-destructive"
+          className="border border-destructive/30 bg-destructive/[0.06] px-4 py-3 text-xs leading-relaxed text-destructive"
         >
           {error ?? apiErrorMessage(create.error, t.error)}
         </p>
@@ -154,7 +161,7 @@ export default function SalonReviewForm({
         <button
           type="submit"
           disabled={create.isPending || rating < 1}
-          className="rounded-full px-6 py-3 text-sm font-light text-white transition-opacity disabled:opacity-40"
+          className="w-full px-7 py-3.5 text-[0.68rem] font-medium uppercase tracking-[0.16em] text-white transition-opacity disabled:opacity-40 sm:w-auto"
           style={{ background: primary }}
         >
           {create.isPending ? t.sending : t.submit}

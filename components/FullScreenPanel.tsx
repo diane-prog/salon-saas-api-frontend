@@ -180,7 +180,7 @@ export default function FullScreenPanel({
           type="button"
           onClick={onClose}
           aria-label={closeLabel}
-          className="grid h-11 w-11 place-items-center rounded-full text-paper/70 ring-1 ring-paper/20 transition-colors hover:text-paper hover:ring-paper/50"
+          className="grid h-11 w-11 place-items-center text-paper/70 ring-1 ring-paper/20 transition-colors hover:text-paper hover:ring-paper/50"
         >
           <Close />
         </button>

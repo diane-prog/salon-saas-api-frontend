@@ -270,25 +270,6 @@ export const hero = {
   ticker: ["Agenda", "Réservation en ligne", "Fiches clientes", "Prestations", "Équipe", "Caisse"],
 };
 
-/**
- * Libellés des quatre chiffres — les VALEURS ne viennent pas d'ici.
- *
- * Elles sont servies en direct par l'API du salon de démonstration, à travers
- * `components/LiveStats.tsx` : prestations publiées, experts, avis publiés,
- * note moyenne. Ces quatre données sont les seules que le produit puisse
- * réellement démontrer ici ; les anciens chiffres (120 projets, 40 clients…)
- * appartenaient à une agence qui n'existe plus dans ce site.
- *
- * Tant que l'API n'a pas répondu, la section n'est pas rendue : elle ne
- * montrerait que des zéros, qui seraient une fausse affirmation.
- */
-export const stats = [
-  { value: 0, suffix: "", label: "Prestations en ligne" },
-  { value: 0, suffix: "", label: "Experts dans l'équipe" },
-  { value: 0, suffix: "", label: "Avis publiés" },
-  { value: 0, suffix: "/5", label: "Note moyenne" },
-];
-
 export const about = {
   title: "À propos",
   heading: "Le logiciel des salons qui travaillent",
@@ -337,11 +318,28 @@ export const projects: ShowcaseProject[] = [];
 export const filters: string[] = [];
 
 /**
- * Témoignages — **volontairement vides**.
+ * Témoignages de l'ACCUEIL — les citations affichées par `components/Testimonials.tsx`.
  *
- * Les quatre entrées précédentes étaient des recommandations adressées à une agence
- * de communication (« faites confiance à l'agence »). Les réutiliser pour parler
- * d'un logiciel de salon aurait été un faux témoignage.
+ * ⚠️ CES SIX CITATIONS SONT DES EXEMPLES RÉDIGÉS POUR LA MISE EN PAGE, pas des paroles
+ * recueillies : elles occupent le rail tant que les vraies ne sont pas fournies. Elles
+ * doivent être remplacées — ou validées, une par une, par la personne citée — avant toute
+ * campagne ou tout argumentaire public. Une citation inventée n'est pas une maquette :
+ * c'est un faux témoignage le jour où elle est publiée.
+ *
+ * Forme d'une entrée :
+ *
+ *   { name: "Awa Diop", role: "Gérante", company: "Salon Awa, Dakar",
+ *     quote: "La phrase exacte, telle qu'elle a été dite.", image: "/temoignages/awa.jpg" }
+ *
+ * `image` est le chemin d'une photo (dans `public/`) ou une URL absolue. Vide (`""`), la
+ * case affiche un aplat chaud à la place du portrait — jamais un visage fabriqué.
+ *
+ * Les six visuels de `public/temoignages/` sont des CHAMPS DESSINÉS (dégradé chaud + grain,
+ * voir `scripts/make-testimonials.py`), pas des portraits : personne n'a encore fourni sa
+ * photo. Le jour où c'est le cas, on dépose le fichier sous le nom attendu et on change
+ * le chemin ici — aucun autre code à toucher.
+ *
+ * Sans entrée, la section n'est pas rendue du tout : pas de bandeau sans personne dedans.
  */
 export type Testimonial = {
   name: string;
@@ -351,7 +349,56 @@ export type Testimonial = {
   image: string;
 };
 
-export const testimonials: Testimonial[] = [];
+export const testimonials: Testimonial[] = [
+  {
+    name: "Awa Diop",
+    role: "Gérante",
+    company: "Salon Awa, Dakar",
+    quote:
+      "Avant, je notais les rendez-vous dans deux cahiers. Maintenant je regarde l'écran le matin et je sais qui vient, à quelle heure, et avec qui.",
+    image: "/temoignages/01.jpg",
+  },
+  {
+    name: "Fatou Ndiaye",
+    role: "Coiffeuse",
+    company: "Studio Kayao, Dakar",
+    quote:
+      "La réservation en ligne a rempli mes trous. Elle prend les rendez-vous le dimanche et à onze heures du soir, quand moi, je ne décroche plus.",
+    image: "/temoignages/02.jpg",
+  },
+  {
+    name: "Moussa Traoré",
+    role: "Barbier",
+    company: "Maison Traoré, Thiès",
+    quote:
+      "Je pose les horaires de mon équipe une fois, et la réservation ne propose plus que ce que mes barbiers peuvent vraiment prendre.",
+    image: "/temoignages/03.jpg",
+  },
+  {
+    name: "Aïcha Sow",
+    role: "Responsable",
+    company: "Institut Ndar, Saint-Louis",
+    quote:
+      "La fiche cliente me rend trois secondes : la teinte, la dernière prestation, ce qu'elle n'aime pas. Je ne redemande plus rien devant le miroir.",
+    image: "/temoignages/04.jpg",
+  },
+  {
+    name: "Nadia Bensalem",
+    role: "Gérante",
+    company: "Salon Lys, Casablanca",
+    quote:
+      "Je clôture le mois avec des chiffres, pas avec une impression. Les commissions de l'équipe sortent des rendez-vous honorés, sans tableur.",
+    image: "/temoignages/05.jpg",
+  },
+  {
+    name: "Léa Mercier",
+    role: "Fondatrice",
+    company: "Atelier Léa, Lyon",
+    quote:
+      "Ce qui m'a décidée, c'est la mise en route : mes prestations, mon équipe et mes horaires repris en une après-midi, et des rendez-vous dès le lendemain.",
+    image: "/temoignages/06.jpg",
+  },
+];
 
 export const aboutPage = {
   /* Titre du hero, repris mot pour mot du site de référence ; « Qui sommes-nous ? »
@@ -450,12 +497,33 @@ export const contactPage = {
     { label: "Adresse", value: "Dakar, Sénégal", href: null },
     { label: "Horaires", value: "Lun-Ven, 9h-18h", href: null },
   ],
-  /* Bas de la colonne de gauche : le bouton ouvre le panneau latéral du formulaire, et
-     les réseaux du site (dictionnaire `site.socials`) le suivent. */
-  /* Titre de la colonne de gauche. Volontairement différent du titre de la page
-     (« Contact »), qui est déjà celui du hero, pour ne pas le répéter sur l'écran. */
+  /* La page ne porte plus de formulaire : les deux actions ci-dessous ouvrent le
+     courriel ou le téléphone, et les coordonnées sont le contenu. Le panneau du
+     formulaire reste dans la barre d'actions flottante (`form`, ci-dessous).
+     Titre de la colonne de gauche : volontairement différent du titre de la page
+     (« Contact »), que le hero affiche déjà. */
   heading: "Parlons de votre salon",
-  cta: "Nous contacter",
+  actions: {
+    email: "Écrire un e-mail",
+    call: "Appeler",
+  },
+  note: "Une réponse sous 24 h ouvrées, du lundi au vendredi.",
+  /* Le déroulé d'un premier échange, sous la fiche. */
+  processTitle: "Comment ça se passe",
+  process: [
+    {
+      title: "Vous écrivez",
+      body: "Un e-mail suffit : votre salon, la taille de l'équipe, et la question qui vous occupe.",
+    },
+    {
+      title: "Nous répondons",
+      body: "Sous 24 h ouvrées, avec une réponse précise ou une proposition de créneau.",
+    },
+    {
+      title: "On avance",
+      body: "Démo sur vos vraies prestations, reprise de votre agenda, ou ouverture d'un espace.",
+    },
+  ],
   /* Contenu du panneau latéral (Sheet). */
   form: {
     title: "Écrivez-nous",
@@ -596,9 +664,6 @@ export const ui = {
   servicesTitle: "Fonctionnalités",
   servicesBody:
     "Six briques, une seule source de données : l'agenda, la réservation en ligne, les fiches clients, les prestations, l'équipe et le pilotage. Rien ne se resaisit deux fois.",
-  statsTitle: "Les chiffres d'un vrai salon, servis en direct.",
-  statsBody:
-    "Cette page interroge l'API du produit pendant que vous la lisez : les prestations, l'équipe et les avis ci-dessous sont ceux du salon de démonstration, pas des valeurs d'exemple.",
   searchLabel: "Rechercher sur le site",
   searchPlaceholder: "Rechercher un service, une réalisation…",
   searchNoResults: "Aucun résultat",
@@ -1399,15 +1464,26 @@ export const ui = {
     title: "Un vrai salon, lu en direct",
     body:
       "Rien n'est mis en scène : le nom, les couleurs, les prestations et l'équipe sont ceux du salon de démonstration, servis par l'API du produit pendant que la page s'affiche.",
-    salonLabel: "Le salon",
     servicesLabel: "Prestations",
     teamLabel: "Équipe",
+    bookingLabel: "Réservation",
     bookingOpen: "Ouverte 24 h/24",
     bookingClosed: "Fermée pour l'instant",
-    min: "min",
     cta: "Voir cette page pour mon salon",
     empty: "Rien n'est encore publié sur ce salon.",
     unavailable: "Le salon de démonstration est injoignable pour l'instant.",
+  },
+
+  /* Témoignages de l'accueil : le cadre est ici, les CITATIONS ne le sont pas — elles
+     viennent des avis publiés par le salon de démonstration (lues sur l'API), ou de
+     `testimonials` si l'exploitant y autorise des citations avec photo. */
+  testimonials: {
+    eyebrow: "Témoignages",
+    title: "Des mots simples, un effet durable.",
+    says: "dit…",
+    previous: "Témoignage précédent",
+    next: "Témoignage suivant",
+    source: "Avis publiés par le salon",
   },
 };
 
@@ -1542,6 +1618,9 @@ export const storefront = {
     booking: "Réservation",
     contact: "Contact",
   },
+  servicesAll: "Tout",
+  reachTitle: "Nous joindre",
+  website: "Site web",
   servicesIntro: "Durées et tarifs affichés par le salon.",
   servicesEmpty: "Le salon n'a pas encore publié ses prestations.",
   teamEmpty: "L'équipe n'est pas encore présentée.",
@@ -1631,7 +1710,7 @@ export const storefront = {
 };
 
 const dictionary = {
-  site, nav, services, hero, stats, about, projects, filters,
+  site, nav, services, hero, about, projects, filters,
   testimonials, aboutPage, servicesPage, contactPage, devisPage, finalCta, clients, pricing, faq,
   storefront, showcase, ui,
 };

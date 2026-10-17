@@ -156,7 +156,7 @@ export default function OtpForm() {
         <button
           type="submit"
           disabled={verify.isPending || code.length !== 6}
-          className="group mt-1 inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-brand to-turquoise px-7 py-4 text-sm font-light text-white shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lift disabled:pointer-events-none disabled:opacity-60"
+          className="group mt-1 inline-flex items-center justify-center gap-2 bg-gradient-to-r from-brand to-turquoise px-7 py-4 text-sm font-light text-white shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lift disabled:pointer-events-none disabled:opacity-60"
         >
           {verify.isPending ? auth.loading : auth.otp.submit}
         </button>

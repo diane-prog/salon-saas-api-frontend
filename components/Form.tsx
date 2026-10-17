@@ -10,7 +10,7 @@ import { useState, type ReactNode } from "react";
 type Tone = "light" | "dark";
 
 const LABEL_TONE: Record<Tone, string> = {
-  light: "text-navy",
+  light: "text-ink/50",
   dark: "text-paper/50",
 };
 
@@ -21,13 +21,14 @@ const STAR_TONE: Record<Tone, string> = {
 };
 
 /**
- * En clair : une boîte arrondie sur fond blanc. Sur l'encre : pas de boîte du tout, un
- * simple filet sous le champ, dans la même écriture que la barre de recherche du panneau —
- * la ligne passe au bleu de marque au focus.
+ * En clair : une boîte à ANGLES DROITS sur fond blanc — le site n'a aucun arrondi, et un
+ * champ rond à côté d'un bouton carré est le premier détail qui trahit un assemblage.
+ * Sur l'encre : pas de boîte du tout, un simple filet sous le champ, dans la même écriture
+ * que la barre de recherche du panneau — la ligne passe au bleu de marque au focus.
  */
 const INPUT_TONE: Record<Tone, string> = {
   light:
-    "w-full rounded-xl border border-navy/10 bg-white px-4 py-3 text-sm text-navy outline-none transition-all duration-200 placeholder:text-muted/60 focus:border-brand focus:ring-4 focus:ring-brand/10",
+    "w-full border border-ink/15 bg-white px-4 py-3 text-sm text-ink outline-none transition-colors duration-200 placeholder:text-ink/35 focus:border-ink",
   dark: "w-full border-0 border-b border-paper/25 bg-transparent px-0 py-3 text-lg font-light text-paper outline-none transition-colors duration-300 placeholder:text-paper/25 focus:border-brand",
 };
 
@@ -229,7 +230,7 @@ export function FormShell({
   if (sent) {
     return (
       <div className="flex flex-col items-center gap-4 rounded-card border border-turquoise/30 bg-turquoise/[0.06] p-12 text-center">
-        <span className="grid h-14 w-14 place-items-center rounded-full bg-gradient-to-br from-brand to-turquoise text-white">
+        <span className="grid h-14 w-14 place-items-center bg-gradient-to-br from-brand to-turquoise text-white">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" className="h-7 w-7" aria-hidden>
             <path d="m5 13 4 4L19 7" />
           </svg>
@@ -253,8 +254,8 @@ export function FormShell({
     >
       {note && (
         <p
-          className={`rounded-xl px-4 py-3 text-xs ${
-            dark ? "bg-paper/[0.06] text-paper/60" : "bg-navy/[0.04] text-muted"
+          className={`px-4 py-3 text-xs ${
+            dark ? "bg-paper/[0.06] text-paper/60" : "bg-ink/[0.04] text-ink/55"
           }`}
         >
           {note}
@@ -263,7 +264,7 @@ export function FormShell({
       {children}
       <button
         type="submit"
-        className="group mt-2 inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-brand to-turquoise px-7 py-4 text-sm font-light text-white shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lift focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-turquoise"
+        className="group mt-2 inline-flex items-center justify-center gap-2 bg-gradient-to-r from-brand to-turquoise px-7 py-4 text-sm font-light text-white shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lift focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-turquoise"
       >
         {submitLabel}
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" aria-hidden>

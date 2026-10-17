@@ -241,7 +241,7 @@ function AvailabilityEditor({
                       onClick={() => removeRow(day, index)}
                       disabled={busy}
                       aria-label={labels.removeSlot}
-                      className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-ink/40 transition-colors hover:bg-ink/[0.06] hover:text-ink disabled:opacity-50"
+                      className="grid h-8 w-8 shrink-0 place-items-center text-ink/40 transition-colors hover:bg-ink/[0.06] hover:text-ink disabled:opacity-50"
                     >
                       ×
                     </button>

@@ -72,7 +72,7 @@ const ToastAction = React.forwardRef<
   <ToastPrimitives.Action
     ref={ref}
     className={cn(
-      "inline-flex h-8 shrink-0 items-center justify-center rounded-full border border-current/30 px-3 text-xs font-light transition-colors hover:bg-white/10 disabled:pointer-events-none disabled:opacity-50",
+      "inline-flex h-8 shrink-0 items-center justify-center border border-current/30 px-3 text-xs font-light transition-colors hover:bg-white/10 disabled:pointer-events-none disabled:opacity-50",
       className,
     )}
     {...props}
@@ -87,7 +87,7 @@ const ToastClose = React.forwardRef<
   <ToastPrimitives.Close
     ref={ref}
     className={cn(
-      "absolute right-2 top-2 rounded-full p-1 text-current/50 opacity-0 transition-opacity hover:text-current focus:opacity-100 group-hover:opacity-100",
+      "absolute right-2 top-2 p-1 text-current/50 opacity-0 transition-opacity hover:text-current focus:opacity-100 group-hover:opacity-100",
       className,
     )}
     toast-close=""

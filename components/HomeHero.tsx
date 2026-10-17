@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 
 import { useDictionary } from "@/components/DictionaryProvider";
@@ -30,9 +30,33 @@ import { prefersReducedMotion } from "@/lib/motion";
  * lisible dessus.
  *
  * Aucune animation au défilement, aucun carrousel : la première page doit être lisible
- * avant que React n'ait fini de s'hydrater. Le titre ne tourne pas non plus — `leadRotating`
- * ne sert ici que sa première entrée, la phrase étant désormais une signature, pas une
- * accroche changeante.
+ * avant que React n'ait fini de s'hydrater.
+ *
+ * LE TITRE, revu sur trois points, tous mesurés à l'œil sur la page :
+ *   - il est écrit dans la police du SITE (`font-sans`, Sora chargée par `next/font`), plus
+ *     dans la pile sérif de `--font-display`. Deux raisons : la sérif n'est pas téléchargée
+ *     mais empruntée au système, donc elle change de dessin d'une machine à l'autre
+ *     (Iowan sur macOS, Georgia sur Windows) ; et son italique, utilisée sur la ligne qui
+ *     tourne, faisait lire DEUX polices là où il n'y a qu'un titre ;
+ *   - plus d'italique du tout ;
+ *   - taille ramenée de `8.4vw / 8.2rem` à `4.4vw / 4.2rem` : à 130 px, le titre écrasait le
+ *     reste de l'affiche au lieu de la signer.
+ *
+ * LE PASSAGE D'UNE PHRASE À L'AUTRE : trois réglages, chacun pour une cause précise.
+ *
+ *   1. PAS DE MASQUE. La cellule était dans un `overflow-hidden`, et la ligne sortante y
+ *      glissait de 0,55 em : ses lettres se faisaient TRANCHER net par le bord du masque
+ *      en pleine course. C'est ce qui se lisait comme un à-coup, et aucune courbe ne le
+ *      rattrape. Le déplacement est donc réduit à 0,28 em et la découpe disparaît.
+ *   2. PLUS LENT, ET DÉCALÉ. Sortie en 760 ms, entrée en 900 ms qui commence 160 ms après.
+ *      Le chevauchement dure alors que les deux lignes sont presque effacées, donc on ne
+ *      lit jamais deux phrases ensemble.
+ *   3. COURBE MAISON, `cubic-bezier(0.22, 1, 0.36, 1)` : départ franc, arrivée qui se pose
+ *      longuement. Le `ease-out` du navigateur s'arrête trop tôt et laisse une impression
+ *      de coup de frein.
+ *
+ * Les autres lignes sont remises en place sans transition (invisibles, donc rien à voir) :
+ * c'est ce qui évite qu'elles glissent quand leur tour passe.
  */
 const PHOTO = process.env.NEXT_PUBLIC_HERO_PHOTO;
 const VIDEO = process.env.NEXT_PUBLIC_HERO_VIDEO;
@@ -55,16 +79,26 @@ export default function HomeHero() {
      client peignent la même chose. */
   const lines = hero.leadRotating;
   const [activeLine, setActiveLine] = useState(0);
+  /** La ligne qui vient de sortir : elle a besoin de son propre mouvement pour s'en aller. */
+  const [leavingLine, setLeavingLine] = useState(-1);
+  const shown = useRef(0);
 
   useEffect(() => {
     if (lines.length < 2 || prefersReducedMotion()) return;
 
     const timer = window.setInterval(() => {
       setActiveLine((current) => (current + 1) % lines.length);
-    }, 3600);
+    }, 4200);
 
     return () => window.clearInterval(timer);
   }, [lines.length]);
+
+  /* À chaque changement, la ligne qu'on quitte est retenue le temps de son départ. */
+  useEffect(() => {
+    if (shown.current === activeLine) return;
+    setLeavingLine(shown.current);
+    shown.current = activeLine;
+  }, [activeLine]);
   const href = (p: string) => `/${locale}${p === "/" ? "" : p}`;
 
   /* La vitrine de démonstration est celle du salon configuré : si la variable n'est pas
@@ -161,26 +195,32 @@ export default function HomeHero() {
         <h1
           id="hero-title"
           aria-label={hero.lead}
-          className="mt-7 max-w-[14ch] font-display text-[clamp(3rem,8.4vw,8.2rem)] leading-[0.88] tracking-[-0.03em] text-paper"
+          className="mt-7 max-w-[16ch] font-sans text-[clamp(1.9rem,4.4vw,4.2rem)] font-normal leading-[1.02] tracking-[-0.02em] text-paper"
         >
           <span aria-hidden>{hero.leadStatic}</span>
 
           {/* La ligne qui tourne : toutes les phrases occupent la même cellule de grille,
-              donc la hauteur du titre ne bouge pas quand l'une s'efface. */}
-          <span aria-hidden className="mt-1 block overflow-hidden">
+              donc la hauteur du titre ne bouge pas quand l'une s'efface. Aucun masque
+              au-dessus : une ligne qui se fait couper en plein mouvement, ça se voit. */}
+          <span aria-hidden className="mt-1 block">
             <span className="grid">
-              {lines.map((line, index) => (
-                <span
-                  key={line}
-                  className={`col-start-1 row-start-1 block italic transition-[opacity,transform] duration-700 ease-out ${
-                    index === activeLine
-                      ? "translate-y-0 opacity-100"
-                      : "translate-y-[0.5em] opacity-0"
-                  }`}
-                >
-                  {line}
-                </span>
-              ))}
+              {lines.map((line, index) => {
+                const state =
+                  index === activeLine
+                    ? "translate-y-0 opacity-100 duration-[900ms] delay-[160ms]"
+                    : index === leavingLine
+                      ? "-translate-y-[0.28em] opacity-0 duration-[760ms] delay-0"
+                      : "translate-y-[0.28em] opacity-0 duration-0 delay-0";
+
+                return (
+                  <span
+                    key={line}
+                    className={`col-start-1 row-start-1 block will-change-[opacity,transform] transition-[opacity,transform] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${state}`}
+                  >
+                    {line}
+                  </span>
+                );
+              })}
             </span>
           </span>
         </h1>

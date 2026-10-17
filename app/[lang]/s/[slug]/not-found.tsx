@@ -35,7 +35,7 @@ export default function SalonNotFound() {
 
         <Link
           href={`/${locale}`}
-          className="mt-7 inline-flex rounded-full bg-ink px-5 py-2.5 text-xs text-paper transition-opacity hover:opacity-85"
+          className="mt-7 inline-flex bg-ink px-5 py-2.5 text-xs text-paper transition-opacity hover:opacity-85"
         >
           {labels.backHome}
         </Link>

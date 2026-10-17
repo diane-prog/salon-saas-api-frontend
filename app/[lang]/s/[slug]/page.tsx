@@ -125,13 +125,13 @@ export default async function SalonStorefrontRoute({
             {/* Recharger la page relance la lecture serveur : c'est le vrai « réessayer ». */}
             <a
               href={localePath(lang, `/s/${slug}`)}
-              className="rounded-full bg-ink px-5 py-2.5 text-xs text-paper transition-opacity hover:opacity-85"
+              className="bg-ink px-5 py-2.5 text-xs text-paper transition-opacity hover:opacity-85"
             >
               {labels.retry}
             </a>
             <a
               href={localePath(lang)}
-              className="rounded-full border border-ink/15 px-5 py-2.5 text-xs text-ink/70 transition-colors hover:border-ink/35"
+              className="border border-ink/15 px-5 py-2.5 text-xs text-ink/70 transition-colors hover:border-ink/35"
             >
               {labels.backHome}
             </a>

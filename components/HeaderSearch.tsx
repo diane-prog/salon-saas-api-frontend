@@ -110,7 +110,7 @@ export default function HeaderSearch() {
         /* Sur téléphone la barre est d'encre, toujours : l'icône y reste donc claire, même
            une fois la page défilée. Sur grand écran, elle suit la barre (blanche translucide
            au défilement), d'où le décalage en `lg:`. */
-        className="grid h-11 w-11 place-items-center rounded-full text-ink transition-colors hover:bg-ink/[0.06]"
+        className="grid h-11 w-11 place-items-center text-ink transition-colors hover:bg-ink/[0.06]"
       >
         <Search />
       </button>

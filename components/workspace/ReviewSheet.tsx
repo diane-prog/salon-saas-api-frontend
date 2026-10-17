@@ -96,7 +96,7 @@ function ReviewForm({ onDone }: { onDone: () => void }) {
               aria-pressed={rating === value}
               aria-label={`${value}/5`}
               disabled={pending}
-              className={`h-9 w-9 rounded-full border text-xs tabular-nums transition-colors ${
+              className={`h-9 w-9 border text-xs tabular-nums transition-colors ${
                 value <= rating
                   ? "border-transparent bg-ink text-paper"
                   : "border-ink/15 text-ink/50 hover:border-ink/35"

@@ -155,7 +155,7 @@ export default function Header() {
                   aria-haspopup="dialog"
                   aria-expanded={servicesPanel}
                   onClick={() => setServicesPanel(true)}
-                  className={`flex items-center cursor-pointer gap-1 rounded-full px-4 py-2 transition-colors ${
+                  className={`flex items-center cursor-pointer gap-1 px-4 py-2 transition-colors ${
                     "text-ink/75 hover:text-brand"
                   }`}
                 >
@@ -170,7 +170,7 @@ export default function Header() {
                 <Link
                   key={item.href}
                   href={href(item.href)}
-                  className={`rounded-full px-4 py-2 text-md font-light transition-colors ${
+                  className={`px-4 py-2 text-md font-light transition-colors ${
                     "text-ink/75 hover:text-brand"
                   }`}
                 >
@@ -199,7 +199,7 @@ export default function Header() {
               type="button"
               onClick={() => setOpen(true)}
               aria-label={dict.ui.menuOpenLabel}
-              className={`grid h-11 w-11 place-items-center rounded-full transition-colors ${
+              className={`grid h-11 w-11 place-items-center transition-colors ${
                 overHero
                   ? "text-paper hover:bg-paper/10"
                   : "text-ink hover:bg-ink/5 lg:hidden"
@@ -333,7 +333,7 @@ export default function Header() {
               type="button"
               onClick={() => setOpen(false)}
               aria-label={dict.ui.menuCloseLabel}
-              className="grid h-11 w-11 place-items-center rounded-full text-paper/70 ring-1 ring-paper/20 transition-colors hover:text-paper hover:ring-paper/50"
+              className="grid h-11 w-11 place-items-center text-paper/70 ring-1 ring-paper/20 transition-colors hover:text-paper hover:ring-paper/50"
             >
               <Close />
             </button>
@@ -467,7 +467,7 @@ function LocaleSwitch({
   const labels = switchLabels[locale];
   /* Deux surfaces, deux jeux de couleurs : encre sur papier dans la barre, papier sur
      encre dans le menu. La pastille active s'inverse avec la surface. */
-  const base = `inline-flex items-center rounded-full p-0.5 text-[0.68rem] font-light transition-colors ${
+  const base = `inline-flex items-center p-0.5 text-[0.68rem] font-light transition-colors ${
     tone === "dark" ? "bg-paper/10 text-paper/60" : "bg-ink/[0.06] text-ink/60"
   }`;
   const active = tone === "dark" ? "bg-paper text-ink" : "bg-ink text-paper";
@@ -480,7 +480,7 @@ function LocaleSwitch({
         type="button"
         onClick={() => onChange("fr")}
         aria-current={locale === "fr" ? "true" : undefined}
-        className={`rounded-full px-2.5 py-1 transition-colors ${
+        className={`px-2.5 py-1 transition-colors ${
           locale === "fr" ? active : idleHover
         }`}
       >
@@ -490,7 +490,7 @@ function LocaleSwitch({
         type="button"
         onClick={() => onChange("en")}
         aria-current={locale === "en" ? "true" : undefined}
-        className={`rounded-full px-2.5 py-1 transition-colors ${
+        className={`px-2.5 py-1 transition-colors ${
           locale === "en" ? active : idleHover
         }`}
       >
