@@ -21,7 +21,8 @@ const legacyPaths = [
   { source: "/services", destination: "/fr/services" },
   { source: "/realisations", destination: "/fr/realisations" },
   { source: "/contact", destination: "/fr/contact" },
-  { source: "/devis", destination: "/fr/devis" },
+  /* `/devis` n'est plus redirigé : la page n'existe plus (mesuré le 2026-10-17).
+     La laisser ici enverrait une 301 vers une 404. */
   { source: "/", destination: "/fr" },
 ];
 

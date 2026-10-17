@@ -15,12 +15,26 @@ export const site = {
      numéro — pour qu'un changement de numéro ne se fasse qu'ici. */
   whatsapp: "https://wa.me/221781229305",
   /* Adresse de contact du produit. C'est un point à remplacer par la boîte réelle
-     avant la mise en ligne ; aucun profil social n'est listé tant que les comptes
-     Belora n'existent pas. WhatsApp est déduit du numéro (`components/SocialIcons`). */
+     avant la mise en ligne. WhatsApp est déduit du numéro (`components/SocialIcons`). */
   email: "bonjour@belora.app",
   address: "Dakar, Sénégal",
   hours: "Lun-Ven, 9h-18h",
-  socials: [] as { label: string; href: string }[],
+  /* ⚠️ LES HUIT `href` CI-DESSOUS SONT GÉNÉRIQUES, ET VOLONTAIREMENT : ils pointent vers
+     la RACINE du réseau, sans identifiant de compte, parce que les comptes Belora ne sont
+     pas connus ici et qu'une adresse devinée (`instagram.com/quelquun`) désignerait le
+     compte d'un inconnu. Remplace chaque `href` par l'adresse réelle — un lien vers la
+     racine d'Instagram ne mène nulle part d'utile — ou vide la liste pour que le pied de
+     page ne montre que WhatsApp, qui vient du numéro ci-dessus. */
+  socials: [
+    { label: "Instagram", href: "https://www.instagram.com/" },
+    { label: "TikTok", href: "https://www.tiktok.com/" },
+    { label: "Facebook", href: "https://www.facebook.com/" },
+    { label: "LinkedIn", href: "https://www.linkedin.com/" },
+    { label: "YouTube", href: "https://www.youtube.com/" },
+    { label: "X", href: "https://x.com/" },
+    { label: "Pinterest", href: "https://www.pinterest.com/" },
+    { label: "Threads", href: "https://www.threads.net/" },
+  ] as { label: string; href: string }[],
 };
 
 /* Navigation : trois destinations et une ancre de métier. Les seuls href
@@ -497,9 +511,10 @@ export const contactPage = {
     { label: "Adresse", value: "Dakar, Sénégal", href: null },
     { label: "Horaires", value: "Lun-Ven, 9h-18h", href: null },
   ],
-  /* La page ne porte plus de formulaire : les deux actions ci-dessous ouvrent le
-     courriel ou le téléphone, et les coordonnées sont le contenu. Le panneau du
-     formulaire reste dans la barre d'actions flottante (`form`, ci-dessous).
+  /* La page ne porte pas de formulaire : les deux actions ci-dessous ouvrent le
+     courriel ou le téléphone, et les coordonnées sont le contenu. C'est le seul
+     point de contact du site depuis le retrait de la barre d'actions flottante
+     (2026-10-17).
      Titre de la colonne de gauche : volontairement différent du titre de la page
      (« Contact »), que le hero affiche déjà. */
   heading: "Parlons de votre salon",
@@ -538,44 +553,6 @@ export const contactPage = {
     successTitle: "Message envoyé",
     successBody: "Merci pour votre message. Notre équipe vous répondra dans les meilleurs délais.",
   },
-};
-
-export const devisPage = {
-  title: "Parlons de votre salon",
-  lead: "Une démo, une question sur les forfaits, une migration depuis votre ancien agenda : dites-nous où vous en êtes.",
-  jsNote: "Veuillez activer JavaScript dans votre navigateur pour remplir ce formulaire.",
-  servicePlaceholder: "Ce qui vous amène",
-  serviceOptions: [
-    "Découvrir le produit",
-    "Migrer mon agenda",
-    "Plusieurs salons",
-    "Facturation et forfaits",
-    "Autre",
-  ],
-  submit: "Recevoir mon devis",
-  formTitle: "Votre salon en quelques champs",
-  formBody: "Le nom, la taille de l'équipe, ce que vous utilisez aujourd'hui : de quoi préparer un échange utile.",
-  successTitle: "Demande envoyée",
-  successBody: "Merci ! Votre demande de devis est partie. Nous revenons vers vous sous 48 h ouvrées.",
-  /* Libellés des champs : ils vivent ici et non dans la page, parce que la page ET le
-     panneau du devis les affichent — une seule source, aucune divergence. */
-  fields: {
-    firstName: "Prénom",
-    lastName: "Nom",
-    email: "E-mail",
-    phone: "Téléphone",
-    service: "Service souhaité",
-    timeline: "Délais souhaités",
-    description: "Description du projet",
-    descriptionPlaceholder: "Parlez-nous de votre projet…",
-  },
-  includeTitle: "Ce qui suit votre demande",
-  includes: [
-    "Une réponse sous 48 h ouvrées",
-    "Une démo sur vos vraies prestations",
-    "Un devis écrit, sans engagement",
-    "Un interlocuteur unique pendant la migration",
-  ],
 };
 
 export const finalCta = {
@@ -638,10 +615,14 @@ export const ui = {
   expertise: "Fonctionnalité",
   agency: "Logiciel de gestion pour salons et instituts",
   freeQuote: "Créer mon salon",
+  /* Connexion : le seul mot de la barre, avec `freeQuote`. Le reste du vocabulaire d'accès
+     vit dans `auth` (titres, corps de page, aides) — ici, c'est le libellé d'un bouton. */
+  login: "Connexion",
   talkToUs: "Parlons-nous",
   whatDrivesUs: "Ce qui nous anime",
   footerQuickLinks: "Liens rapide",
   footerService: "Service",
+  socials: "Nos réseaux",
   rights: "Tous droits réservés.",
   notFoundTitle: "Oups ! Cette page est introuvable.",
   notFoundBody: "On dirait que rien n'a été trouvé à cet endroit. Retournez à l'accueil pour poursuivre votre navigation.",
@@ -654,7 +635,6 @@ export const ui = {
   menuOpenLabel: "Ouvrir le menu",
   menuCloseLabel: "Fermer le menu",
   menuNavLabel: "Navigation mobile",
-  searchCloseLabel: "Fermer la recherche",
   formCloseLabel: "Fermer le formulaire",
   otherServices: "Autres services",
   /* Libellés historiques de la galerie de projets. `viewAllProjects` est encore lu par les
@@ -664,39 +644,9 @@ export const ui = {
   servicesTitle: "Fonctionnalités",
   servicesBody:
     "Six briques, une seule source de données : l'agenda, la réservation en ligne, les fiches clients, les prestations, l'équipe et le pilotage. Rien ne se resaisit deux fois.",
-  searchLabel: "Rechercher sur le site",
-  searchPlaceholder: "Rechercher un service, une réalisation…",
-  searchNoResults: "Aucun résultat",
-  /* Recherche plein écran (icône du header). « Résultats » est un intitulé, jamais accordé :
-     le nombre s'ajoute à côté (« Résultats · 3 »), donc aucun pluriel à gérer. */
-  searchResults: "Résultats",
-  searchSuggestions: "Suggestions",
-  /* Rappel de clavier en pied de panneau plein écran (recherche, formulaire de contact). */
+  /* Rappel de clavier en pied de panneau plein écran (formulaire de contact, menu des
+     fonctionnalités). */
   panelHint: "Échap pour fermer",
-  /* Barre d'actions flottante (bas d'écran, après le premier scroll) et l'éventail de
-     réseaux qu'elle ouvre. Les intitulés servent aussi d'`aria-label` : un seul mot, pour ce
-     qu'on voit et pour ce qu'un lecteur d'écran annonce. */
-  dock: {
-    title: "Actions rapides",
-    quote: "Parler à l'équipe",
-    contact: "Contacter",
-    chat: "Assistant",
-    socials: "Nos réseaux",
-    openSocials: "Afficher les réseaux sociaux",
-    closeSocials: "Masquer les réseaux sociaux",
-    whatsapp: "WhatsApp",
-    /* État replié : un seul bouton, avec une accroche. C'est lui qu'on voit au scroll —
-       pas la barre entière. L'accroche est une SÉQUENCE de phrases courtes : une phrase
-       figée se lit une fois et disparaît, une séquence donne plusieurs portes d'entrée. */
-    phrases: [
-      "Votre agenda vous déborde ?",
-      "Encore un cahier de rendez-vous ?",
-      "Combien coûte Belora ?",
-      "Quatorze jours pour essayer",
-      "Parlons de votre salon",
-    ],
-    openActions: "Ouvrir les actions rapides",
-  },
   /* Assistant conversationnel : libellés de la fenêtre de discussion. */
   chat: {
     title: "Assistant Belora",
@@ -730,6 +680,21 @@ export const ui = {
       phone: "Téléphone",
     },
     passwordHint: "8 caractères minimum, une lettre et un chiffre.",
+    /* Messages de validation des formulaires d'accès. Ils vivent ICI parce qu'ils s'affichent
+       à l'écran : écrits dans `features/auth/schemas.ts`, ils restaient français sur le site
+       anglais. Les règles, elles, ne bougent pas — seule leur phrase change de langue. */
+    validation: {
+      tenantNameMin: "Le nom du salon fait au moins 2 caractères.",
+      tenantNameMax: "Le nom du salon est trop long.",
+      slugFormat: "Adresse attendue : minuscules, chiffres et tirets.",
+      firstNameMin: "Le prénom fait au moins 2 caractères.",
+      lastNameMin: "Le nom fait au moins 2 caractères.",
+      email: "Adresse e-mail invalide.",
+      passwordMin: "Le mot de passe fait au moins 8 caractères.",
+      passwordLetter: "Le mot de passe contient au moins une lettre.",
+      passwordDigit: "Le mot de passe contient au moins un chiffre.",
+      code: "Le code fait exactement 6 chiffres.",
+    },
     login: {
       eyebrow: "Espace salon",
       title: "Votre salon vous attend",
@@ -767,6 +732,17 @@ export const ui = {
       lastName: "Nom",
       phone: "Téléphone",
       submit: "Créer mon salon",
+      /* Parcours en trois étapes. Les noms du rail sont volontairement courts : à trois
+         colonnes, ils doivent tenir sur une ligne — même sur téléphone. */
+      steps: {
+        salon: "Le salon",
+        account: "Le compte",
+        security: "La sécurité",
+      },
+      next: "Continuer",
+      back: "Retour",
+      reviewTitle: "Vérifiez vos informations",
+      edit: "Modifier",
       haveAccount: "Vous avez déjà un salon ?",
       signIn: "Se connecter",
       error: "La création a échoué. Vérifiez vos informations ou réessayez.",
@@ -1711,7 +1687,7 @@ export const storefront = {
 
 const dictionary = {
   site, nav, services, hero, about, projects, filters,
-  testimonials, aboutPage, servicesPage, contactPage, devisPage, finalCta, clients, pricing, faq,
+  testimonials, aboutPage, servicesPage, contactPage, finalCta, clients, pricing, faq,
   storefront, showcase, ui,
 };
 

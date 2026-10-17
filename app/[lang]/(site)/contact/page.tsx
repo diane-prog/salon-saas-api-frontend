@@ -21,10 +21,12 @@ export async function generateMetadata({ params }: PageProps<"/[lang]/contact">)
  *
  * CE QUI A CHANGÉ, ET POURQUOI : la page ouvrait un panneau contenant un formulaire de
  * six champs, précédé d'une gerbe d'icônes de réseaux. Les deux gênaient plus qu'ils
- * n'aidaient : un visiteur qui veut joindre la maison a déjà son client de messagerie,
- * et les réseaux du site n'existent pas encore (`site.socials` est vide). Ils sont donc
- * retirés d'ICI. Le formulaire, lui, n'est pas perdu : il vit dans la barre d'actions
- * flottante (`ActionDock`), accessible depuis toutes les pages.
+ * n'aidaient : un visiteur qui veut joindre la maison a déjà son client de messagerie.
+ *
+ * LE FORMULAIRE N'A PLUS DE MAISON, et c'est assumé (2026-10-17) : il vivait dans la barre
+ * d'actions flottante, qui a été retirée du rendu. Joindre la maison passe donc par les
+ * deux liens NATIFS ci-dessous — courriel et téléphone — qui ouvrent le client de la
+ * personne au lieu de lui imposer un champ de plus.
  *
  * Ce qui reste tient en trois blocs, dans le vocabulaire du site :
  *
@@ -122,14 +124,14 @@ export default async function ContactPage({ params }: PageProps<"/[lang]/contact
         <div className="container-x pb-20 sm:pb-24">
           <div className="flex flex-wrap items-baseline justify-between gap-x-8 gap-y-2 border-t border-ink/10 pt-6">
             <h2 className={`${LABEL} text-ink/40`}>{contactPage.processTitle}</h2>
-            <span className={`${LABEL} text-ink/25`}>[ 01 — 03 ]</span>
+            <span className={`${LABEL} text-ink/25`}>01 — 03</span>
           </div>
 
           <ol className="mt-8 grid gap-2.5 sm:grid-cols-3 sm:gap-3">
             {contactPage.process.map((step, index) => (
               <li key={step.title} className="border border-ink/12 p-6 sm:p-7">
                 <span className={`${LABEL} tabular-nums text-ink/25`}>
-                  [ {String(index + 1).padStart(2, "0")} ]
+                  {String(index + 1).padStart(2, "0")}
                 </span>
 
                 <h3 className="mt-4 font-display text-[1.15rem] font-light leading-tight">

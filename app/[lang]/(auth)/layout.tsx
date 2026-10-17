@@ -84,15 +84,9 @@ export default async function AuthLayout({
           </p>
 
           <ul className="mt-10 grid gap-0">
-            {auth.panel.points.map((point, index) => (
-              <li
-                key={point}
-                className="flex items-start gap-4 border-t border-paper/10 py-4 last:border-b"
-              >
-                <span className="mt-0.5 font-display text-sm tabular-nums text-turquoise/60">
-                  {String(index + 1).padStart(2, "0")}
-                </span>
-                <span className="text-sm leading-relaxed text-paper/65">{point}</span>
+            {auth.panel.points.map((point) => (
+              <li key={point} className="border-t border-paper/10 py-4 last:border-b">
+                <span className="block text-sm leading-relaxed text-paper/65">{point}</span>
               </li>
             ))}
           </ul>

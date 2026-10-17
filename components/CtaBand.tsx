@@ -16,7 +16,7 @@ import { LABEL } from "@/lib/editorial";
  * (`clamp(2.2rem, 6vw, 5rem)`), et le reste se range dessous — la phrase, puis l'action,
  * puis les trois façons de joindre la maison.
  *
- * La bande n'est plus un objet à part : même papier, mêmes filets, mêmes crochets que le
+ * La bande n'est plus un objet à part : même papier, mêmes filets, mêmes étiquettes que le
  * reste du site. Le titre reste révélé mot à mot par `SplitText` — c'est la seule animation.
  *
  * Les coordonnées sont des CASES à filets (courriel, téléphone, adresse), avec l'icône en
@@ -32,9 +32,9 @@ export default function CtaBand() {
     <section className="border-t border-ink/10 bg-paper text-ink">
       <div className="container-x py-20 sm:py-28">
         <div className="flex flex-wrap items-baseline justify-between gap-x-8 gap-y-2">
-          <span className={`${LABEL} text-ink/40`}>[ {ui.talkToUs} ]</span>
+          <span className={`${LABEL} text-ink/40`}>{ui.talkToUs}</span>
           <span className={`${LABEL} text-ink/25`}>
-            © {new Date().getFullYear()} {site.name}
+            © 2026 {site.name}
           </span>
         </div>
 

@@ -72,18 +72,27 @@ export default function SmoothScroll() {
     };
   }, []);
 
-  // Nouvelle page : on repart du haut, puis on recalcule les déclencheurs une fois la mise en page faite.
+  /*
+   * Nouvelle page : on repart du haut, puis on recalcule les déclencheurs une fois la mise
+   * en page faite. C'est le SEUL endroit qui remet le défilement à zéro — `PageTransition`
+   * ne s'en occupe plus, pour ne pas faire deux remises à zéro concurrentes.
+   *
+   * Le délai avant `refresh()` est court (300 ms) : il doit seulement laisser le nouveau
+   * contenu se poser. Il était de 900 ms du temps où la page d'arrivée était animée avec une
+   * `transform` sur son conteneur — un `refresh()` pendant cette animation mesurait des
+   * positions fausses. La transition n'anime plus aucune transformation de page (voir
+   * `PageTransition`), donc l'attente n'a plus de raison d'être : elle ne produisait qu'un
+   * recalcul tardif, perceptible pendant la lecture.
+   */
   useEffect(() => {
     if (firstRun.current) {
       firstRun.current = false;
       return;
     }
     scrollToTop(true);
-    // Après l'animation d'entrée de page : les sections épinglées (services) seraient
-    // mesurées pendant que l'ancêtre porte encore un `transform`.
     const id = window.setTimeout(() => {
       if (pluginReady) ScrollTrigger.refresh();
-    }, 900);
+    }, 300);
     return () => window.clearTimeout(id);
   }, [pathname]);
 

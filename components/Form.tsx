@@ -4,7 +4,7 @@ import { useState, type ReactNode } from "react";
 
 /**
  * Deux tons pour les mêmes champs : `light` sur une page claire (la feuille latérale du
- * contact, la page devis), `dark` sur l'encre du panneau plein écran. Le ton ne change que
+ * contact), `dark` sur l'encre du panneau plein écran. Le ton ne change que
  * l'habillage — cadres et libellés — jamais la structure : un champ est un champ.
  */
 type Tone = "light" | "dark";
@@ -43,7 +43,7 @@ const CHEVRON = {
  * Un champ texte.
  *
  * Il sert DEUX régimes, et c'est voulu : sans `value`, c'est un champ non
- * contrôlé (les formulaires marketing de `ContactSheet` et `DevisSheet`, qui
+ * contrôlé (le formulaire marketing de `ContactSheet`, qui
  * postent leur contenu et n'ont rien à valider avant) ; avec `value` et
  * `onChange`, c'est un champ contrôlé (les écrans d'accès, qui valident à la
  * saisie). Les props de contrôle sont donc optionnelles — aucun appelant

@@ -15,8 +15,8 @@ import {
 } from "@/components/ui/sheet";
 
 /**
- * Les intitulés communs à TOUS les formulaires du site : contact comme devis. Ce qui change
- * d'un formulaire à l'autre, ce sont les CHAMPS — ils arrivent en enfants, avec le ton reçu.
+ * Les intitulés communs à TOUS les formulaires du site. Ce qui change d'un formulaire à
+ * l'autre, ce sont les CHAMPS — ils arrivent en enfants, avec le ton reçu.
  */
 export type FormPanelLabels = {
   trigger: string;
@@ -36,9 +36,10 @@ export type FormPanelLabels = {
  * les champs respirent, on les remplit au clavier sans jamais quitter le panneau. Sous `lg`,
  * une feuille qui glisse depuis la droite reste plus confortable au pouce.
  *
- * Pourquoi UN composant pour le contact ET le devis : la mécanique — bascule de présentation,
- * focus rendu au déclencheur, panneau qui descend, pied de panneau — est identique. La
- * dupliquer par formulaire garantissait qu'un correctif n'arrive que dans l'un des deux.
+ * Pourquoi UN composant pour toutes les feuilles de formulaire : la mécanique — bascule de
+ * présentation, focus rendu au déclencheur, panneau qui descend, pied de panneau — est
+ * identique. La dupliquer par formulaire garantissait qu'un correctif n'arrive que dans
+ * l'un des deux.
  *
  * Le serveur ne connaît pas la largeur de la fenêtre : le rendu commence donc sur la feuille
  * (celle qui marche partout) et bascule après montage si l'écran est large. Les deux

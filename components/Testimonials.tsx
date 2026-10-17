@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { useDictionary } from "@/components/DictionaryProvider";
 import { LABEL } from "@/lib/editorial";
@@ -13,27 +13,27 @@ import { LABEL } from "@/lib/editorial";
  * sur la vitrine d'un salon : ce que dit une cliente d'un salon de démonstration est un avis
  * sur ce salon-là, pas sur le logiciel.
  *
- * LA COMPOSITION : bandeau plein cadre, rail qui traverse toute la largeur de la fenêtre
- * (seuls le sur-titre et le titre restent sur `container-x`), et le fond de la section EST
- * l'image de la case active — floutée, assombrie, croisée en fondu.
+ * LE RAIL N'A NI DÉBUT NI FIN, et c'est la contrainte qui commande tout le reste. Trois
+ * copies de la liste sont rendues à la suite (`COPIES`), la lecture démarre dans celle du
+ * milieu, et dès que la position sort de cette copie on la décale d'une copie entière —
+ * d'un coup, sans animation, PENDANT que l'image affichée ne change pas d'un pixel (les
+ * copies sont identiques, et l'index logique est lu modulo le nombre de citations, donc le
+ * fond ne bronche pas). Résultat : il reste toujours au moins six cases à gauche et six à
+ * droite, la bande ne s'arrête jamais et aucun bord ne se vide.
  *
- * LE MOUVEMENT, réglé ici et pas laissé au navigateur. Trois choses le rendaient saccadé :
- *   1. `scrollTo({ behavior: "smooth" })` : la durée est choisie par le navigateur et
- *      change d'une machine à l'autre, sans courbe maîtrisée ;
- *   2. `snap-mandatory` reprenait la main PENDANT le trajet et recollait la case au point
- *      d'arrêt le plus proche — d'où l'à-coup en fin de course ;
- *   3. le saut de la dernière case à la première parcourait tout le rail en un temps
- *      constant, donc à une vitesse démesurée.
- * D'où `glideTo` : une interpolation image par image, courbe `easeInOutCubic`, durée
- * proportionnelle à la distance (≈ 0,9 s pour une case, ≈ 1,8 s pour un retour au début),
- * et le snap SUSPENDU le temps du trajet puis rendu intact. L'index actif bascule à
- * l'arrivée, pas au départ : le fond se fond dans l'image quand la case est en place.
+ * POURQUOI PAS UNE SIMPLE BOUCLE « dernier → premier » : c'était le cas avant, et la fin
+ * du rail montrait le fond noir à droite de la dernière case, puis le retour au début
+ * rembobinait toute la bande. Deux vides, l'un après l'autre.
  *
- * Le rail défile seul toutes les six secondes, et boucle. Il s'arrête au survol, au focus
- * clavier et quand l'onglet passe en arrière-plan ; il ne démarre pas du tout sous
- * `prefers-reduced-motion` — un défilement qu'on n'a pas demandé est exactement ce que ce
- * réglage refuse. Le doigt, la molette et les flèches restent maîtres et interrompent le
- * mouvement en cours.
+ * LE MOUVEMENT est animé ici, pas laissé au navigateur (`glideTo`) : interpolation image par
+ * image, `easeInOutCubic`, durée proportionnelle à la distance, `scroll-snap` suspendu le
+ * temps du trajet. `snap-mandatory` reprenait la main en pleine course et recollait la case
+ * au point d'arrêt le plus proche — d'où l'à-coup.
+ *
+ * CE QUI L'ARRÊTE, et rien d'autre : l'onglet en arrière-plan, le focus clavier dans les
+ * flèches (pour qu'on ait le temps de s'en servir), et `prefers-reduced-motion`, qui
+ * supprime tout défilement automatique — un mouvement qu'on n'a pas demandé est exactement
+ * ce que ce réglage refuse. Le survol, lui, ne l'arrête plus.
  */
 
 /** Écart entre deux cases (`gap-3`), nécessaire pour calculer une avance exacte. */
@@ -47,6 +47,12 @@ const GLIDE_BASE_MS = 620;
 const GLIDE_PER_PX = 0.28;
 const GLIDE_MAX_MS = 1800;
 
+/** Copies de la liste rendues à la suite. Trois : une avant, une à l'écran, une après. */
+const COPIES = 3;
+
+/** Délai avant de recaler un rail déplacé à la main. */
+const SETTLE_MS = 260;
+
 /** `easeInOutCubic` : démarre doucement, accélère au milieu, se pose sans à-coup. */
 const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 
@@ -56,15 +62,32 @@ export default function Testimonials() {
   const quotes = dict.testimonials;
   const count = quotes.length;
 
+  /* Les trois copies, à plat : la clé porte le numéro de copie, sinon React réutiliserait
+     les nœuds d'une copie à l'autre. */
+  const items = useMemo(
+    () =>
+      Array.from({ length: COPIES }, (_, copy) =>
+        quotes.map((quote) => ({ quote, copy })),
+      ).flat(),
+    [quotes],
+  );
+
   const trackRef = useRef<HTMLDivElement>(null);
   const frame = useRef(0);
-  /** Animation en cours (annulable) et verrou : pendant un trajet, le scroll ne fait pas foi. */
+  const settleTimer = useRef(0);
+  /** Animation en cours (annulable). */
   const glide = useRef(0);
+  /** Pendant un trajet animé ou un recalage, le scroll ne fait pas foi. */
   const moving = useRef(false);
-  /** L'index courant, en ref : le minuteur doit lire la valeur du moment, pas celle du rendu. */
-  const activeRef = useRef(0);
-  const [active, setActive] = useState(0);
+  const correcting = useRef(false);
+  /** Position dans le rail complet (0 → 3 × citations). Le minuteur la lit à chaque tir. */
+  const railRef = useRef(0);
+  /** La même position, en état : ce qui est peint est ce qui est actif. */
+  const [activeRail, setActiveRail] = useState(0);
   const [paused, setPaused] = useState(false);
+
+  /** La citation active : la position, ramenée aux citations elles-mêmes. */
+  const active = count ? activeRail % count : 0;
 
   /** Une case + son écart. Mesuré sur la première case : elles ont toutes la même largeur. */
   const step = useCallback(() => {
@@ -80,19 +103,51 @@ export default function Testimonials() {
     moving.current = false;
   }, []);
 
-  const glideTo = useCallback(
-    (index: number) => {
+  /**
+   * Ramène une position dans la copie du milieu. Le décalage vaut exactement une copie,
+   * donc l'image à l'écran est identique avant et après : personne ne le voit passer.
+   */
+  const normalise = useCallback(
+    (railIndex: number) => {
       const track = trackRef.current;
-      if (!track) return;
+      if (!track || count < 2) return railIndex;
 
-      const target = Math.max(0, Math.min(count - 1, index));
+      let next = railIndex;
+      if (next < count) next += count;
+      else if (next >= count * 2) next -= count;
+      if (next === railIndex) return railIndex;
+
+      correcting.current = true;
+      track.style.scrollSnapType = "none";
+      track.scrollLeft += (next - railIndex) * step();
+      railRef.current = next;
+
+      window.requestAnimationFrame(() => {
+        if (trackRef.current) trackRef.current.style.scrollSnapType = "";
+        correcting.current = false;
+      });
+
+      return next;
+    },
+    [count, step],
+  );
+
+  const glideTo = useCallback(
+    (railIndex: number) => {
+      const track = trackRef.current;
+      if (!track || items.length === 0) return;
+
+      const target = Math.max(0, Math.min(items.length - 1, railIndex));
 
       /* Sous `prefers-reduced-motion`, on ne fait pas glisser : on change de case. Le
          réglage demande moins de mouvement, pas un mouvement plus court. */
-      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-        track.scrollLeft = target * step();
-        activeRef.current = target;
-        setActive(target);
+      const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+      if (reduce) {
+        const settled = normalise(target);
+        track.scrollLeft = settled * step();
+        railRef.current = settled;
+        setActiveRail(settled);
         return;
       }
 
@@ -101,8 +156,9 @@ export default function Testimonials() {
       const delta = distance - from;
 
       if (Math.abs(delta) < 1) {
-        activeRef.current = target;
-        setActive(target);
+        const settled = normalise(target);
+        railRef.current = settled;
+        setActiveRail(settled);
         return;
       }
 
@@ -111,10 +167,7 @@ export default function Testimonials() {
       /* Le snap recollerait la case à chaque image : on le retire le temps du trajet. */
       track.style.scrollSnapType = "none";
 
-      const duration = Math.min(
-        GLIDE_MAX_MS,
-        GLIDE_BASE_MS + Math.abs(delta) * GLIDE_PER_PX,
-      );
+      const duration = Math.min(GLIDE_MAX_MS, GLIDE_BASE_MS + Math.abs(delta) * GLIDE_PER_PX);
       const start = performance.now();
 
       const tick = (now: number) => {
@@ -127,15 +180,17 @@ export default function Testimonials() {
         }
 
         glide.current = 0;
-        /* La case est en place : le fond peut la rejoindre. */
-        activeRef.current = target;
-        setActive(target);
+        /* Recalage AVANT de rendre la main : les événements de défilement qu'il provoque
+           tombent pendant que `moving` est encore vrai, donc ils ne comptent pas. */
+        const settled = normalise(target);
+        railRef.current = settled;
+        setActiveRail(settled);
         release();
       };
 
       glide.current = requestAnimationFrame(tick);
     },
-    [count, release, step],
+    [items.length, normalise, release, step],
   );
 
   /** Geste de l'utilisateur : il reprend la main immédiatement, sans finir le trajet. */
@@ -145,34 +200,67 @@ export default function Testimonials() {
     release();
   };
 
-  /* Le minuteur lit `activeRef` et la géométrie à l'instant du tir : rien à recalculer
-     quand la fenêtre est redimensionnée, et pas de dépendance sur `active` qui relancerait
-     l'intervalle à chaque case. */
+  /* Mise en place : on démarre dans la copie du milieu, sinon il n'y aurait rien à gauche.
+     Le déplacement est posé avant la première image peinte (`requestAnimationFrame`), et
+     les deux copies se ressemblent, donc on ne voit pas de saut. */
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!track || count < 2) return;
+
+    track.style.scrollSnapType = "none";
+    track.scrollLeft = count * step();
+    railRef.current = count;
+    setActiveRail(count);
+
+    const restore = window.requestAnimationFrame(() => {
+      track.style.scrollSnapType = "";
+    });
+
+    return () => window.cancelAnimationFrame(restore);
+  }, [count, step]);
+
+  /* Le minuteur lit `railRef` à l'instant du tir : pas de dépendance sur la position, qui
+     relancerait l'intervalle à chaque case. */
   useEffect(() => {
     if (count < 2 || paused) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     const id = window.setInterval(() => {
-      if (document.hidden || moving.current) return;
-      glideTo(activeRef.current + 1 >= count ? 0 : activeRef.current + 1);
+      if (document.hidden || moving.current || correcting.current) return;
+      glideTo(railRef.current + 1);
     }, AUTOPLAY_MS);
 
     return () => window.clearInterval(id);
   }, [count, paused, glideTo]);
 
-  /* Le doigt, la molette et les flèches déplacent le rail : c'est LUI qui fait foi. On
-     relit la position à chaque image pour que le fond suive, y compris après un geste.
-     Pendant un trajet animé, l'index est posé par `glideTo` — sans ce verrou, un retour
-     au début ferait défiler les six images dans le fond en trois dixièmes de seconde. */
+  useEffect(() => () => window.clearTimeout(settleTimer.current), []);
+
+  /* Le doigt, la molette et les flèches déplacent le rail : c'est LUI qui fait foi. On relit
+     la position à chaque image pour que le fond suive — puis, une fois le geste fini, on
+     recale la position pour que les bords ne se vident jamais. Pendant un trajet animé,
+     l'index est posé par `glideTo` : sans ce verrou, un recalage ferait défiler les images
+     du fond en quelques dixièmes de seconde. */
   const handleScroll = () => {
-    if (moving.current || frame.current) return;
+    if (moving.current || correcting.current || frame.current) return;
+
     frame.current = window.requestAnimationFrame(() => {
       frame.current = 0;
       const track = trackRef.current;
       if (!track) return;
-      const index = Math.max(0, Math.min(count - 1, Math.round(track.scrollLeft / step())));
-      activeRef.current = index;
-      setActive((current) => (current === index ? current : index));
+
+      const railIndex = Math.max(
+        0,
+        Math.min(items.length - 1, Math.round(track.scrollLeft / step())),
+      );
+      railRef.current = railIndex;
+      setActiveRail(railIndex);
+
+      window.clearTimeout(settleTimer.current);
+      settleTimer.current = window.setTimeout(() => {
+        const settled = normalise(railIndex);
+        railRef.current = settled;
+        setActiveRail(settled);
+      }, SETTLE_MS);
     });
   };
 
@@ -181,14 +269,12 @@ export default function Testimonials() {
   return (
     <section
       className="relative isolate overflow-hidden bg-ink text-paper"
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
       onFocusCapture={() => setPaused(true)}
       onBlurCapture={(event) => {
         if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setPaused(false);
       }}
     >
-      {/* ——— Le fond : l'image de la case active, floutée. Toutes les couches restent
+      {/* ——— Le fond : l'image de la citation active, floutée. Toutes les couches restent
               montées et se croisent en opacité — changer d'image ne recharge rien. */}
       <div aria-hidden className="absolute inset-0">
         <div
@@ -222,7 +308,7 @@ export default function Testimonials() {
         {/* ——— Sur-titre, titre, flèches : alignés sur la grille du site. */}
         <div className="container-x flex flex-wrap items-start justify-between gap-x-12 gap-y-6">
           <div>
-            <span className={`${LABEL} text-paper/45`}>[ {t.eyebrow} ]</span>
+            <span className={`${LABEL} text-paper/45`}>{t.eyebrow}</span>
 
             <h2 className="mt-5 max-w-[15ch] font-display text-[clamp(2rem,4.4vw,3.6rem)] font-light leading-[1.03] tracking-[-0.025em] text-paper">
               {t.title}
@@ -233,7 +319,7 @@ export default function Testimonials() {
             <div className="mt-1 flex gap-2">
               <button
                 type="button"
-                onClick={() => glideTo(active - 1)}
+                onClick={() => glideTo(railRef.current - 1)}
                 aria-label={t.previous}
                 className="grid h-10 w-10 place-items-center border border-paper/25 text-paper/70 transition-colors hover:border-paper hover:text-paper"
               >
@@ -241,7 +327,7 @@ export default function Testimonials() {
               </button>
               <button
                 type="button"
-                onClick={() => glideTo(active + 1)}
+                onClick={() => glideTo(railRef.current + 1)}
                 aria-label={t.next}
                 className="grid h-10 w-10 place-items-center border border-paper/25 text-paper/70 transition-colors hover:border-paper hover:text-paper"
               >
@@ -251,14 +337,15 @@ export default function Testimonials() {
           )}
         </div>
 
-        {/* ——— Le rail : PLEINE LARGEUR de la fenêtre. Ses marges intérieures reprennent
-                exactement celles de `container-x` — y compris quand la page est centrée
-                au-delà de 80rem — pour que la première case tombe sous le titre.
+        {/* ——— Le rail : PLEINE LARGEUR de la fenêtre, et sans extrémités visibles (trois
+                copies, position recalée). Ses marges intérieures reprennent exactement
+                celles de `container-x` — y compris quand la page est centrée au-delà de
+                80rem — pour que la première case tombe sous le titre.
 
-                `scroll-px-*` doit doubler `px-*` : sans lui, l'alignement magnétique
-                amène la première case jusqu'au bord de l'écran et la marge disparaît
-                (mesuré : `scrollLeft` valait 120 au repos). Avec, la position d'arrêt de
-                la case n est exactement `n × (largeur + écart)`, ce que lit `glideTo`. */}
+                `scroll-px-*` doit doubler `px-*` : sans lui, l'alignement magnétique amène
+                la case jusqu'au bord de l'écran et la marge disparaît (mesuré : `scrollLeft`
+                valait 120 au repos). Avec, la position d'arrêt de la case n est exactement
+                `n × (largeur + écart)`, ce que lisent `glideTo` et `normalise`. */}
         <div
           ref={trackRef}
           onScroll={handleScroll}
@@ -268,12 +355,12 @@ export default function Testimonials() {
           aria-live="off"
           className="mt-12 flex snap-x snap-mandatory gap-3 overflow-x-auto px-5 pb-1 [scrollbar-width:none] scroll-px-5 sm:px-8 sm:scroll-px-8 lg:px-[max(2.5rem,calc((100vw-80rem)/2+2.5rem))] lg:scroll-px-[max(2.5rem,calc((100vw-80rem)/2+2.5rem))] [&::-webkit-scrollbar]:hidden"
         >
-          {quotes.map((item, index) => (
+          {items.map(({ quote: item, copy }, railIndex) => (
             <article
-              key={`${item.name}-${item.quote.slice(0, 16)}`}
-              aria-current={index === active ? "true" : undefined}
+              key={`${copy}-${item.name}`}
+              aria-current={railIndex === activeRail ? "true" : undefined}
               className={`grid w-[calc(100vw-2.5rem)] max-w-[68rem] shrink-0 snap-start grid-cols-1 gap-0 bg-paper text-ink transition-opacity duration-700 ease-out sm:w-[min(86vw,58rem)] sm:grid-cols-[minmax(0,0.78fr)_minmax(0,1.22fr)] ${
-                index === active ? "opacity-100" : "opacity-55"
+                railIndex === activeRail ? "opacity-100" : "opacity-55"
               }`}
             >
               {/* Le portrait : la photo fournie, sinon un aplat chaud. */}

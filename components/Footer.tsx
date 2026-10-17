@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowUpRight } from "@/components/Icons";
 import { socialIcon, socialLinks } from "@/components/SocialIcons";
 import { useDictionary } from "@/components/DictionaryProvider";
 import { LABEL } from "@/lib/editorial";
@@ -22,8 +21,11 @@ export default function Footer() {
             </span>
             <p className="mt-5 max-w-sm text-sm leading-relaxed text-paper/60">{dict.site.tagline}</p>
             {/* Les VRAIS logos des réseaux (WhatsApp compris, déduit du téléphone) : deux
-                lettres dans une pastille ne disent pas de quel réseau il s'agit, une marque si. */}
-            <div className="mt-6 flex flex-wrap gap-2">
+                lettres dans une pastille ne disent pas de quel réseau il s'agit, une marque si.
+                Huit réseaux à ce jour — la liste vit dans le dictionnaire, les tracés dans
+                `SocialIcons` ; ajouter un réseau ne touche donc qu'à ces deux endroits. */}
+            <h3 className={`${LABEL} mt-10 text-paper/45`}>{dict.ui.socials}</h3>
+            <div className="mt-4 flex flex-wrap gap-2">
               {socialLinks(dict.site).map((s) => {
                 const Icon = socialIcon(s.label);
                 return (
@@ -93,13 +95,6 @@ export default function Footer() {
               </li>
               <li className="text-paper/60">{dict.site.address}</li>
             </ul>
-            <Link
-              href={href("/devis")}
-              className="group mt-6 inline-flex items-center gap-2 text-sm font-light text-turquoise transition-colors hover:text-paper"
-            >
-              {dict.ui.dock.quote}
-              <ArrowUpRight className="h-4 w-4 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
-            </Link>
           </div>
         </div>
 

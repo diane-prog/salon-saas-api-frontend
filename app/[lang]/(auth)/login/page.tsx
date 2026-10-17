@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { Field } from "@/components/Form";
 import { useDictionary } from "@/components/DictionaryProvider";
 import { useLogin } from "@/features/auth/queries";
-import { fieldErrors, loginSchema } from "@/features/auth/schemas";
+import { createLoginSchema, fieldErrors } from "@/features/auth/schemas";
 import { apiErrorMessage } from "@/lib/api-error";
 import { LABEL } from "@/lib/editorial";
 
@@ -35,7 +35,9 @@ export default function LoginPage() {
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
 
-    const parsed = loginSchema.safeParse(values);
+    /* Le schéma se construit avec les messages du dictionnaire : l'erreur s'écrit dans la
+       langue de la page, jamais dans celle du code. */
+    const parsed = createLoginSchema(auth.validation).safeParse(values);
     if (!parsed.success) {
       setErrors(fieldErrors(parsed.error));
       return;

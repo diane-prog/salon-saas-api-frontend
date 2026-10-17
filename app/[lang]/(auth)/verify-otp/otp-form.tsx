@@ -7,7 +7,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Field } from "@/components/Form";
 import { useDictionary } from "@/components/DictionaryProvider";
 import { useResendOtp, useVerifyOtp } from "@/features/auth/queries";
-import { fieldErrors, verifyOtpSchema } from "@/features/auth/schemas";
+import { createVerifyOtpSchema, fieldErrors } from "@/features/auth/schemas";
 import { useToast } from "@/hooks/use-toast";
 import { apiErrorMessage } from "@/lib/api-error";
 import { LABEL } from "@/lib/editorial";
@@ -67,7 +67,8 @@ export default function OtpForm() {
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
 
-    const parsed = verifyOtpSchema.safeParse({ email, code });
+    /* Messages du dictionnaire : le refus du code s'écrit dans la langue de la page. */
+    const parsed = createVerifyOtpSchema(auth.validation).safeParse({ email, code });
     if (!parsed.success) {
       setErrors({ ...fieldErrors(parsed.error), form: "" });
       return;

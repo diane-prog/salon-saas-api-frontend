@@ -19,19 +19,20 @@ import { useSalonInfo, useSalonServices, useSalonStaff } from "@/features/public
  * réservation. Le champ de droite prend la couleur de sa vitrine : la personnalisation
  * se voit sans qu'on ait à l'écrire.
  *
- * LES MÉDIAS sont fournis par l'exploitant, en variables d'environnement :
+ * LES MÉDIAS sont livrés avec le dépôt (`public/media/demo.mp4`, `public/media/demo.jpg`),
+ * et remplacés par les variables d'environnement quand elles sont posées :
  *   - `NEXT_PUBLIC_DEMO_VIDEO`  : la vidéo de gauche (mp4/webm). Lecture en boucle,
  *     sans son, sans commandes — un plan, pas un lecteur ;
  *   - `NEXT_PUBLIC_DEMO_IMAGE`  : l'image du champ de droite.
- * Sans elles, le cadre garde un champ dessiné (dégradé chaud + grain) : on ne pose
+ * Sans aucun des deux, le cadre garde un champ dessiné (dégradé chaud + grain) : on ne pose
  * jamais une balise média vide, qui afficherait un rectangle noir.
  *
  * TROIS ÉTATS, dits franchement : chargement (un tiret, pas de valeur inventée), échec
  * (une phrase honnête, aucune valeur d'exemple), réponse (les vraies lignes).
  */
 const SLUG = process.env.NEXT_PUBLIC_DEMO_SALON_SLUG ?? "";
-const VIDEO = process.env.NEXT_PUBLIC_DEMO_VIDEO;
-const IMAGE = process.env.NEXT_PUBLIC_DEMO_IMAGE;
+const VIDEO = process.env.NEXT_PUBLIC_DEMO_VIDEO ?? "/media/demo.mp4";
+const IMAGE = process.env.NEXT_PUBLIC_DEMO_IMAGE ?? "/media/demo.jpg";
 
 /** Champ de repli : le dégradé chaud du site, jamais un rectangle noir. */
 function FallbackField() {
@@ -100,7 +101,7 @@ export default function SalonDemo() {
             {/* Le texte : l'état du direct, le titre, la provenance, la sortie. */}
             <div className="sm:col-start-2 sm:row-start-1">
               <span className={`${LABEL} flex items-center gap-2 text-ink/45`}>
-                <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-brand" />[ {demo.eyebrow} ]
+                <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-brand" />{demo.eyebrow}
               </span>
 
               <h2 className="mt-5 font-display text-[clamp(1.6rem,2.6vw,2.15rem)] font-light leading-[1.08] tracking-[-0.02em]">

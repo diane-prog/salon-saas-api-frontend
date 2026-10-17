@@ -4,7 +4,7 @@ import type { Dictionary } from "@/lib/dictionaries";
 /**
  * Les réseaux du site — ICÔNES SEULES, et volontairement grandes.
  *
- * Pourquoi sans l'intitulé : sur les pages contact et devis, la ligne de réseaux est une
+ * Pourquoi sans l'intitulé : sur la page contact, la ligne de réseaux est une
  * rangée d'actions, pas une liste à lire. Les logos officiels se reconnaissent d'un coup
  * d'œil, et le nom répété à côté d'eux n'ajoutait que du texte à une colonne qui en porte
  * déjà beaucoup.
@@ -14,7 +14,7 @@ import type { Dictionary } from "@/lib/dictionaries";
  * nom reste dans le HTML servi, à portée des moteurs de recherche. Une icône seule sans
  * intitulé du tout serait un lien muet.
  *
- * Composant de SERVEUR (aucune interactivité) : les pages contact et devis l'affichent tel
+ * Composant de SERVEUR (aucune interactivité) : la page contact l'affiche tel
  * quel, avec exactement les réseaux du dictionnaire — WhatsApp compris.
  */
 

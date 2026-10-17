@@ -577,7 +577,7 @@ export default function SalonPage({ slug, salon }: { slug: string; salon: SalonI
 
           <div className="mt-10 flex flex-wrap items-center justify-between gap-4 border-t border-white/20 pt-5 text-[0.62rem] uppercase tracking-[0.16em] opacity-70">
             <span>
-              © {new Date().getFullYear()} {salon.name}
+              © 2026 {salon.name}
             </span>
             <span>
               {labels.poweredBy}{" "}
@@ -605,7 +605,7 @@ function SectionHead({
   return (
     <div className="flex flex-wrap items-baseline justify-between gap-x-8 gap-y-2">
       <span className="flex items-baseline gap-4">
-        <span className={`${LABEL} tabular-nums text-ink/25`}>[ {index} ]</span>
+        <span className={`${LABEL} tabular-nums text-ink/25`}>{index}</span>
         <h2 className="font-display text-[1.3rem] font-light leading-tight">{label}</h2>
       </span>
       {note && <p className="max-w-xs text-[0.75rem] leading-relaxed text-ink/40">{note}</p>}

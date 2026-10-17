@@ -9,7 +9,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
      est liée depuis le header. Les vitrines de salons (`/s/[slug]`) n'y figurent
      pas : la liste des salons n'est pas publique, et une entrée inventée serait
      une URL morte. */
-  const routes = ["", "/a-propos", "/services", "/tarifs", "/realisations", "/contact", "/devis"];
+  const routes = ["", "/a-propos", "/services", "/tarifs", "/realisations", "/contact"];
 
   const entries = await Promise.all(
     locales.map(async (lang) => {

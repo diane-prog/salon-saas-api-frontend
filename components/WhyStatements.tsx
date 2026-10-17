@@ -12,16 +12,16 @@ import { useDictionary } from "@/components/DictionaryProvider";
  *
  *   1. le TITRE, seul, en haut à gauche, sur deux lignes, sans sur-titre ni filet ;
  *   2. la SORTIE entre crochets, en petites capitales, en haut à droite — `[ MÉTHODE ]` ;
- *   3. une GRILLE de TROIS cases réparties en L inversé : `[ 01 ]` en haut à gauche,
- *      `[ 02 ]` à sa droite, `[ 03 ]` DIRECTEMENT SOUS `[ 02 ]`. La case sous `[ 01 ]`
+ *   3. une GRILLE de TROIS cases réparties en L inversé : `01` en haut à gauche,
+ *      `02` à sa droite, `03` DIRECTEMENT SOUS `02`. La case sous `01`
  *      reste volontairement vide ;
- *   4. l'ILLUSTRATION en bas à droite, à la hauteur de `[ 03 ]`, avec la pastille posée
+ *   4. l'ILLUSTRATION en bas à droite, à la hauteur de `03`, avec la pastille posée
  *      dessus.
  *
  * La trame est une grille de TROIS colonnes et DEUX lignes, pas deux colonnes : sans la
- * troisième colonne, l'image retomberait sous `[ 03 ]` et la composition en L serait
+ * troisième colonne, l'image retomberait sous `03` et la composition en L serait
  * perdue. Les emplacements sont donc posés explicitement (`col-start` / `row-start`), et
- * les deux cases vides (dessous `[ 01 ]`, au-dessus de l'image) ne sont pas rendues du
+ * les deux cases vides (dessous `01`, au-dessus de l'image) ne sont pas rendues du
  * tout : c'est le blanc qui les tient.
  *
  * Les cases sont SÉPARÉES par un blanc, pas collées : chacune porte son propre filet
@@ -30,11 +30,12 @@ import { useDictionary } from "@/components/DictionaryProvider";
  * Pas d'ombre, pas d'arrondi, pas de carte flottante, pas de grande case d'en-tête dans la
  * grille : l'en-tête est HORS grille, comme sur la référence.
  *
- * L'illustration est un champ chaud dessiné (soleil + grain) tant qu'aucune image n'est
- * fournie ; `NEXT_PUBLIC_WHY_IMAGE` reçoit `/why.jpg` ou une URL absolue, et remplace le
- * champ sans toucher au reste. La pastille reste au-dessus dans les deux cas.
+ * L'illustration est livrée avec le dépôt (`public/media/why.jpg`) ; `NEXT_PUBLIC_WHY_IMAGE`
+ * la REMPLACE quand elle est posée (chemin local ou URL absolue), sans toucher au reste.
+ * Sans image du tout, le champ est dessiné (soleil + grain). La pastille reste au-dessus dans
+ * tous les cas.
  */
-const IMAGE = process.env.NEXT_PUBLIC_WHY_IMAGE;
+const IMAGE = process.env.NEXT_PUBLIC_WHY_IMAGE ?? "/media/why.jpg";
 
 export default function WhyStatements() {
   const { dict, locale } = useDictionary();
@@ -54,7 +55,7 @@ export default function WhyStatements() {
             href={`/${locale}/services`}
             className="mt-1 shrink-0 text-[0.6rem] font-medium uppercase tracking-[0.14em] text-ink/45 transition-colors hover:text-ink"
           >
-            [ {ui.methodology} ]
+            {ui.methodology}
           </Link>
         </div>
 
@@ -77,7 +78,7 @@ export default function WhyStatements() {
                 <Reveal as="div" delay={index * 60} className="h-full">
                   <article className="flex h-full min-h-[12.5rem] flex-col border border-ink/12 p-5 sm:min-h-[16rem] sm:p-6 lg:min-h-[18rem] lg:p-7">
                     <span className="text-[0.62rem] font-medium tabular-nums tracking-[0.14em] text-ink/40">
-                      [ {String(index + 1).padStart(2, "0")} ]
+                      {String(index + 1).padStart(2, "0")}
                     </span>
 
                     <h3 className="mt-3 max-w-[24ch] text-[1.05rem] font-light leading-[1.25] text-ink lg:text-[1.15rem]">

@@ -23,8 +23,8 @@ export type ContactSheetLabels = {
 
 /**
  * Formulaire de contact : le panneau (plein écran sur grand écran, feuille latérale sur
- * téléphone) et les champs. La mécanique du panneau vit dans `FormSheet`, partagée avec le
- * devis — ici, seul le CONTENU du formulaire est décrit.
+ * téléphone) et les champs. La mécanique du panneau vit dans `FormSheet` — ici, seul le
+ * CONTENU du formulaire est décrit.
  */
 export default function ContactSheet({
   labels,

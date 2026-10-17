@@ -20,7 +20,7 @@ import { LABEL } from "@/lib/editorial";
  *
  * Ici la page a une ossature, la même pour les six, et l'ordre se lit de haut en bas :
  *
- *   1. OUVERTURE — le numéro de la fonctionnalité (`[ 03 / 06 ]`), le titre en très grand,
+ *   1. OUVERTURE — le numéro de la fonctionnalité (`03 / 06`), le titre en très grand,
  *      le sous-titre et l'écran du produit. Un filigrane du numéro occupe le fond.
  *   2. POURQUOI — une phrase qui engage, en tête de colonne, et le texte qui la tient.
  *   3. CE QUE ÇA DONNE — les capacités en cases numérotées à filets (deux colonnes).
@@ -67,7 +67,7 @@ export default function ServicePageTemplate({ service }: { service: Service }) {
         <div className="container-x relative pb-16 pt-32 sm:pt-36 lg:pb-24 lg:pt-40">
           <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
             <span className={`${LABEL} text-ink/40`}>
-              [ {num(index)} / {num(dict.services.length - 1)} · {ui.expertise} ]
+              {num(index)} / {num(dict.services.length - 1)} · {ui.expertise}
             </span>
 
             <Link
@@ -119,7 +119,7 @@ export default function ServicePageTemplate({ service }: { service: Service }) {
         <section className="container-x py-20 sm:py-24">
           <div className="grid gap-10 lg:grid-cols-12 lg:gap-16">
             <div className="lg:col-span-4">
-              <span className={`${LABEL} text-ink/40`}>[ {ui.presentation} ]</span>
+              <span className={`${LABEL} text-ink/40`}>{ui.presentation}</span>
               <h2 className="mt-5 max-w-[16ch] text-[clamp(1.5rem,2.6vw,2.15rem)] font-light leading-[1.1] tracking-[-0.02em]">
                 {service.whyTitle}
               </h2>
@@ -135,7 +135,7 @@ export default function ServicePageTemplate({ service }: { service: Service }) {
         <section className="border-t border-ink/10">
           <div className="container-x py-20 sm:py-24">
             <div className="flex flex-wrap items-baseline justify-between gap-x-8 gap-y-2">
-              <span className={`${LABEL} text-ink/40`}>[ {ui.ourOffer} ]</span>
+              <span className={`${LABEL} text-ink/40`}>{ui.ourOffer}</span>
               <span className={`${LABEL} text-ink/30`}>
                 {String(service.offerings.length).padStart(2, "0")}
               </span>
@@ -147,7 +147,7 @@ export default function ServicePageTemplate({ service }: { service: Service }) {
                   <Reveal as="div" delay={i * 50} className="h-full">
                     <div className="flex h-full min-h-[7.5rem] flex-col justify-between gap-6 p-6">
                       <span className="text-[0.6rem] font-medium tabular-nums tracking-[0.14em] text-ink/35">
-                        [ {num(i)} ]
+                        {num(i)}
                       </span>
                       <p className="max-w-[32ch] text-[0.98rem] leading-snug text-ink">{item}</p>
                     </div>
@@ -163,7 +163,7 @@ export default function ServicePageTemplate({ service }: { service: Service }) {
           <div className="container-x py-20 sm:py-24">
             <div className="grid gap-8 lg:grid-cols-12 lg:gap-16">
               <div className="lg:col-span-4">
-                <span className={`${LABEL} text-ink/40`}>[ {ui.methodology} ]</span>
+                <span className={`${LABEL} text-ink/40`}>{ui.methodology}</span>
                 <h2 className="mt-5 max-w-[16ch] text-[clamp(1.5rem,2.6vw,2.15rem)] font-light leading-[1.1] tracking-[-0.02em]">
                   {service.processLabel}
                 </h2>
@@ -178,7 +178,7 @@ export default function ServicePageTemplate({ service }: { service: Service }) {
                     <Reveal as="div" delay={i * 60} className="h-full">
                       <div className="flex h-full min-h-[9.5rem] flex-col gap-4 p-6">
                         <span className="text-[0.6rem] font-medium tabular-nums tracking-[0.14em] text-ink/35">
-                          [ {num(i)} ]
+                          {num(i)}
                         </span>
                         <h3 className="text-[1.05rem] font-light leading-snug text-ink">
                           {step.title}
@@ -195,10 +195,13 @@ export default function ServicePageTemplate({ service }: { service: Service }) {
           </div>
         </section>
 
-        {/* ——— 5. La sortie : bande d'encre, l'affirmation du service, un bouton carré. */}
+        {/* ——— 5. La sortie : bande d'encre, l'affirmation du service, la sortie vers le
+                contact. Le bouton et la page de devis ont été retirés le 2026-10-17 : on
+                écrit ou on appelle depuis `/contact`, dont les coordonnées sont des liens
+                natifs — aucun formulaire intermédiaire. */}
         <section className="bg-ink text-paper">
           <div className="container-x py-20 sm:py-28">
-            <span className={`${LABEL} text-paper/35`}>[ {ui.talkToUs} ]</span>
+            <span className={`${LABEL} text-paper/35`}>{ui.talkToUs}</span>
 
             <h2 className="mt-6 max-w-[18ch] text-[clamp(1.9rem,4.4vw,3.6rem)] font-light leading-[1.02] tracking-[-0.03em]">
               {service.ctaTitle}
@@ -209,14 +212,6 @@ export default function ServicePageTemplate({ service }: { service: Service }) {
             </p>
 
             <div className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-4">
-              <Link
-                href={href("/devis")}
-                className="inline-flex items-center gap-2 bg-turquoise px-6 py-3.5 text-[0.64rem] font-medium uppercase tracking-[0.16em] text-ink transition-colors hover:bg-paper"
-              >
-                {ui.discussProject}
-                <ArrowUpRight className="h-4 w-4" />
-              </Link>
-
               <Link
                 href={href("/contact")}
                 className="text-[0.64rem] uppercase tracking-[0.16em] text-paper/50 underline decoration-paper/20 underline-offset-[6px] transition-colors hover:text-paper"
@@ -230,7 +225,7 @@ export default function ServicePageTemplate({ service }: { service: Service }) {
         {/* ——— 6. Les autres fonctionnalités : trois colonnes de cases, la visite continue. */}
         <section className="border-t border-ink/10">
           <div className="container-x py-16 sm:py-20">
-            <span className={`${LABEL} text-ink/40`}>[ {ui.otherServices} ]</span>
+            <span className={`${LABEL} text-ink/40`}>{ui.otherServices}</span>
 
             <ul className="mt-8 grid grid-cols-1 gap-px border border-ink/10 bg-ink/10 sm:grid-cols-2 lg:grid-cols-3">
               {others.map((other) => (
@@ -241,7 +236,7 @@ export default function ServicePageTemplate({ service }: { service: Service }) {
                   >
                     <span className="flex items-center justify-between gap-3">
                       <span className="text-[0.6rem] font-medium tabular-nums tracking-[0.14em] text-ink/35">
-                        [ {num(dict.services.findIndex((s) => s.slug === other.slug))} ]
+                        {num(dict.services.findIndex((s) => s.slug === other.slug))}
                       </span>
                       <ArrowRight className="h-4 w-4 -translate-x-1 text-ink/25 transition-all duration-300 group-hover:translate-x-0 group-hover:text-ink" />
                     </span>

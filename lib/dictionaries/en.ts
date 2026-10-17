@@ -13,13 +13,26 @@ export const site = {
   /* WhatsApp: a single address across the whole site (footer, fan, assistant), derived from
      the phone number — so changing the number happens in one place only. */
   whatsapp: "https://wa.me/221781229305",
-  /* Product contact address. Replace with the real mailbox before launch; no social
-     profiles are listed until Belora accounts exist. WhatsApp is derived from the phone
-     number (`components/SocialIcons`). */
+  /* Product contact address. Replace with the real mailbox before launch. WhatsApp is
+     derived from the phone number (`components/SocialIcons`). */
   email: "bonjour@belora.app",
   address: "Dakar, Senegal",
   hours: "Mon–Fri, 9am–6pm",
-  socials: [] as { label: string; href: string }[],
+  /* ⚠️ THE EIGHT `href` BELOW ARE GENERIC ON PURPOSE: they point at the network ROOT, with no
+     account handle, because Belora's accounts are not known here and a guessed address
+     (`instagram.com/someone`) would designate a stranger's account. Replace each `href` with
+     the real profile — a link to Instagram's root leads nowhere useful — or empty the list so
+     the footer only shows WhatsApp, which comes from the phone number above. */
+  socials: [
+    { label: "Instagram", href: "https://www.instagram.com/" },
+    { label: "TikTok", href: "https://www.tiktok.com/" },
+    { label: "Facebook", href: "https://www.facebook.com/" },
+    { label: "LinkedIn", href: "https://www.linkedin.com/" },
+    { label: "YouTube", href: "https://www.youtube.com/" },
+    { label: "X", href: "https://x.com/" },
+    { label: "Pinterest", href: "https://www.pinterest.com/" },
+    { label: "Threads", href: "https://www.threads.net/" },
+  ] as { label: string; href: string }[],
 };
 
 /* Navigation: real routes only — never a link to a page that does not exist.
@@ -483,9 +496,9 @@ export const contactPage = {
     { label: "Address", value: "Dakar, Senegal", href: null },
     { label: "Opening hours", value: "Mon–Fri, 9am–6pm", href: null },
   ],
-  /* The page no longer carries a form: the two actions below open email or phone, and
-     the contact details ARE the content. The form panel still lives in the floating
-     action dock (`form`, below).
+  /* The page carries no form: the two actions below open email or phone, and the
+     contact details ARE the content. It is the site's only contact point since the
+     floating action bar was removed (2026-10-17).
      Heading of the left-hand column: deliberately different from the page title
      ("Contact"), which the hero already displays. */
   heading: "Let's talk about your salon",
@@ -524,44 +537,6 @@ export const contactPage = {
     successTitle: "Message sent",
     successBody: "Thanks for your message. Our team will get back to you as soon as possible.",
   },
-};
-
-export const devisPage = {
-  title: "Let's talk about your salon",
-  lead: "A demo, a question about plans, a migration from your current calendar: tell us where you are.",
-  jsNote: "Please enable JavaScript in your browser to fill in this form.",
-  servicePlaceholder: "What brings you here",
-  serviceOptions: [
-    "Discover the product",
-    "Migrate my calendar",
-    "Several salons",
-    "Billing and plans",
-    "Something else",
-  ],
-  submit: "Send my request",
-  formTitle: "Your salon in a few fields",
-  formBody: "The name, the size of the team, what you use today: enough to prepare a useful conversation.",
-  successTitle: "Request sent",
-  successBody: "Thank you! Your request is on its way. We'll get back to you within 48 business hours.",
-  /* Field labels live here and not in the page: both the page AND the quote panel render
-     them — one source, no divergence. */
-  fields: {
-    firstName: "First name",
-    lastName: "Last name",
-    email: "Email",
-    phone: "Phone",
-    service: "What brings you here",
-    timeline: "Desired timeline",
-    description: "Project description",
-    descriptionPlaceholder: "Your salon, your team, what you use today…",
-  },
-  includeTitle: "What's included",
-  includes: [
-    "A response within 48 business hours",
-    "A tailored, costed proposal",
-    "A free discovery call",
-    "A single point of contact from quote to delivery",
-  ],
 };
 
 export const finalCta = {
@@ -623,10 +598,14 @@ export const ui = {
   expertise: "Feature",
   agency: "Salon & spa management software",
   freeQuote: "Create my salon",
+  /* Sign-in: the only word in the bar, alongside `freeQuote`. The rest of the access
+     vocabulary lives under `auth` (page titles, bodies, hints) — this is a button label. */
+  login: "Log in",
   talkToUs: "Let's talk",
   whatDrivesUs: "What drives us",
   footerQuickLinks: "Quick links",
   footerService: "Service",
+  socials: "Our socials",
   rights: "All rights reserved.",
   notFoundTitle: "Oops! This page could not be found.",
   notFoundBody: "It looks like nothing was found here. Head back home to keep browsing.",
@@ -639,7 +618,6 @@ export const ui = {
   menuOpenLabel: "Open menu",
   menuCloseLabel: "Close menu",
   menuNavLabel: "Mobile navigation",
-  searchCloseLabel: "Close search",
   formCloseLabel: "Close form",
   otherServices: "Other services",
   /* Historic project-gallery labels. `viewAllProjects` is still read by the feature pages;
@@ -649,39 +627,8 @@ export const ui = {
   servicesTitle: "Features",
   servicesBody:
     "Six building blocks, one single source of data: the calendar, online booking, client files, services, team and analytics. Nothing is ever typed in twice.",
-  searchLabel: "Search the site",
-  searchPlaceholder: "Search a service, a project…",
-  searchNoResults: "No results",
-  /* Full-screen search (header icon). “Results” is a heading, never inflected: the count is
-     appended next to it (“Results · 3”), so there is no plural to handle. */
-  searchResults: "Results",
-  searchSuggestions: "Suggestions",
-  /* Keyboard hint in the footer of a full-screen panel (search, contact form). */
+  /* Keyboard hint in the footer of a full-screen panel (contact form, services menu). */
   panelHint: "Esc to close",
-  /* Floating action bar (bottom of the screen, after the first scroll) and the social fan it
-     opens. The labels double as `aria-label`s: one word, both what you see and what a screen
-     reader announces. */
-  dock: {
-    title: "Quick actions",
-    quote: "Get a quote",
-    contact: "Contact us",
-    chat: "Assistant",
-    socials: "Our socials",
-    openSocials: "Show social networks",
-    closeSocials: "Hide social networks",
-    whatsapp: "WhatsApp",
-    /* Collapsed state: a single button with a hook. That's what appears on scroll — not the
-       whole bar. The hook is a SEQUENCE of short phrases: a frozen phrase is read once and
-       forgotten, a sequence opens several doors. */
-    phrases: [
-      "Got a project in mind?",
-      "Need a new website?",
-      "A brand to build?",
-      "A quote, no strings",
-      "Let's talk about it",
-    ],
-    openActions: "Open quick actions",
-  },
   /* Conversational assistant: the chat window labels. */
   chat: {
     title: "Belora assistant",
@@ -712,6 +659,21 @@ export const ui = {
       phone: "Phone",
     },
     passwordHint: "At least 8 characters, one letter and one digit.",
+    /* Validation messages for the access forms. They live HERE because they are displayed:
+       written inside `features/auth/schemas.ts`, they stayed French on the English site. The
+       rules do not move — only their wording changes with the language. */
+    validation: {
+      tenantNameMin: "The salon name needs at least 2 characters.",
+      tenantNameMax: "The salon name is too long.",
+      slugFormat: "Expected address: lowercase letters, digits and dashes.",
+      firstNameMin: "The first name needs at least 2 characters.",
+      lastNameMin: "The last name needs at least 2 characters.",
+      email: "Invalid email address.",
+      passwordMin: "The password needs at least 8 characters.",
+      passwordLetter: "The password needs at least one letter.",
+      passwordDigit: "The password needs at least one digit.",
+      code: "The code is exactly 6 digits.",
+    },
     login: {
       eyebrow: "Salon workspace",
       title: "Your salon is waiting",
@@ -749,6 +711,17 @@ export const ui = {
       lastName: "Last name",
       phone: "Phone",
       submit: "Create my salon",
+      /* Three-step flow. The rail names are deliberately short: in three columns they must
+         fit on one line — phone included. */
+      steps: {
+        salon: "Your salon",
+        account: "Your account",
+        security: "Security",
+      },
+      next: "Continue",
+      back: "Back",
+      reviewTitle: "Check your details",
+      edit: "Edit",
       haveAccount: "Already have a salon?",
       signIn: "Sign in",
       error: "Creation failed. Check your details or try again.",
@@ -1682,7 +1655,7 @@ export const storefront = {
 
 const dictionary = {
   site, nav, services, hero, about, projects, filters,
-  testimonials, aboutPage, servicesPage, contactPage, devisPage, finalCta, clients, pricing, faq,
+  testimonials, aboutPage, servicesPage, contactPage, finalCta, clients, pricing, faq,
   storefront, showcase, ui,
 };
 

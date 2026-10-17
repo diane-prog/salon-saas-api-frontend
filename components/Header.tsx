@@ -7,7 +7,6 @@ import { usePathname } from "next/navigation";
 import { Close, Menu, ChevronDown, ArrowRight, ArrowUpRight } from "@/components/Icons";
 import { switchLocalePath, type Locale } from "@/lib/dictionaries";
 import { useDictionary } from "@/components/DictionaryProvider";
-import HeaderSearch from "@/components/HeaderSearch";
 import FullScreenPanel from "@/components/FullScreenPanel";
 import { TextLink } from "@/components/ui";
 import { usePageTransition } from "@/components/PageTransition";
@@ -37,9 +36,42 @@ export default function Header() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
-  /* Mega menu Services : un VRAI dialogue plein écran (même `FullScreenPanel` que la
-     recherche), plus un panneau CSS survolé. L'état vit ici, avec le déclencheur qui
-     reprend le focus à la fermeture. */
+  /* Le menu est une BARRE LATÉRALE À DROITE (`aside`), pas un plein écran : sur un menu de
+     cinq entrées, un plein écran écrase la page et on perd le fil de ce qu'on quitte. Le
+     panneau glisse depuis le bord droit, la page s'éteint derrière mais reste lisible.
+
+     DEUX ÉTATS pour une seule intention, et c'est ce qui donne l'entrée ET la sortie :
+     `open` dit « monté », `drawerShown` dit « en place ». Ouvert, il passe à `true` à la
+     frame suivante — monté directement en place, le panneau n'aurait aucune transition à
+     jouer et apparaîtrait d'un coup ; fermé, il passe à `false` et on laisse 560 ms à la
+     sortie avant de démonter (`closeMenu`). */
+  const [drawerShown, setDrawerShown] = useState(false);
+  const drawerRef = useRef<HTMLElement>(null);
+  const hamburgerRef = useRef<HTMLButtonElement>(null);
+  const closeTimer = useRef(0);
+
+  const openMenu = useCallback(() => {
+    window.clearTimeout(closeTimer.current);
+    setOpen(true);
+    window.requestAnimationFrame(() => setDrawerShown(true));
+  }, []);
+
+  /**
+   * Ferme la barre latérale. `immediate` pour les gestes qui QUITTENT la page : il n'y a
+   * rien à animer quand la navigation emporte déjà le document.
+   */
+  const closeMenu = useCallback((immediate = false) => {
+    setDrawerShown(false);
+    window.clearTimeout(closeTimer.current);
+    if (immediate) {
+      setOpen(false);
+      return;
+    }
+    closeTimer.current = window.setTimeout(() => setOpen(false), 560);
+  }, []);
+
+  /* Mega menu Services : un VRAI dialogue plein écran (`FullScreenPanel`), plus un panneau
+     CSS survolé. L'état vit ici, avec le déclencheur qui reprend le focus à la fermeture. */
   const [servicesPanel, setServicesPanel] = useState(false);
   const servicesTriggerRef = useRef<HTMLButtonElement>(null);
   const closeServicesPanel = useCallback(() => setServicesPanel(false), []);
@@ -53,11 +85,60 @@ export default function Header() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Menu plein écran : on met aussi Lenis en pause pour figer la page derrière.
+  // Barre latérale : on met aussi Lenis en pause pour figer la page derrière.
   useEffect(() => {
     lockScroll(open);
     return () => lockScroll(false);
   }, [open]);
+
+  /* Échap ferme, Tab reste DANS la barre, le focus part sur la croix à l'ouverture et
+     revient sur le bouton du menu à la fermeture — au cycle suivant, comme dans
+     `FullScreenPanel` : traité dans la foulée du geste qui ferme, la fin de la séquence de
+     la touche rouvrait le panneau aussitôt. */
+  useEffect(() => {
+    if (!open) return;
+    const drawer = drawerRef.current;
+    if (!drawer) return;
+    /* Le bouton est lu MAINTENANT (il est monté avant la barre) : dans le nettoyage,
+       `ref.current` pourrait déjà pointer ailleurs. */
+    const returnTo = hamburgerRef.current;
+
+    const focusTimer = window.setTimeout(() => {
+      drawer.querySelector<HTMLElement>("a[href], button")?.focus();
+    }, 0);
+
+    const onKeyDown = (event: globalThis.KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        closeMenu();
+        return;
+      }
+      if (event.key !== "Tab") return;
+
+      const focusables = drawer.querySelectorAll<HTMLElement>("a[href], button");
+      if (focusables.length === 0) return;
+      const start = focusables[0];
+      const end = focusables[focusables.length - 1];
+      const current = document.activeElement;
+
+      if (event.shiftKey && current === start) {
+        event.preventDefault();
+        end.focus();
+      } else if (!event.shiftKey && current === end) {
+        event.preventDefault();
+        start.focus();
+      }
+    };
+
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      window.clearTimeout(focusTimer);
+      document.removeEventListener("keydown", onKeyDown);
+      window.requestAnimationFrame(() => returnTo?.focus());
+    };
+  }, [open, closeMenu]);
+
+  useEffect(() => () => window.clearTimeout(closeTimer.current), []);
 
   useEffect(() => {
     blurHeaderFocus();
@@ -68,7 +149,7 @@ export default function Header() {
   /* SUR L'ACCUEIL, la barre n'est pas la barre du site : c'est une signature posée sur la
      vidéo du hero — le nom à gauche, le menu à droite, rien entre les deux. Dès qu'on
      descend, ou dès qu'on quitte l'accueil, elle redevient la barre complète (liens,
-     langue, recherche) et retrouve son fond de papier. */
+     langue, actions de compte) et retrouve son fond de papier. */
   const overHero = pathname === `/${locale}` && !scrolled;
 
   const changeLocale = (next: Locale) => {
@@ -76,17 +157,14 @@ export default function Header() {
        mobile laissait sinon le panneau par-dessus la page d'arrivée : l'écran restait couvert
        et il fallait actualiser. Ici, pas d'état à rattraper après coup — on referme à la
        source, dans le geste qui quitte la page. */
-    setOpen(false);
+    closeMenu(true);
     setServicesPanel(false);
     document.cookie = `belora-locale=${next};path=/;max-age=31536000;samesite=lax`;
-    /* `hard: true` : navigation PLEINE PAGE sous le rideau, et non `router.push`. Un
-       changement de langue remonte tout `app/[lang]` — donc le rideau lui-même. En doux,
-       l'ancienne instance partait en laissant son rideau posé, et l'écran restait couvert
-       sur l'ancienne langue jusqu'à actualisation. En pleine page, l'ancien document (rideau
-       baissé inclus) est détruit avec la navigation : rien ne peut rester coincé. */
-    navigate(switchLocalePath(next, pathname), next === "fr" ? "Français" : "English", {
-      hard: true,
-    });
+    /* `hard: true` : navigation PLEINE PAGE, et non `router.push`. Un changement de langue
+       remonte tout `app/[lang]` — donc le composant de transition lui-même, et le drapeau de
+       langue posé en cookie ne serait relu qu'après coup. En pleine page, le nouveau document
+       est rendu d'emblée dans la bonne langue : rien à rattraper. */
+    navigate(switchLocalePath(next, pathname), { hard: true });
   };
 
   return (
@@ -94,10 +172,10 @@ export default function Header() {
       {/* La barre a DEUX comportements, et c'est voulu.
 
           Sur TELEPHONE : une barre d'ENCRE, toujours — la même que les panneaux plein écran
-          (recherche, formulaire) et que le rideau de transition. Le logo clair y est lisible
-          en permanence, alors qu'une barre transparente le faisait disparaître au-dessus des
-          heros clairs des pages internes ; et la page ne « saute » plus au premier scroll,
-          puisque le fond ne change pas.
+          et que les feuilles de formulaire. Le logo clair y est lisible en permanence, alors
+          qu'une barre transparente le faisait disparaître au-dessus des heros clairs des
+          pages internes ; et la page ne « saute » plus au premier scroll, puisque le fond ne
+          change pas.
 
           Sur GRAND ÉCRAN : le comportement d'origine — transparent au repos, blanc translucide
           une fois la page défilée — parce que le hero de l'accueil est sombre et que la barre y
@@ -147,7 +225,7 @@ export default function Header() {
                 /* L'entrée Services n'est plus un lien survolé : c'est le déclencheur du
                    panneau plein écran (même objet que la recherche — fond encre, logo, croix
                    cerclée, Échap, Tab contenu, page figée). La vue d'ensemble des services
-                   et le devis vivent DANS le panneau, en tête de sa liste. */
+                   vit DANS le panneau, en tête de sa liste. */
                 <button
                   key={item.href}
                   ref={servicesTriggerRef}
@@ -181,24 +259,48 @@ export default function Header() {
           </nav>
 
           <div className="flex items-center gap-2 sm:gap-3">
-            {/* Sur le hero, la barre ne garde que le nom et le menu : la langue et la
-                recherche vivent alors DANS le menu, qui est un vrai panneau plein écran. */}
-            {!overHero && (
-              <>
-                <LocaleSwitch
-                  locale={locale}
-                  onChange={changeLocale}
-                  label={dict.ui.languageLabel}
-                />
+            {/* La LANGUE reste dans le menu au-dessus du hero ; les deux actions de COMPTE,
+                elles, restent dans la barre — c'est ce qu'on vient chercher, elles ne
+                dépendent pas de l'endroit où l'on se trouve.
 
-                <HeaderSearch />
-              </>
+                Les deux suivent la convention du site : `freeQuote` (« Créer mon salon »)
+                est l'action d'inscription partout ailleurs — accueil, pages de service — et
+                mène donc à `/register` ; la connexion n'a qu'un mot, ajouté au dictionnaire.
+                Sous `lg`, la barre n'a la place que pour le menu : les deux actions vivent
+                alors dans le pied de la barre latérale. */}
+            {!overHero && (
+              <LocaleSwitch
+                locale={locale}
+                onChange={changeLocale}
+                label={dict.ui.languageLabel}
+              />
             )}
 
+            <Link
+              href={href("/login")}
+              className={`hidden px-3 py-2 text-md font-light transition-colors lg:inline-block ${
+                overHero ? "text-paper/80 hover:text-paper" : "text-ink/75 hover:text-brand"
+              }`}
+            >
+              {dict.ui.login}
+            </Link>
+
+            <Link
+              href={href("/register")}
+              className={`hidden px-5 py-2.5 text-[0.64rem] font-medium uppercase tracking-[0.16em] transition-colors lg:inline-block ${
+                overHero ? "bg-paper text-ink hover:bg-brand hover:text-paper" : "bg-ink text-paper hover:bg-brand"
+              }`}
+            >
+              {dict.ui.freeQuote}
+            </Link>
+
             <button
+              ref={hamburgerRef}
               type="button"
-              onClick={() => setOpen(true)}
+              onClick={openMenu}
               aria-label={dict.ui.menuOpenLabel}
+              aria-haspopup="dialog"
+              aria-expanded={open}
               className={`grid h-11 w-11 place-items-center transition-colors ${
                 overHero
                   ? "text-paper hover:bg-paper/10"
@@ -211,16 +313,17 @@ export default function Header() {
         </div>
       </header>
 
-      {/* Mega menu Services : PLEIN ÉCRAN, comme la recherche — même `FullScreenPanel`
-          (logo, croix cerclée, Échap, Tab contenu, page figée, panneau qui descend du haut
-          puis cascade du contenu — le geste du rideau de transition), mais sur
-          une surface VERRE (`tone="glass"`) : encre translucide et flou d'arrière-plan, la
-          page restant lisible en filigrane derrière le menu.
+      {/* Mega menu Services : PLEIN ÉCRAN — même `FullScreenPanel` que la feuille de
+          formulaire (logo, croix cerclée, Échap, Tab contenu, page figée, panneau qui
+          descend du haut puis cascade du contenu), mais sur une surface VERRE
+          (`tone="glass"`) : encre translucide et flou d'arrière-plan, la page restant
+          lisible en filigrane derrière le menu.
 
           MAIS c'est un MÉGA MENU, pas une page : la grille classique du genre — colonnes de
           liens à GAUCHE (titre + description par case, filets entre les cases, survol qui
-          éclaire la case), et à DROITE le bloc IMAGE mis en avant avec l'action y étant
-          (le devis), celui de l'ancien bandeau survolé. Au-dessus, la rangée de titre : l'étiquette,
+          éclaire la case), et à DROITE le bloc IMAGE mis en avant — l'agenda du jour dessiné,
+          celui de l'ancien bandeau survolé — qui n'est plus qu'une illustration depuis le
+          retrait du bouton de devis. Au-dessus, la rangée de titre : l'étiquette,
           le grand libellé, et l'action « vue d'ensemble » à droite. */}
       {servicesPanel && (
         <FullScreenPanel
@@ -306,14 +409,6 @@ export default function Header() {
                   <ProductPanel variant="agenda" />
                 </div>
 
-                <Link
-                  href={href("/devis")}
-                  onClick={closeServicesPanel}
-                  className="group inline-flex w-fit items-center gap-2 border-b border-paper/30 pb-1 text-[0.7rem] uppercase tracking-[0.16em] text-paper/80 transition-colors hover:border-paper hover:text-paper"
-                >
-                  {dict.ui.freeQuote}
-                  <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-0.5" />
-                </Link>
               </div>
             </div>
           </div>
@@ -321,130 +416,199 @@ export default function Header() {
       )}
 
       {open && (
-        <div className="fixed inset-0 z-60 flex flex-col bg-ink text-paper grain">
-          {/* Barre haute : le MÊME en-tête que les autres panneaux plein écran — logo clair,
-              croix cerclée. Les trois surfaces du site (recherche, formulaire, menu) se
-              ressemblent, on ne change pas de vocabulaire en changeant de panneau. */}
-          <div className="container-x flex items-center justify-between py-4">
-            <span className="font-display text-[1.4rem] leading-none tracking-[-0.015em] text-paper">
-              {dict.site.name}
-            </span>
-            <button
-              type="button"
-              onClick={() => setOpen(false)}
-              aria-label={dict.ui.menuCloseLabel}
-              className="grid h-11 w-11 place-items-center text-paper/70 ring-1 ring-paper/20 transition-colors hover:text-paper hover:ring-paper/50"
-            >
-              <Close />
-            </button>
-          </div>
+        <>
+          {/* ——— LE VOILE : la page s'éteint derrière la barre latérale, mais ne disparaît
+                  pas — on continue de voir ce qu'on quitte. Cliquer dessus ferme.
 
-          {/* Le menu est une LISTE ÉDITORIALE : un numéro, un grand libellé, un filet — la
-              grammaire des listes du site (services, valeurs, réalisations), tenue à l'échelle
-              d'un menu de téléphone. Les liens ne sont plus des lignes muettes : chaque entrée
-              se numérote et se souligne, comme une page de sommaire. */}
-          {/* Le menu est une PAGE DE SOMMAIRE plein écran, pas une liste de téléphone
-              agrandie : les pages en très grand à gauche (numéro entre crochets, filet,
-              flèche qui n'apparaît qu'au survol), et à droite une colonne de service —
-              les six fonctionnalités, la langue, l'action et les coordonnées. Deux
-              colonnes sur grand écran, une sur téléphone. */}
+                  Un BOUTON et non un `div` cliquable : il porte un nom pour les lecteurs
+                  d'écran, et `tabIndex -1` le garde hors de la boucle de tabulation (elle
+                  vit dans le panneau, hors de son périmètre). */}
+          <button
+            type="button"
+            onClick={() => closeMenu()}
+            aria-label={dict.ui.menuCloseLabel}
+            tabIndex={-1}
+            className={`fixed inset-0 z-[55] cursor-default bg-ink/70 backdrop-blur-[3px] transition-opacity duration-500 motion-reduce:transition-none ${
+              drawerShown ? "opacity-100" : "opacity-0"
+            }`}
+          />
+
+          {/* ——— LA BARRE LATÉRALE, à DROITE : pleine hauteur, glissée depuis le bord. Sa
+                  largeur se plafonne à 30rem — au-delà, un menu de cinq entrées s'étale
+                  plus qu'il ne se lit.
+
+                  Trois étages, comme un vrai menu de côté : l'en-tête (la maison, la croix),
+                  le sommaire qui défile seul si la fenêtre est courte (`data-lenis-prevent`
+                  pour que la molette lui reste attachée), et le pied (langue, action,
+                  coordonnées) qui ne défile jamais. */}
+          <aside
+            ref={drawerRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label={dict.ui.menuNavLabel}
+            className={`fixed inset-y-0 right-0 z-60 flex w-[min(30rem,88vw)] flex-col border-l border-paper/10 bg-ink text-paper transition-transform duration-[560ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${
+              drawerShown ? "translate-x-0" : "translate-x-full"
+            }`}
+          >
+            {/* Le grain vit dans son propre cadre : `grain` pose `position: relative`, ce
+                qui écraserait l'`absolute` du calque. */}
+            <div aria-hidden className="pointer-events-none absolute inset-0">
+              <div className="grain h-full w-full" />
+            </div>
+
+            {/* En-tête : le nom de la maison et la croix cerclée — le même vocabulaire que
+                les autres surfaces du site (formulaire, méga menu). */}
+            <div className="relative flex items-center justify-between border-b border-paper/10 px-6 py-4">
+              <span className="font-display text-[1.3rem] leading-none tracking-[-0.015em] text-paper">
+                {dict.site.name}
+              </span>
+
+              <span className="flex items-center gap-4">
+                <span className="hidden text-[0.56rem] uppercase tracking-[0.18em] text-paper/25 sm:block">
+                  {dict.ui.panelHint}
+                </span>
+
+                <button
+                  type="button"
+                  onClick={() => closeMenu()}
+                  aria-label={dict.ui.menuCloseLabel}
+                  className="grid h-10 w-10 place-items-center text-paper/70 ring-1 ring-paper/20 transition-colors hover:text-paper hover:ring-paper/50"
+                >
+                  <Close />
+                </button>
+              </span>
+            </div>
+
+          {/* ——— LE SOMMAIRE. Une liste éditoriale à l'échelle d'une colonne : numéro entre
+                  crochets, grand libellé en display, filet. Chaque entrée ENTRE EN CASCADE
+                  (décalage croissant, 55 ms d'écart) une fois la barre posée : c'est ce qui
+                  distingue un menu qu'on ouvre d'un menu qui apparaît. */}
           <div
             data-lenis-prevent
-            className="no-scrollbar container-x grid min-h-0 flex-1 gap-10 overflow-y-auto pb-10 pt-2 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] lg:gap-16"
+            className="no-scrollbar relative flex min-h-0 flex-1 flex-col gap-10 overflow-y-auto overscroll-contain px-6 pb-8 pt-7"
           >
             <nav aria-label={dict.ui.menuNavLabel}>
-              <span className={`${LABEL} text-paper/30`}>[ {dict.ui.menuNavLabel} ]</span>
+              <span className={`${LABEL} text-paper/30`}>{dict.ui.menuNavLabel}</span>
 
               <ul className="mt-5 border-t border-paper/10">
                 {dict.nav.map((item, i) => (
-                  <li key={item.href} className="border-b border-paper/10">
+                  <li
+                    key={item.href}
+                    style={{ transitionDelay: drawerShown ? `${120 + i * 55}ms` : "0ms" }}
+                    className={`border-b border-paper/10 transition-[opacity,transform] duration-[700ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${
+                      drawerShown ? "translate-x-0 opacity-100" : "translate-x-6 opacity-0"
+                    }`}
+                  >
                     <Link
                       href={href(item.href)}
-                      onClick={() => setOpen(false)}
-                      className="group flex items-baseline gap-4 py-3.5"
+                      onClick={() => closeMenu(true)}
+                      className="group flex items-baseline gap-3 py-4"
                     >
-                      <span className="w-9 shrink-0 text-[0.56rem] font-medium tabular-nums tracking-[0.1em] text-paper/30">
-                        [ {String(i + 1).padStart(2, "0")} ]
+                      <span className="w-8 shrink-0 text-[0.56rem] font-medium tabular-nums tracking-[0.1em] text-paper/30 transition-colors duration-300 group-hover:text-brand">
+                        {String(i + 1).padStart(2, "0")}
                       </span>
 
-                      <span
-                        className={`text-[clamp(1.8rem,4.2vw,3.3rem)] font-light leading-[1.02] tracking-[-0.025em] transition-[transform,color] duration-500 group-hover:translate-x-2 ${
-                          item.href === "/services" ? "text-turquoise" : "text-paper"
-                        }`}
-                      >
+                      <span className="font-display text-[clamp(1.45rem,1.9vw,1.8rem)] leading-[1.06] tracking-[-0.02em] text-paper transition-[transform,color] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-1.5 group-hover:text-brand">
                         {item.label}
                       </span>
 
-                      <ArrowUpRight className="ml-auto h-4 w-4 shrink-0 self-center text-paper/20 transition-all duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-paper" />
+                      <ArrowUpRight className="ml-auto h-4 w-4 shrink-0 -translate-x-1 self-center text-brand opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100" />
                     </Link>
                   </li>
                 ))}
               </ul>
             </nav>
 
-            <aside className="flex flex-col gap-9">
-              <div>
-                <span className={`${LABEL} text-paper/30`}>[ {dict.ui.expertise} ]</span>
-
-                <ul className="mt-4 border-t border-paper/10">
-                  {dict.services.map((s, i) => (
-                    <li key={s.slug} className="border-b border-paper/10">
-                      <Link
-                        href={href(`/services/${s.slug}`)}
-                        onClick={() => setOpen(false)}
-                        className="group flex items-baseline gap-3 py-2.5 text-paper/60 transition-colors hover:text-paper"
-                      >
-                        <span className="text-[0.55rem] tabular-nums tracking-[0.1em] text-paper/25">
-                          {String(i + 1).padStart(2, "0")}
-                        </span>
-                        <span className="text-[0.95rem] font-light">{s.title}</span>
-                        <ArrowRight className="ml-auto h-3.5 w-3.5 shrink-0 -translate-x-1 text-paper/25 opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100" />
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div className="flex items-center justify-between gap-4">
-                <span className={`${LABEL} text-paper/30`}>[ {dict.ui.languageLabel} ]</span>
-                <LocaleSwitch
-                  locale={locale}
-                  onChange={changeLocale}
-                  label={dict.ui.languageLabel}
-                  tone="dark"
-                />
-              </div>
-
-              <div className="mt-auto flex flex-col gap-4">
+            {/* Les six fonctionnalités, en liste courte : le menu mène aussi au métier,
+                pas seulement aux pages. Elle arrive APRÈS le sommaire dans la cascade. */}
+            <div
+              style={{ transitionDelay: drawerShown ? `${140 + dict.nav.length * 55}ms` : "0ms" }}
+              className={`transition-[opacity,transform] duration-[700ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${
+                drawerShown ? "translate-x-0 opacity-100" : "translate-x-6 opacity-0"
+              }`}
+            >
+              <div className="flex items-baseline justify-between gap-4">
+                <span className={`${LABEL} text-paper/30`}>{dict.ui.expertise}</span>
                 <Link
-                  href={href("/devis")}
-                  onClick={() => setOpen(false)}
-                  className="inline-flex items-center justify-center gap-2 bg-turquoise px-6 py-4 text-[0.62rem] font-medium uppercase tracking-[0.16em] text-ink transition-colors hover:bg-paper"
+                  href={href("/services")}
+                  onClick={() => closeMenu(true)}
+                  className="text-[0.6rem] uppercase tracking-[0.14em] text-paper/40 transition-colors hover:text-paper"
                 >
-                  {dict.ui.dock.quote}
-                  <ArrowUpRight className="h-4 w-4" />
+                  {dict.ui.viewAllServices}
                 </Link>
-
-                <div className="flex flex-col gap-1 text-[0.7rem] uppercase tracking-[0.14em] text-paper/40">
-                  <a
-                    href={`mailto:${dict.site.email}`}
-                    className="transition-colors hover:text-paper"
-                  >
-                    {dict.site.email}
-                  </a>
-                  <a href={dict.site.phoneRaw} className="transition-colors hover:text-paper">
-                    {dict.site.phone}
-                  </a>
-                </div>
               </div>
-            </aside>
+
+              <ul className="mt-4 border-t border-paper/10">
+                {dict.services.map((s, i) => (
+                  <li key={s.slug} className="border-b border-paper/10">
+                    <Link
+                      href={href(`/services/${s.slug}`)}
+                      onClick={() => closeMenu(true)}
+                      className="group flex items-baseline gap-3 py-2.5 text-paper/60 transition-colors hover:text-paper"
+                    >
+                      <span className="text-[0.55rem] tabular-nums tracking-[0.1em] text-paper/25">
+                        {String(i + 1).padStart(2, "0")}
+                      </span>
+                      <span className="text-[0.95rem] font-light">{s.title}</span>
+                      <ArrowRight className="ml-auto h-3.5 w-3.5 shrink-0 -translate-x-1 text-paper/25 opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100" />
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
 
-          <div className="container-x flex flex-wrap items-center justify-between gap-3 border-t border-paper/10 py-4 text-[0.56rem] uppercase tracking-[0.18em] text-paper/30">
-            <span>© {new Date().getFullYear()} {dict.site.name}</span>
-            <span>{dict.ui.panelHint}</span>
+          {/* ——— LE PIED : langue et coordonnées. HORS de la zone qui défile — c'est ce
+                  qui distingue une barre latérale d'une page : le geste à faire reste
+                  toujours sous la main, quelle que soit la hauteur de la fenêtre. */}
+          <div
+            style={{ transitionDelay: drawerShown ? "480ms" : "0ms" }}
+            className={`relative border-t border-paper/10 px-6 py-5 transition-[opacity,transform] duration-[700ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${
+              drawerShown ? "translate-x-0 opacity-100" : "translate-x-6 opacity-0"
+            }`}
+          >
+            <div className="flex items-center justify-between gap-4">
+              <span className={`${LABEL} text-paper/30`}>{dict.ui.languageLabel}</span>
+              <LocaleSwitch
+                locale={locale}
+                onChange={changeLocale}
+                label={dict.ui.languageLabel}
+                tone="dark"
+              />
+            </div>
+
+            {/* Les deux actions de compte : c'est ici qu'elles vivent sur téléphone, et
+                au-dessus du hero de l'accueil, où la barre ne garde que le nom et le menu. */}
+            <div className="mt-4 grid grid-cols-2 gap-2">
+              <Link
+                href={href("/login")}
+                onClick={() => closeMenu(true)}
+                className="border border-paper/25 px-4 py-3 text-center text-[0.64rem] font-medium uppercase tracking-[0.16em] text-paper/75 transition-colors hover:border-paper/60 hover:text-paper"
+              >
+                {dict.ui.login}
+              </Link>
+
+              <Link
+                href={href("/register")}
+                onClick={() => closeMenu(true)}
+                className="bg-paper px-4 py-3 text-center text-[0.64rem] font-medium uppercase tracking-[0.16em] text-ink transition-colors hover:bg-brand hover:text-paper"
+              >
+                {dict.ui.freeQuote}
+              </Link>
+            </div>
+
+            <div className="mt-4 flex flex-col gap-1 text-[0.7rem] uppercase tracking-[0.14em] text-paper/40">
+              <a href={`mailto:${dict.site.email}`} className="transition-colors hover:text-paper">
+                {dict.site.email}
+              </a>
+              <a href={dict.site.phoneRaw} className="transition-colors hover:text-paper">
+                {dict.site.phone}
+              </a>
+            </div>
           </div>
-        </div>
+
+          </aside>
+        </>
       )}
     </>
   );

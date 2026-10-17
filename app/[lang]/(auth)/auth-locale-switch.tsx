@@ -12,8 +12,8 @@ import { localeNames, locales, switchLocalePath, type Locale } from "@/lib/dicti
  * même raison : changer de langue remonte tout `app/[lang]`, donc en navigation
  * douce l'ancienne instance de page reste montée le temps d'un aller-retour.
  *
- * Il est écrit ici plutôt que partagé avec `Header` : la version du header
- * dépend du rideau de transition (`usePageTransition`), absent de cette surface.
+ * Il est écrit ici plutôt que partagé avec `Header` : la version du header passe
+ * par le contexte de transition (`usePageTransition`), absent de cette surface.
  */
 /**
  * Pose le cookie de langue, puis recharge sur la même page dans l'autre langue.

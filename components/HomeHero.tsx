@@ -20,25 +20,25 @@ import { prefersReducedMotion } from "@/lib/motion";
  *   - en bas à gauche, le titre, très grand, sur deux lignes (ce qu'on retient) ;
  *   - en bas, le vocabulaire du produit et la maison (ce qu'on signe).
  *
- * LE MÉDIA N'EST PAS DANS LE CODE : `NEXT_PUBLIC_HERO_VIDEO` reçoit l'adresse de la vidéo
- * de fond (`/hero.mp4` déposée dans `public`, ou une URL absolue), et
- * `NEXT_PUBLIC_HERO_PHOTO` celle d'une image fixe. La vidéo passe au-dessus de l'image, qui
- * lui sert d'affiche — et qui reste seule si la personne a demandé moins d'animation
- * (`motion-reduce`). Sans aucune des deux, le champ est dessiné — ciel chaud, soleil haut à
- * droite, grain — pour que l'écran soit fini sans dépendre d'un asset. Dans tous les cas,
- * un voile sombre monte du bas : il ne filtre pas l'image, il garantit que le titre reste
- * lisible dessus.
+ * LE MÉDIA : un fichier est livré AVEC le dépôt — `public/media/hero.mp4` en fond et
+ * `public/media/hero.jpg` en affiche — pour que l'écran soit fini sans configuration. Les
+ * variables `NEXT_PUBLIC_HERO_VIDEO` et `NEXT_PUBLIC_HERO_PHOTO` les REMPLACENT quand elles
+ * sont posées (chemin local ou URL absolue) : c'est le point de passage pour mettre la vraie
+ * vidéo du salon, sans toucher au code. La vidéo passe au-dessus de l'image, qui lui sert
+ * d'affiche — et qui reste seule si la personne a demandé moins d'animation (`motion-reduce`).
+ * Sans aucune des deux, le champ est dessiné. Dans tous les cas, un voile sombre monte du
+ * bas : il ne filtre pas l'image, il garantit que le titre reste lisible dessus.
  *
  * Aucune animation au défilement, aucun carrousel : la première page doit être lisible
  * avant que React n'ait fini de s'hydrater.
  *
- * LE TITRE, revu sur trois points, tous mesurés à l'œil sur la page :
- *   - il est écrit dans la police du SITE (`font-sans`, Sora chargée par `next/font`), plus
- *     dans la pile sérif de `--font-display`. Deux raisons : la sérif n'est pas téléchargée
- *     mais empruntée au système, donc elle change de dessin d'une machine à l'autre
- *     (Iowan sur macOS, Georgia sur Windows) ; et son italique, utilisée sur la ligne qui
- *     tourne, faisait lire DEUX polices là où il n'y a qu'un titre ;
- *   - plus d'italique du tout ;
+ * LE TITRE, revu sur trois points :
+ *   - il porte la MÊME police que les grands titres de section — celle de
+ *     `ServicesEditorial`, `PricingSection` et `Testimonials`, c'est-à-dire `font-display`.
+ *     Le hero est la première marche de cette échelle : une seule famille pour tous les
+ *     titres de la page, sinon on croit à deux maisons ;
+ *   - plus d'italique du tout : c'est elle, et non la famille, qui faisait lire DEUX polices
+ *     là où il n'y a qu'un titre ;
  *   - taille ramenée de `8.4vw / 8.2rem` à `4.4vw / 4.2rem` : à 130 px, le titre écrasait le
  *     reste de l'affiche au lieu de la signer.
  *
@@ -58,8 +58,8 @@ import { prefersReducedMotion } from "@/lib/motion";
  * Les autres lignes sont remises en place sans transition (invisibles, donc rien à voir) :
  * c'est ce qui évite qu'elles glissent quand leur tour passe.
  */
-const PHOTO = process.env.NEXT_PUBLIC_HERO_PHOTO;
-const VIDEO = process.env.NEXT_PUBLIC_HERO_VIDEO;
+const PHOTO = process.env.NEXT_PUBLIC_HERO_PHOTO ?? "/media/hero.jpg";
+const VIDEO = process.env.NEXT_PUBLIC_HERO_VIDEO ?? "/media/hero.mp4";
 
 /** Le type MIME suit l'extension : un `.webm` annoncé en `mp4` n'est pas lu par Safari. */
 const VIDEO_TYPE = VIDEO?.endsWith(".webm")
@@ -195,7 +195,7 @@ export default function HomeHero() {
         <h1
           id="hero-title"
           aria-label={hero.lead}
-          className="mt-7 max-w-[16ch] font-sans text-[clamp(1.9rem,4.4vw,4.2rem)] font-normal leading-[1.02] tracking-[-0.02em] text-paper"
+          className="mt-7 max-w-[16ch] font-display text-[clamp(1.9rem,4.4vw,4.2rem)] leading-[1.02] tracking-[-0.02em] text-paper"
         >
           <span aria-hidden>{hero.leadStatic}</span>
 
@@ -237,7 +237,7 @@ export default function HomeHero() {
           </span>
 
           <span className="text-paper/40">
-            © {new Date().getFullYear()} {site.name}
+            © 2026 {site.name}
           </span>
         </div>
       </div>

@@ -467,65 +467,27 @@ html[data-js] .split-anim .split-word {
   animation: split-word-in var(--w-duration, 0.9s) cubic-bezier(0.22, 1, 0.36, 1) var(--w-delay, 0ms) both;
 }
 
-/* Rideau de transition : un panneau uni qui GLISSE (plus de bascule 3D), animé en CSS
-   (et non en JS) pour rester fluide. Il descend du haut pour couvrir, puis redescend
-   en s'effaçant — un seul axe, aucune décoration, aucun dégradé.
+/* Transition entre les pages : UN FONDU, rien d'autre — voir `components/PageTransition`.
 
-   Le fond est l'encre du site (`ink`), la MÊME que les panneaux plein écran de la
-   recherche et du formulaire : le rideau, la recherche et le formulaire sont le même objet
-   visuel — l'encre du site — et l'arrivée sur la page est une suite, pas un objet à part.
-   Le libellé du rideau est donc clair (`text-paper`), pas bleu nuit. */
-.curtain-panel {
-  position: absolute;
-  inset: 0;
-  background: var(--color-ink);
-  will-change: transform;
-}
+   C'était un « rideau » à l'origine (il tombait d'en haut), puis un balayage horizontal,
+   puis un fondu de sortie avec translation de la page entière, puis une règle de progression
+   en haut de l'écran : tout cela a été retiré le 2026-10-17. Le fondu de sortie l'a été pour
+   la FLUIDITÉ — une `transform` sur le conteneur qui porte toute la page se re-rastérise à
+   chaque image et crée un containing block ; la règle, parce qu'elle n'apportait rien.
 
-/* Le rideau d'ouverture est dans le premier rendu : pour les personnes qui demandent
-   moins d'animations, on le masque ici plutôt que de le retirer du HTML (la séquence
-   JS continue de tourner, la phase retombe sur « idle » et rien ne bloque). */
+   Il ne reste donc QUE l'opacité de la page d'arrivée : la seule propriété de la transition
+   que le navigateur joue sur le compositeur, sans toucher à la mise en page. */
+
+/* Mouvement réduit : la page est là, sans fondu. */
 @media (prefers-reduced-motion: reduce) {
-  .curtain-panel {
-    display: none;
-  }
-}
-
-/* Rideau d'ouverture : couvrant dès la première frame, sans animation d'entrée.
-   Le retrait (`curtain-reveal`) part de `translateY(0)`, donc l'enchaînement est continu. */
-.curtain-still {
-  transform: translateY(0);
-}
-
-.curtain-cover {
-  animation: curtain-cover var(--curtain-cover, 0.52s) cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-.curtain-reveal {
-  animation: curtain-reveal var(--curtain-reveal, 0.62s) cubic-bezier(0.64, 0, 0.78, 0) both;
-}
-
-@keyframes curtain-cover {
-  from {
-    transform: translateY(-100%);
-  }
-  to {
-    transform: translateY(0);
-  }
-}
-
-@keyframes curtain-reveal {
-  from {
-    transform: translateY(0);
-  }
-  to {
-    transform: translateY(100%);
+  html[data-js] .page-enter {
+    animation: none;
   }
 }
 
 /* Entrée des panneaux plein écran (méga menu Services, recherche, formulaire) : le panneau
-   lui-même entre par le HAUT, du même geste que le rideau de transition — mêmes keyframes,
-   même courbe, même durée. Le geste du site n'est décrit qu'une fois.
+   lui-même entre par le HAUT. La transition de page, elle, ne recouvre plus rien : elle se
+   contente d'un fondu et d'une règle (voir plus haut).
 
    `backwards` et non `both` : le panneau porte l'état de départ avant le premier pixel (il
    est hors écran, puis descend), et une fois posé PLUS AUCUNE transformation ne reste
@@ -534,8 +496,17 @@ html[data-js] .split-anim .split-word {
 
    Le mouvement est en CSS et une seule translation verticale : pas de JS par frame, pas de
    démarcation du viewport, et c'est le compositeur qui la joue. */
+@keyframes enter-from-top {
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
 .panel-cover {
-  animation: curtain-cover 0.52s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  animation: enter-from-top 0.52s cubic-bezier(0.22, 1, 0.36, 1) backwards;
 }
 
 /* Mouvement réduit : pas d'entrée animée, le panneau est simplement là. */
@@ -545,14 +516,19 @@ html[data-js] .split-anim .split-word {
   }
 }
 
-/* Entrée de page : jouée pendant que le rideau couvre encore l'écran.
-   Volontairement en opacité seule : avec `fill-mode: both`, une déformation
-   (même `transform: none`) reste appliquée sous forme de matrice identité, ce qui crée un
+/* Entrée de page : jouée à l'arrivée de la route, sur un nœud neuf (`key={pathname}`).
+
+   Volontairement en opacité seule : avec `fill-mode: both`, une déformation (même
+   `transform: none`) reste appliquée sous forme de matrice identité, ce qui crée un
    containing block et casse le `position: fixed` des sections épinglées par ScrollTrigger
-   (la section « services » défilait au lieu de rester figée). */
+   (la section « services » défilait au lieu de rester figée).
+
+   Le fondu part de 0,4 et non de 0 : la page d'arrivée n'est jamais invisible, donc on ne
+   voit ni écran vide ni clignotement — le contenu se pose au lieu d'apparaître. Court
+   (0,26 s) parce qu'il est perçu comme un retard au-delà. */
 @keyframes page-enter {
   from {
-    opacity: 0;
+    opacity: 0.4;
   }
   to {
     opacity: 1;
@@ -560,7 +536,7 @@ html[data-js] .split-anim .split-word {
 }
 
 html[data-js] .page-enter {
-  animation: page-enter 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: page-enter 0.26s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 /* Sheet (panneau latéral des formulaires) — voir components/ui/sheet.tsx.
