@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ProductPanel } from "@/components/ProductPanel";
 import { usePathname } from "next/navigation";
-import { Close, Menu, ChevronDown, ArrowRight } from "@/components/Icons";
+import { Close, Menu, ChevronDown, ArrowRight, ArrowUpRight } from "@/components/Icons";
 import { switchLocalePath, type Locale } from "@/lib/dictionaries";
 import { useDictionary } from "@/components/DictionaryProvider";
 import HeaderSearch from "@/components/HeaderSearch";
@@ -36,7 +36,7 @@ export default function Header() {
   const { dict, locale } = useDictionary();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [servicesOpen, setServicesOpen] = useState(false);
+
   /* Mega menu Services : un VRAI dialogue plein écran (même `FullScreenPanel` que la
      recherche), plus un panneau CSS survolé. L'état vit ici, avec le déclencheur qui
      reprend le focus à la fermeture. */
@@ -65,13 +65,18 @@ export default function Header() {
 
   const href = (path: string) => `/${locale}${path === "/" ? "" : path}`;
 
+  /* SUR L'ACCUEIL, la barre n'est pas la barre du site : c'est une signature posée sur la
+     vidéo du hero — le nom à gauche, le menu à droite, rien entre les deux. Dès qu'on
+     descend, ou dès qu'on quitte l'accueil, elle redevient la barre complète (liens,
+     langue, recherche) et retrouve son fond de papier. */
+  const overHero = pathname === `/${locale}` && !scrolled;
+
   const changeLocale = (next: Locale) => {
     /* Les panneaux du header se referment AVANT de partir. Changer de langue depuis le menu
        mobile laissait sinon le panneau par-dessus la page d'arrivée : l'écran restait couvert
        et il fallait actualiser. Ici, pas d'état à rattraper après coup — on referme à la
        source, dans le geste qui quitte la page. */
     setOpen(false);
-    setServicesOpen(false);
     setServicesPanel(false);
     document.cookie = `belora-locale=${next};path=/;max-age=31536000;samesite=lax`;
     /* `hard: true` : navigation PLEINE PAGE sous le rideau, et non `router.push`. Un
@@ -98,10 +103,12 @@ export default function Header() {
           une fois la page défilée — parce que le hero de l'accueil est sombre et que la barre y
           doit s'effacer. */}
       <header
-        className={`fixed inset-x-0 top-0 z-50 border-b border-ink/10 transition-all duration-300 ${
-          scrolled
-            ? "bg-paper/90 py-2 backdrop-blur-xl"
-            : "bg-paper/70 py-3 backdrop-blur-md lg:py-4"
+        className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${
+          overHero
+            ? "border-b border-transparent bg-transparent py-4 lg:py-6"
+            : scrolled
+              ? "border-b border-ink/10 bg-paper/90 py-2 backdrop-blur-xl"
+              : "border-b border-ink/10 bg-paper/70 py-3 backdrop-blur-md lg:py-4"
         }`}
       >
         <div className="max-w-[91rem] mx-auto flex items-center justify-between gap-4 px-4 sm:gap-6 sm:px-6 lg:px-0">
@@ -115,7 +122,7 @@ export default function Header() {
                 suit l'état de la barre : clair au-dessus du hero, encre une fois collé. */}
             <span
               className={`font-display text-[1.4rem] leading-none tracking-[-0.015em] transition-colors lg:hidden ${
-                "text-ink"
+                overHero ? "text-paper" : "text-ink"
               }`}
             >
               {dict.site.name}
@@ -123,7 +130,7 @@ export default function Header() {
 
             <span
               className={`hidden font-display text-[1.45rem] leading-none tracking-[-0.015em] transition-colors lg:inline ${
-                "text-ink"
+                overHero ? "text-paper" : "text-ink"
               }`}
             >
               {dict.site.name}
@@ -131,7 +138,10 @@ export default function Header() {
             </span>
           </Link>
 
-          <nav className="hidden items-center gap-1 lg:flex" aria-label={dict.ui.navLabel}>
+          <nav
+            className={`items-center gap-1 ${overHero ? "hidden" : "hidden lg:flex"}`}
+            aria-label={dict.ui.navLabel}
+          >
             {dict.nav.map((item) =>
               item.href === "/services" ? (
                 /* L'entrée Services n'est plus un lien survolé : c'est le déclencheur du
@@ -171,19 +181,29 @@ export default function Header() {
           </nav>
 
           <div className="flex items-center gap-2 sm:gap-3">
-            <LocaleSwitch
-              locale={locale}
-              onChange={changeLocale}
-              label={dict.ui.languageLabel}
-            />
+            {/* Sur le hero, la barre ne garde que le nom et le menu : la langue et la
+                recherche vivent alors DANS le menu, qui est un vrai panneau plein écran. */}
+            {!overHero && (
+              <>
+                <LocaleSwitch
+                  locale={locale}
+                  onChange={changeLocale}
+                  label={dict.ui.languageLabel}
+                />
 
-            <HeaderSearch />
+                <HeaderSearch />
+              </>
+            )}
 
             <button
               type="button"
               onClick={() => setOpen(true)}
               aria-label={dict.ui.menuOpenLabel}
-              className="grid h-11 w-11 place-items-center rounded-full text-white transition-colors hover:bg-white/10 lg:hidden"
+              className={`grid h-11 w-11 place-items-center rounded-full transition-colors ${
+                overHero
+                  ? "text-paper hover:bg-paper/10"
+                  : "text-ink hover:bg-ink/5 lg:hidden"
+              }`}
             >
               <Menu />
             </button>
@@ -301,7 +321,7 @@ export default function Header() {
       )}
 
       {open && (
-        <div className="fixed inset-0 z-60 flex flex-col bg-ink text-paper grain lg:hidden">
+        <div className="fixed inset-0 z-60 flex flex-col bg-ink text-paper grain">
           {/* Barre haute : le MÊME en-tête que les autres panneaux plein écran — logo clair,
               croix cerclée. Les trois surfaces du site (recherche, formulaire, menu) se
               ressemblent, on ne change pas de vocabulaire en changeant de panneau. */}
@@ -323,95 +343,107 @@ export default function Header() {
               grammaire des listes du site (services, valeurs, réalisations), tenue à l'échelle
               d'un menu de téléphone. Les liens ne sont plus des lignes muettes : chaque entrée
               se numérote et se souligne, comme une page de sommaire. */}
-          <nav
-            className="no-scrollbar container-x flex-1 overflow-y-auto pb-12"
-            aria-label={dict.ui.menuNavLabel}
+          {/* Le menu est une PAGE DE SOMMAIRE plein écran, pas une liste de téléphone
+              agrandie : les pages en très grand à gauche (numéro entre crochets, filet,
+              flèche qui n'apparaît qu'au survol), et à droite une colonne de service —
+              les six fonctionnalités, la langue, l'action et les coordonnées. Deux
+              colonnes sur grand écran, une sur téléphone. */}
+          <div
+            data-lenis-prevent
+            className="no-scrollbar container-x grid min-h-0 flex-1 gap-10 overflow-y-auto pb-10 pt-2 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] lg:gap-16"
           >
-            <ul className="mt-2 border-t border-paper/10">
-              {dict.nav
-                .filter((n) => n.href !== "/services")
-                .map((item, i) => (
+            <nav aria-label={dict.ui.menuNavLabel}>
+              <span className={`${LABEL} text-paper/30`}>[ {dict.ui.menuNavLabel} ]</span>
+
+              <ul className="mt-5 border-t border-paper/10">
+                {dict.nav.map((item, i) => (
                   <li key={item.href} className="border-b border-paper/10">
                     <Link
                       href={href(item.href)}
                       onClick={() => setOpen(false)}
-                      className="group flex items-baseline gap-5 py-5"
+                      className="group flex items-baseline gap-4 py-3.5"
                     >
-                      <span className="text-[0.7rem] font-medium tabular-nums uppercase tracking-[0.2em] text-paper/35">
-                        {String(i + 1).padStart(2, "0")}
+                      <span className="w-9 shrink-0 text-[0.56rem] font-medium tabular-nums tracking-[0.1em] text-paper/30">
+                        [ {String(i + 1).padStart(2, "0")} ]
                       </span>
-                      <span className="font-light text-3xl text-paper transition-transform duration-500 group-hover:translate-x-1.5">
+
+                      <span
+                        className={`text-[clamp(1.8rem,4.2vw,3.3rem)] font-light leading-[1.02] tracking-[-0.025em] transition-[transform,color] duration-500 group-hover:translate-x-2 ${
+                          item.href === "/services" ? "text-turquoise" : "text-paper"
+                        }`}
+                      >
                         {item.label}
                       </span>
-                    </Link>
-                  </li>
-                ))}
-            </ul>
 
-            {/* Services : la même ligne que les autres, mais dépliable. Le libellé porte
-                l'accent (turquoise) — c'est la seule entrée qui a un contenu derrière. */}
-            <button
-              type="button"
-              onClick={() => setServicesOpen((v) => !v)}
-              aria-expanded={servicesOpen}
-              className="flex w-full items-baseline gap-5 border-b border-paper/10 py-5 text-left"
-            >
-              <span className="text-[0.7rem] font-medium tabular-nums uppercase tracking-[0.2em] text-paper/35">
-                {String(dict.nav.filter((n) => n.href !== "/services").length + 1).padStart(2, "0")}
-              </span>
-              <span className="flex-1 font-light text-3xl text-turquoise">
-                {dict.nav.find((n) => n.href === "/services")?.label}
-              </span>
-              <ChevronDown
-                className={`h-5 w-5 shrink-0 self-center text-paper/50 transition-transform duration-300 ${
-                  servicesOpen ? "rotate-180" : ""
-                }`}
-              />
-            </button>
-            {servicesOpen && (
-              <ul className="border-b border-paper/10">
-                {dict.services.map((s) => (
-                  <li key={s.slug}>
-                    <Link
-                      href={href(`/services/${s.slug}`)}
-                      onClick={() => setOpen(false)}
-                      className="flex items-baseline justify-between gap-4 border-b border-paper/[0.06] py-4 pl-9 last:border-b-0"
-                    >
-                      <span className="font-light text-lg text-paper/85">{s.title}</span>
-                      <ArrowRight className="h-4 w-4 shrink-0 text-paper/30" />
+                      <ArrowUpRight className="ml-auto h-4 w-4 shrink-0 self-center text-paper/20 transition-all duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-paper" />
                     </Link>
                   </li>
                 ))}
               </ul>
-            )}
+            </nav>
 
-            <div className="mt-8 flex items-center gap-3">
-              <LocaleSwitch
-                locale={locale}
-                onChange={changeLocale}
-                label={dict.ui.languageLabel}
-                size="lg"
-              />
-              <Link
-                href={href("/devis")}
-                onClick={() => setOpen(false)}
-                className="inline-flex flex-1 items-center justify-center rounded-full bg-gradient-to-r from-brand to-turquoise px-6 py-4 text-sm font-light text-white"
-              >
-                {dict.ui.dock.quote}
-              </Link>
-            </div>
+            <aside className="flex flex-col gap-9">
+              <div>
+                <span className={`${LABEL} text-paper/30`}>[ {dict.ui.expertise} ]</span>
 
-            {/* Le pied du panneau : les coordonnées, en petites capitales — la même clôture
-                que les panneaux de recherche et de contact. */}
-            <div className="mt-10 flex flex-col gap-1 border-t border-paper/10 pt-6 text-[0.7rem] font-medium uppercase tracking-[0.2em] text-paper/35">
-              <a href={`mailto:${dict.site.email}`} className="transition-colors hover:text-paper">
-                {dict.site.email}
-              </a>
-              <a href={dict.site.phoneRaw} className="transition-colors hover:text-paper">
-                {dict.site.phone}
-              </a>
-            </div>
-          </nav>
+                <ul className="mt-4 border-t border-paper/10">
+                  {dict.services.map((s, i) => (
+                    <li key={s.slug} className="border-b border-paper/10">
+                      <Link
+                        href={href(`/services/${s.slug}`)}
+                        onClick={() => setOpen(false)}
+                        className="group flex items-baseline gap-3 py-2.5 text-paper/60 transition-colors hover:text-paper"
+                      >
+                        <span className="text-[0.55rem] tabular-nums tracking-[0.1em] text-paper/25">
+                          {String(i + 1).padStart(2, "0")}
+                        </span>
+                        <span className="text-[0.95rem] font-light">{s.title}</span>
+                        <ArrowRight className="ml-auto h-3.5 w-3.5 shrink-0 -translate-x-1 text-paper/25 opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100" />
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="flex items-center justify-between gap-4">
+                <span className={`${LABEL} text-paper/30`}>[ {dict.ui.languageLabel} ]</span>
+                <LocaleSwitch
+                  locale={locale}
+                  onChange={changeLocale}
+                  label={dict.ui.languageLabel}
+                  tone="dark"
+                />
+              </div>
+
+              <div className="mt-auto flex flex-col gap-4">
+                <Link
+                  href={href("/devis")}
+                  onClick={() => setOpen(false)}
+                  className="inline-flex items-center justify-center gap-2 bg-turquoise px-6 py-4 text-[0.62rem] font-medium uppercase tracking-[0.16em] text-ink transition-colors hover:bg-paper"
+                >
+                  {dict.ui.dock.quote}
+                  <ArrowUpRight className="h-4 w-4" />
+                </Link>
+
+                <div className="flex flex-col gap-1 text-[0.7rem] uppercase tracking-[0.14em] text-paper/40">
+                  <a
+                    href={`mailto:${dict.site.email}`}
+                    className="transition-colors hover:text-paper"
+                  >
+                    {dict.site.email}
+                  </a>
+                  <a href={dict.site.phoneRaw} className="transition-colors hover:text-paper">
+                    {dict.site.phone}
+                  </a>
+                </div>
+              </div>
+            </aside>
+          </div>
+
+          <div className="container-x flex flex-wrap items-center justify-between gap-3 border-t border-paper/10 py-4 text-[0.56rem] uppercase tracking-[0.18em] text-paper/30">
+            <span>© {new Date().getFullYear()} {dict.site.name}</span>
+            <span>{dict.ui.panelHint}</span>
+          </div>
         </div>
       )}
     </>
@@ -423,29 +455,33 @@ function LocaleSwitch({
   onChange,
   label,
   size = "sm",
+  tone = "light",
 }: {
   locale: Locale;
   onChange: (l: Locale) => void;
   label: string;
   size?: "sm" | "lg";
+  /** `light` pour la barre de papier, `dark` pour les panneaux d'encre (le menu). */
+  tone?: "light" | "dark";
 }) {
   const labels = switchLabels[locale];
-  /* La barre est claire en toutes circonstances (hero papier) : la pastille est donc
-     encre sur papier, sans variante de défilement — une seule apparence, partout. */
-  const base =
-    "inline-flex items-center rounded-full p-0.5 text-[0.68rem] font-light transition-colors bg-ink/[0.06] text-ink/60";
-  const tone = "";
-  const active = "bg-ink text-paper";
+  /* Deux surfaces, deux jeux de couleurs : encre sur papier dans la barre, papier sur
+     encre dans le menu. La pastille active s'inverse avec la surface. */
+  const base = `inline-flex items-center rounded-full p-0.5 text-[0.68rem] font-light transition-colors ${
+    tone === "dark" ? "bg-paper/10 text-paper/60" : "bg-ink/[0.06] text-ink/60"
+  }`;
+  const active = tone === "dark" ? "bg-paper text-ink" : "bg-ink text-paper";
+  const idleHover = tone === "dark" ? "hover:text-paper" : "hover:text-ink";
   const pad = size === "lg" ? "py-2 px-1" : "py-1";
 
   return (
-    <div className={`${base} ${tone} ${pad}`} role="group" aria-label={label}>
+    <div className={`${base} ${pad}`} role="group" aria-label={label}>
       <button
         type="button"
         onClick={() => onChange("fr")}
         aria-current={locale === "fr" ? "true" : undefined}
         className={`rounded-full px-2.5 py-1 transition-colors ${
-          locale === "fr" ? active : "hover:text-ink"
+          locale === "fr" ? active : idleHover
         }`}
       >
         {labels.fr}
@@ -455,7 +491,7 @@ function LocaleSwitch({
         onClick={() => onChange("en")}
         aria-current={locale === "en" ? "true" : undefined}
         className={`rounded-full px-2.5 py-1 transition-colors ${
-          locale === "en" ? active : "hover:text-ink"
+          locale === "en" ? active : idleHover
         }`}
       >
         {labels.en}

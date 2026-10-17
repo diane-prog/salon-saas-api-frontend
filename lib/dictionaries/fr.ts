@@ -245,6 +245,11 @@ export const hero = {
   leadStatic: "Votre salon,",
   leadRotating: ["sans le chaos.", "au bon rythme.", "sous contrôle."],
   body: "L'agenda, la réservation en ligne, les fiches clientes, la caisse et votre équipe dans un seul geste. Les clientes réservent à toute heure, vous voyez la journée d'un coup d'œil, et chaque créneau rapporte ce qu'il doit rapporter.",
+  /* Le hero est une affiche : la phrase de droite reste courte, et les trois lignes de
+     capitales de gauche nomment le produit au lieu de le vanter. */
+  aside:
+    "L'agenda, la réservation en ligne et les fiches clientes du salon, au même endroit — y compris quand le salon est fermé.",
+  manifesto: ["Agenda & réservation", "Clientes, prestations, équipe", "Le salon tenu d'une main"],
   liveLabel: "Démonstration en direct",
   reassurances: [
     { value: "24 h/24", label: "Réservation en ligne" },
@@ -363,28 +368,21 @@ export const aboutPage = {
   ],
   whyEyebrow: "Pourquoi Belora",
   whyHeadline: "Ce que change Belora",
-  /* Une carte par raison : la grille de l'accueil affiche ces cinq entrées numérotées
-     (01 → 05). */
+  /* Une carte par raison : la grille de l'accueil affiche ces TROIS entrées numérotées
+     (01 → 03), la quatrième case étant l'illustration. Trois titres courts, trois
+     phrases : c'est la composition de la référence, pas un argumentaire. */
   whyCards: [
     {
-      title: "Un agenda qui se remplit tout seul",
-      body: "Les clients réservent la nuit, le week-end et pendant que vous travaillez : la page est toujours ouverte.",
+      title: "Un agenda qui se remplit seul",
+      body: "Les clientes réservent la nuit, le week-end, pendant que vous coiffez : la vitrine ne ferme jamais.",
     },
     {
       title: "Tout au même endroit",
-      body: "Rendez-vous, clients, prestations, caisse et équipe partagent une seule source. Plus de double saisie, plus de cahier.",
+      body: "Rendez-vous, clientèle, prestations, caisse et équipe partagent une seule source. Plus de double saisie.",
     },
     {
-      title: "Des créneaux réellement disponibles",
+      title: "Des créneaux réels",
       body: "Les horaires proposés en ligne sont ceux que votre équipe peut absorber — jamais inventés.",
-    },
-    {
-      title: "Votre salon, à vos couleurs",
-      body: "Chaque page porte le nom, les couleurs et les horaires de votre salon. Une vitrine, pas un gabarit.",
-    },
-    {
-      title: "Chaque créneau, calculé",
-      body: "Prix, durée, commission et chiffre du mois sortent du rendez-vous, sans tableur.",
     },
   ],
   mission: {
@@ -1212,6 +1210,23 @@ export const ui = {
           user: "Auteur",
           ip: "IP",
         },
+        /* Vue « pipeline » : le journal se lit de haut en bas comme une suite d'étapes, avec un
+           rail, un nœud par action et des journées séparées. */
+        families: {
+          create: "Créé",
+          update: "Modifié",
+          delete: "Supprimé",
+          session: "Session",
+          other: "Autre",
+        },
+        today: "Aujourd'hui",
+        yesterday: "Hier",
+        by: "par",
+        machine: "Tâche du salon",
+        legend: "Familles",
+        periodLabel: "Période",
+        authorsLabel: "Auteurs",
+        agentLabel: "Navigateur",
         emptyTitle: "Journal vide",
         emptyBody:
           "Les actions (connexion, création, modification) s'inscrivent ici au fil de l'eau.",
@@ -1381,13 +1396,12 @@ export const ui = {
      en direct. Les étiquettes nomment ce que l'API rapporte, jamais autre chose. */
   demo: {
     eyebrow: "En direct",
-    title: "La vitrine d'un vrai salon, chargée pendant que vous la regardez",
+    title: "Un vrai salon, lu en direct",
     body:
-      "Rien n'est mis en scène : le nom, les couleurs, les prestations, l'équipe et la note viennent de l'API du produit, sur le salon de démonstration.",
+      "Rien n'est mis en scène : le nom, les couleurs, les prestations et l'équipe sont ceux du salon de démonstration, servis par l'API du produit pendant que la page s'affiche.",
+    salonLabel: "Le salon",
     servicesLabel: "Prestations",
     teamLabel: "Équipe",
-    ratingLabel: "Note",
-    bookingLabel: "Réservation",
     bookingOpen: "Ouverte 24 h/24",
     bookingClosed: "Fermée pour l'instant",
     min: "min",

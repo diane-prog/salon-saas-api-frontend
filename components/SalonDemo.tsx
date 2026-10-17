@@ -3,37 +3,32 @@
 import Link from "next/link";
 
 import { useDictionary } from "@/components/DictionaryProvider";
-import { BODY, LABEL, RULE } from "@/lib/editorial";
-import { useSalonInfo, useSalonReviews, useSalonServices, useSalonStaff } from "@/features/public-salon/queries";
-import type { SalonColors } from "@/features/public-salon/types";
+import { BODY, LABEL } from "@/lib/editorial";
+import { useSalonInfo, useSalonServices, useSalonStaff } from "@/features/public-salon/queries";
 
 /**
- * Section « en direct » de l'accueil (`#demo`).
+ * Section « En direct » de l'accueil (`#demo`).
  *
- * Ce qu'elle démontre, et pourquoi c'est la pièce la plus importante de la page :
- * le produit rend la vitrine d'un salon AUX COULEURS DE CE SALON. La maquette à
- * droite n'est pas une image — c'est la vraie réponse de l'API du salon de
- * démonstration (nom, couleurs, prestations, équipe, note, état de la
- * réservation), posée dans le vrai composant de la vitrine.
+ * CE QU'ELLE MONTRE, ET COMMENT : les données réelles du salon de démonstration,
+ * lues sur l'API pendant que la page s'affiche — le nom, les trois couleurs de sa
+ * vitrine, ses prestations avec leur durée et leur prix, son équipe. Rien n'est
+ * écrit à la main, rien n'est mis en scène.
  *
- * On ne montre donc pas ce que le logiciel *pourrait* faire : on montre ce
- * qu'il vient de faire, pendant que la page s'affiche.
+ * CE QUI A ÉTÉ RETIRÉ : la maquette d'écran de la colonne de droite (un cadre, un
+ * en-tête peint aux couleurs du salon, une pastille « réservation ouverte », des
+ * listes à l'intérieur). Elle ressemblait à une capture du logiciel — donc à une
+ * promesse — alors que la section doit montrer une donnée. Ici, pas de cadre et
+ * pas de faux écran : du papier, des filets d'un pixel, de la typographie. La
+ * personnalisation se lit dans trois traits de couleur posés à côté du nom, et le
+ * nom mène à la vraie page du salon.
  *
- * Trois états : chargement (le cadre et son titre, sans donnée), échec (une
- * phrase honnête, jamais des valeurs d'exemple), réponse (le salon). Les
- * requêtes sont les mêmes que `LiveStats`, donc partagées par le cache : un
+ * TROIS ÉTATS, dits franchement : chargement (une ligne, pas de valeur inventée),
+ * échec (une phrase honnête, aucune valeur d'exemple), réponse (les vraies lignes).
+ *
+ * Les requêtes sont les mêmes que `LiveStats`, donc partagées par le cache : un
  * seul aller-retour par ressource pour toute la page.
  */
 const SLUG = process.env.NEXT_PUBLIC_DEMO_SALON_SLUG ?? "";
-
-/** Variables CSS posées sur la maquette : ce sont celles du salon, pas les nôtres. */
-function salonTheme(colors: SalonColors): React.CSSProperties {
-  return {
-    ["--salon-primary" as string]: colors.primary,
-    ["--salon-secondary" as string]: colors.secondary,
-    ["--salon-accent" as string]: colors.accent,
-  };
-}
 
 export default function SalonDemo() {
   const { dict, locale } = useDictionary();
@@ -42,193 +37,170 @@ export default function SalonDemo() {
   const info = useSalonInfo(SLUG);
   const services = useSalonServices(SLUG);
   const staff = useSalonStaff(SLUG);
-  const reviews = useSalonReviews(SLUG);
 
-  const loading = [info, services, staff, reviews].some((query) => query.isPending);
-  const failed = [info, services, staff, reviews].some((query) => query.isError);
+  const loading = [info, services, staff].some((query) => query.isPending);
+  const failed = [info, services, staff].some((query) => query.isError);
 
   const salon = info.data?.data;
   const serviceList = services.data?.data ?? [];
   const teamList = staff.data?.data ?? [];
-  const reviewData = reviews.data?.data;
+
+  /** Les couleurs réelles de la vitrine, réduites à trois traits. */
+  const swatches = salon
+    ? [salon.colors.primary, salon.colors.secondary, salon.colors.accent]
+    : [];
 
   return (
-    <section id="demo" className={`border-t bg-white ${RULE}`}>
-      <div className="container-x grid gap-12 py-20 sm:py-28 lg:grid-cols-12 lg:gap-16">
-        {/* ——— Colonne de gauche : le texte. */}
-        <div className="flex flex-col justify-center gap-5 lg:col-span-5">
-          <span className={`${LABEL} text-brand`}>{demo.eyebrow}</span>
+    <section id="demo" className="bg-white text-ink">
+      <div className="container-x py-20 sm:py-24 lg:py-28">
+        {/* ——— Ligne haute : l'état du direct à gauche, la provenance à droite. */}
+        <div className="flex flex-wrap items-baseline justify-between gap-x-8 gap-y-2 border-b border-ink/10 pb-5">
+          <span className={`${LABEL} flex items-center gap-2 text-ink/45`}>
+            <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-brand" />[ {demo.eyebrow} ]
+          </span>
+          <span className={`${LABEL} text-ink/25`}>[ API · {dict.site.name} ]</span>
+        </div>
 
-          <h2 className="max-w-lg font-display text-[clamp(1.9rem,3.4vw,2.9rem)] leading-[1.05] tracking-[-0.015em] text-ink">
+        {/* ——— Le titre, puis la phrase qui dit d'où viennent les données. */}
+        <div className="mt-10 grid gap-8 lg:grid-cols-12 lg:items-end lg:gap-12">
+          <h2 className="max-w-[22ch] font-display text-[clamp(1.9rem,3.6vw,3rem)] font-light leading-[1.04] tracking-[-0.02em] lg:col-span-7">
             {demo.title}
           </h2>
 
-          <p className={`max-w-md ${BODY} text-ink/70`}>{demo.body}</p>
-
-          <dl className="mt-4 grid gap-px bg-ink/10 sm:grid-cols-3">
-            <Stat label={demo.servicesLabel} value={serviceList.length} pending={loading} failed={failed} />
-            <Stat label={demo.teamLabel} value={teamList.length} pending={loading} failed={failed} />
-            <Stat
-              label={demo.ratingLabel}
-              value={reviewData?.averageRating ?? 0}
-              suffix="/5"
-              pending={loading}
-              failed={failed}
-            />
-          </dl>
-
-          <Link
-            href={`/${locale}/register`}
-            className="group mt-3 inline-flex w-fit items-center gap-2 bg-ink px-6 py-3.5 text-[0.7rem] font-medium uppercase tracking-[0.16em] text-paper transition-colors hover:bg-brand"
-          >
-            {demo.cta}
-          </Link>
+          <p className={`max-w-md text-ink/55 lg:col-span-5 ${BODY}`}>{demo.body}</p>
         </div>
 
-        {/* ——— Colonne de droite : la vitrine, avec les couleurs du salon. */}
-        <div className="lg:col-span-7">
-          <div
-            className="overflow-hidden border border-ink/15"
-            style={salon ? salonTheme(salon.colors) : undefined}
-          >
-            {/* En-tête peint avec la couleur primaire du salon. */}
-            <div
-              className="flex flex-wrap items-center justify-between gap-3 px-6 py-5 text-white"
-              style={{ background: salon ? salon.colors.primary : "#0f172a" }}
-            >
-              <div className="flex flex-col gap-0.5">
-                <span className="text-[0.65rem] uppercase tracking-[0.2em] opacity-70">
-                  {demo.eyebrow}
-                </span>
-                <span className="font-light text-xl leading-tight">
-                  {failed ? demo.unavailable : (salon?.name ?? "…")}
-                </span>
-              </div>
+        {/* ——— API muette : une phrase, et rien d'autre. Une valeur d'exemple serait une
+                donnée inventée. */}
+        {failed && (
+          <p className="mt-12 max-w-xl border-t border-ink/10 pt-6 text-sm text-ink/50">
+            {demo.unavailable}
+          </p>
+        )}
 
-              <span
-                className="rounded-full px-3 py-1 text-[0.65rem] font-medium uppercase tracking-[0.14em]"
-                style={{
-                  background: salon ? salon.colors.secondary : "#d4af37",
-                  color: salon?.colors.primary ?? "#0f172a",
-                }}
-              >
-                {salon?.publicBooking ? demo.bookingOpen : demo.bookingClosed}
-              </span>
-            </div>
-
-            <div className="grid gap-6 bg-white p-6 sm:grid-cols-2 sm:p-7">
-              {/* Prestations : nom, durée, prix — réels. */}
-              <div>
-                <span className={`${LABEL} text-ink/40`}>{demo.servicesLabel}</span>
-
-                <ul className="mt-3">
-                  {loading && <li className="py-3 text-sm text-ink/40">{dict.ui.dashboard.loading}</li>}
-
-                  {!loading && failed && (
-                    <li className="py-3 text-sm text-ink/50">{demo.unavailable}</li>
-                  )}
-
-                  {!loading && !failed && serviceList.length === 0 && (
-                    <li className="py-3 text-sm text-ink/50">{demo.empty}</li>
-                  )}
-
-                  {serviceList.map((service) => (
-                    <li
-                      key={service.name}
-                      className="flex items-baseline justify-between gap-4 border-b border-ink/10 py-3 text-sm"
-                    >
-                      <span className="text-ink">{service.name}</span>
-                      <span className="shrink-0 tabular-nums text-ink/50">
-                        {service.durationMinutes} {demo.min}
-                        <span className="mx-2 text-ink/20">·</span>
-                        <span
-                          className="font-medium"
-                          style={{ color: salon?.colors.primary ?? undefined }}
-                        >
-                          {service.price} €
-                        </span>
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              {/* Équipe et note : réels. */}
-              <div className="flex flex-col gap-5">
+        {/* ——— Le salon, en deux colonnes : les prestations à gauche, l'équipe à droite.
+                Aucune maquette d'écran, seulement des lignes et un filet vertical. */}
+        {!failed && (
+          <div className="mt-14 grid gap-12 lg:grid-cols-12 lg:gap-0">
+            <div className="lg:col-span-7 lg:pr-12">
+              {/* Le nom — cliquable vers la vraie page du salon — et ses couleurs. */}
+              <div className="flex flex-wrap items-end justify-between gap-x-8 gap-y-3 border-b border-ink/10 pb-4">
                 <div>
-                  <span className={`${LABEL} text-ink/40`}>{demo.teamLabel}</span>
-                  <ul className="mt-3">
-                    {teamList.map((member) => (
+                  <span className={`${LABEL} block text-ink/35`}>{demo.salonLabel}</span>
+
+                  {salon ? (
+                    <Link
+                      href={`/${locale}/s/${salon.slug}`}
+                      className="mt-2 block w-fit font-display text-[clamp(1.7rem,3.2vw,2.6rem)] font-light leading-none tracking-[-0.02em] transition-colors hover:text-brand"
+                    >
+                      {salon.name}
+                    </Link>
+                  ) : (
+                    <span className="mt-2 block font-display text-[clamp(1.7rem,3.2vw,2.6rem)] font-light leading-none tracking-[-0.02em] text-ink/25">
+                      —
+                    </span>
+                  )}
+                </div>
+
+                {swatches.length > 0 && (
+                  <span aria-hidden className="flex items-end gap-1 pb-1">
+                    {swatches.map((color, index) => (
+                      <span
+                        key={`${color}-${index}`}
+                        className="block w-1.5 rounded-full"
+                        style={{ background: color, height: `${1.6 + index * 0.5}rem` }}
+                      />
+                    ))}
+                  </span>
+                )}
+              </div>
+
+              {/* Les prestations : numéro, nom, durée, prix — les vraies lignes du salon. */}
+              <div className="mt-8">
+                <span className={`${LABEL} text-ink/35`}>{demo.servicesLabel}</span>
+
+                <ul className="mt-4">
+                  {loading && (
+                    <li className="border-b border-ink/10 py-4 text-sm text-ink/40">
+                      {dict.ui.dashboard.loading}
+                    </li>
+                  )}
+
+                  {!loading && serviceList.length === 0 && (
+                    <li className="border-b border-ink/10 py-4 text-sm text-ink/50">{demo.empty}</li>
+                  )}
+
+                  {!loading &&
+                    serviceList.map((service, index) => (
                       <li
-                        key={`${member.firstName}-${member.lastName}`}
-                        className="flex items-center gap-3 border-b border-ink/10 py-3 text-sm text-ink"
+                        key={`${service.name}-${index}`}
+                        className="flex items-baseline gap-4 border-b border-ink/10 py-3.5"
                       >
-                        <span
-                          aria-hidden
-                          className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-[0.7rem] text-white"
-                          style={{ background: salon?.colors.accent ?? "#10b981" }}
-                        >
-                          {member.firstName.slice(0, 1)}
-                          {member.lastName.slice(0, 1)}
+                        <span className={`${LABEL} shrink-0 tabular-nums text-ink/25`}>
+                          {String(index + 1).padStart(2, "0")}
                         </span>
-                        <span className="min-w-0">
-                          <span className="block truncate">
-                            {member.firstName} {member.lastName}
-                          </span>
-                          {member.title && (
-                            <span className="block truncate text-xs text-ink/50">{member.title}</span>
-                          )}
+                        <span className="min-w-0 flex-1 truncate text-[0.95rem]">{service.name}</span>
+                        <span className="shrink-0 tabular-nums text-[0.78rem] text-ink/40">
+                          {service.durationMinutes} {demo.min}
+                        </span>
+                        <span className="w-16 shrink-0 text-right tabular-nums text-[0.95rem]">
+                          {service.price} €
                         </span>
                       </li>
                     ))}
-
-                    {!loading && !failed && teamList.length === 0 && (
-                      <li className="py-3 text-sm text-ink/50">{demo.empty}</li>
-                    )}
-                  </ul>
-                </div>
-
-                <div className="border-t border-ink/10 pt-4">
-                  <span className={`${LABEL} text-ink/40`}>{demo.ratingLabel}</span>
-                  <p className="mt-2 flex items-baseline gap-2">
-                    <span className="font-light text-3xl leading-none tabular-nums text-ink">
-                      {(reviewData?.averageRating ?? 0).toFixed(1)}
-                    </span>
-                    <span className="text-xs text-ink/50">
-                      /5 · {reviewData?.reviews.length ?? 0}
-                    </span>
-                  </p>
-                </div>
+                </ul>
               </div>
             </div>
+
+            {/* ——— L'équipe et la sortie, dans la colonne de droite. */}
+            <div className="lg:col-span-5 lg:border-l lg:border-ink/10 lg:pl-12">
+              <span className={`${LABEL} text-ink/35`}>{demo.teamLabel}</span>
+
+              <ul className="mt-4">
+                {loading && (
+                  <li className="border-b border-ink/10 py-3.5 text-sm text-ink/40">
+                    {dict.ui.dashboard.loading}
+                  </li>
+                )}
+
+                {!loading && teamList.length === 0 && (
+                  <li className="border-b border-ink/10 py-3.5 text-sm text-ink/50">{demo.empty}</li>
+                )}
+
+                {!loading &&
+                  teamList.map((member, index) => (
+                    <li
+                      key={`${member.firstName}-${member.lastName}-${index}`}
+                      className="border-b border-ink/10 py-3.5"
+                    >
+                      <span className="block truncate font-light text-[1.05rem] leading-tight">
+                        {member.firstName} {member.lastName}
+                      </span>
+                      {member.title && (
+                        <span className="mt-1 block text-[0.72rem] uppercase tracking-[0.14em] text-ink/35">
+                          {member.title}
+                        </span>
+                      )}
+                    </li>
+                  ))}
+              </ul>
+
+              <Link
+                href={`/${locale}/register`}
+                className="mt-8 inline-flex w-fit items-center gap-2 bg-ink px-6 py-3.5 text-[0.7rem] font-medium uppercase tracking-[0.16em] text-paper transition-colors hover:bg-brand"
+              >
+                {demo.cta}
+              </Link>
+
+              {salon && (
+                <p className={`${LABEL} mt-8 block text-ink/25`}>
+                  [ {salon.publicBooking ? demo.bookingOpen : demo.bookingClosed} ]
+                </p>
+              )}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </section>
-  );
-}
-
-/** Un chiffre de la colonne de gauche, avec ses trois états. */
-function Stat({
-  label,
-  value,
-  suffix = "",
-  pending,
-  failed,
-}: {
-  label: string;
-  value: number;
-  suffix?: string;
-  pending: boolean;
-  failed: boolean;
-}) {
-  return (
-    <div className="bg-paper px-5 py-4">
-      <dt className={`${LABEL} text-ink/40`}>{label}</dt>
-      <dd className="mt-2 font-light text-2xl leading-none tabular-nums text-ink">
-        {pending || failed ? "—" : value}
-        {!pending && !failed && suffix}
-      </dd>
-    </div>
   );
 }

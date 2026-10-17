@@ -1,21 +1,27 @@
 "use client";
 
+import Link from "next/link";
+
 import SplitText from "@/components/SplitText";
-import { TextLink } from "@/components/ui";
+import { ArrowUpRight, Mail, Phone, Pin } from "@/components/Icons";
 import { useDictionary } from "@/components/DictionaryProvider";
-import { BODY, CLOSING, LABEL, LEAD, RULE } from "@/lib/editorial";
+import { LABEL } from "@/lib/editorial";
 
 /**
- * Bandeau de conclusion, présent en bas de chaque page.
+ * Bandeau de conclusion, présent en bas de chaque page — « Parlons-en ».
  *
- * Version « galerie » : plus de fond navy, plus de halos flous, plus de pastilles. Une
- * bande de papier, un filet, l'affirmation en grand corps à droite, les deux actions en
- * texte souligné, et les coordonnées en petites capitales dans la marge de gauche — la
- * même disposition que les autres sections du site (étiquette à gauche, contenu à droite),
- * pour que la fin de page ne soit pas un objet à part.
+ * CE QUI A CHANGÉ : l'ancienne version rangeait les coordonnées dans une marge de gauche
+ * et l'affirmation à droite, comme n'importe quel bloc de la page. Une fin de page doit
+ * avoir une autre voix : ici l'affirmation prend TOUTE la largeur, en très grand corps
+ * (`clamp(2.2rem, 6vw, 5rem)`), et le reste se range dessous — la phrase, puis l'action,
+ * puis les trois façons de joindre la maison.
  *
- * Le titre reste révélé mot à mot par `SplitText` (déjà utilisé partout) : c'est la seule
- * animation de la bande.
+ * La bande n'est plus un objet à part : même papier, mêmes filets, mêmes crochets que le
+ * reste du site. Le titre reste révélé mot à mot par `SplitText` — c'est la seule animation.
+ *
+ * Les coordonnées sont des CASES à filets (courriel, téléphone, adresse), avec l'icône en
+ * tête : c'est la même grille que les sections « ce que ça donne » et « pourquoi », donc la
+ * page se termine sur un vocabulaire déjà lu, pas sur un nouveau.
  */
 export default function CtaBand() {
   const { dict, locale } = useDictionary();
@@ -23,46 +29,86 @@ export default function CtaBand() {
   const { finalCta, site, ui } = dict;
 
   return (
-    <section className={`border-t bg-paper ${RULE}`}>
+    <section className="border-t border-ink/10 bg-paper text-ink">
       <div className="container-x py-20 sm:py-28">
-        <div className="grid gap-10 lg:grid-cols-12 lg:gap-12">
-          {/* Marge de gauche : l'étiquette, puis de quoi joindre l'agence sans passer par
-              le formulaire — les coordonnées sont déjà dans le dictionnaire du site. */}
-          <div className="lg:col-span-4">
-            <span className={`${LABEL} text-ink/45`}>{ui.talkToUs}</span>
-            <ul className={`mt-6 grid gap-2 ${BODY} text-ink/70`}>
-              <li>
-                <a
-                  href={`mailto:${site.email}`}
-                  className="transition-colors duration-300 hover:text-brand"
-                >
-                  {site.email}
-                </a>
-              </li>
-              <li>
-                <a
-                  href={site.phoneRaw}
-                  className="transition-colors duration-300 hover:text-brand"
-                >
-                  {site.phone}
-                </a>
-              </li>
-            </ul>
-          </div>
+        <div className="flex flex-wrap items-baseline justify-between gap-x-8 gap-y-2">
+          <span className={`${LABEL} text-ink/40`}>[ {ui.talkToUs} ]</span>
+          <span className={`${LABEL} text-ink/25`}>
+            © {new Date().getFullYear()} {site.name}
+          </span>
+        </div>
 
-          <div className="lg:col-span-8">
-            <SplitText as="h2" text={finalCta.title} className={CLOSING} />
-            <p className={`mt-6 max-w-xl ${LEAD} text-ink/70`}>{finalCta.body}</p>
-            <div className="mt-9 flex flex-wrap items-center gap-x-10 gap-y-4">
-            {/* « Ouvrir un salon » pointe sur l'inscription, et non plus sur le formulaire
-                de devis : l'action principale d'un logiciel est l'entrée dans le produit. */}
-            <TextLink href={href("/register")} strong>
+        {/* ——— L'affirmation, seule sur sa largeur. */}
+        <SplitText
+          as="h2"
+          text={finalCta.title}
+          className="mt-8 max-w-[19ch] font-light text-[clamp(2.2rem,6vw,5rem)] leading-[0.96] tracking-[-0.04em]"
+        />
+
+        <div className="mt-10 grid gap-10 lg:grid-cols-12 lg:items-end lg:gap-16">
+          <p className="max-w-md text-[1rem] leading-relaxed text-ink/60 lg:col-span-7">
+            {finalCta.body}
+          </p>
+
+          <div className="flex flex-wrap items-center gap-x-8 gap-y-4 lg:col-span-5 lg:justify-end">
+            {/* Bouton carré : le même geste que dans le hero — aucun arrondi sur les
+                actions principales du site. */}
+            <Link
+              href={href("/register")}
+              className="inline-flex items-center gap-2 bg-ink px-7 py-4 text-[0.64rem] font-medium uppercase tracking-[0.16em] text-paper transition-colors hover:bg-brand"
+            >
               {finalCta.primary}
-            </TextLink>
-              <TextLink href={href("/contact")}>{finalCta.secondary}</TextLink>
-            </div>
+              <ArrowUpRight className="h-4 w-4" />
+            </Link>
+
+            <Link
+              href={href("/contact")}
+              className="text-[0.64rem] uppercase tracking-[0.16em] text-ink/55 underline decoration-ink/20 underline-offset-[6px] transition-colors hover:text-ink"
+            >
+              {finalCta.secondary}
+            </Link>
           </div>
         </div>
+
+        {/* ——— Les trois façons de joindre la maison, en cases à filets. */}
+        <dl className="mt-16 grid grid-cols-1 gap-px border border-ink/10 bg-ink/10 sm:grid-cols-3">
+          <div className="flex min-h-[8.5rem] flex-col justify-between gap-6 bg-white p-6">
+            <dt>
+              <Mail className="h-4 w-4 text-ink/35" />
+            </dt>
+            <dd>
+              <a
+                href={`mailto:${site.email}`}
+                className="break-all text-[0.95rem] font-light text-ink transition-colors hover:text-brand"
+              >
+                {site.email}
+              </a>
+            </dd>
+          </div>
+
+          <div className="flex min-h-[8.5rem] flex-col justify-between gap-6 bg-white p-6">
+            <dt>
+              <Phone className="h-4 w-4 text-ink/35" />
+            </dt>
+            <dd>
+              <a
+                href={site.phoneRaw}
+                className="text-[0.95rem] font-light tabular-nums text-ink transition-colors hover:text-brand"
+              >
+                {site.phone}
+              </a>
+            </dd>
+          </div>
+
+          <div className="flex min-h-[8.5rem] flex-col justify-between gap-6 bg-white p-6">
+            <dt>
+              <Pin className="h-4 w-4 text-ink/35" />
+            </dt>
+            <dd className="max-w-[26ch] text-[0.95rem] font-light leading-snug text-ink/70">
+              {site.address}
+            </dd>
+          </div>
+        </dl>
       </div>
     </section>
   );

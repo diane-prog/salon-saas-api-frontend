@@ -1,161 +1,204 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 
-import { ArrowUpRight } from "@/components/Icons";
 import { useDictionary } from "@/components/DictionaryProvider";
+import { prefersReducedMotion } from "@/lib/motion";
 
 /**
- * Hero de l'accueil — la première page du produit, pas une page d'agence.
+ * Hero de l'accueil — une AFFICHE plein cadre, pas un bandeau de fonctionnalités.
  *
- * Ce qui a changé et pourquoi :
- *   - plus de vidéo de fond ni de parallaxe : sur une connexion moyenne, un plan
- *     vidéo plein cadre retarde le premier mot de trois secondes et donne au
- *     logiciel l'allure d'un site vitrine. Ici, le premier écran est du TEXTE
- *     et une pièce de produit dessinée en HTML — le seul média qui ne ment pas ;
- *   - un titre en sérif éditorial, très grand, sur papier chaud : c'est ce qui
- *     distingue une maison d'un tableau de bord générique ;
- *   - la preuve est à droite : un aperçu de l'agenda, avec ses heures, ses
- *     statuts et sa réservation en ligne. L'aperçu est annoncé comme tel.
+ * POURQUOI CETTE FORME : la version précédente posait le texte à gauche et une carte
+ * d'agenda à droite. C'était lisible, mais ça ressemblait à une page produit parmi
+ * d'autres : le premier écran annonçait une fonctionnalité avant d'annoncer une maison.
+ * Ici la composition est celle d'une couverture — une seule surface plein cadre, et quatre
+ * ancrages, comme sur une affiche :
  *
- * Rien n'est animé au défilement : le hero doit être lisible avant que React
- * n'ait fini de s'hydrater.
+ *   - à droite, une phrase courte et l'unique bouton (ce qu'on peut faire tout de suite) ;
+ *   - à gauche, au-dessus du titre, trois lignes de petites capitales (ce que c'est) ;
+ *   - en bas à gauche, le titre, très grand, sur deux lignes (ce qu'on retient) ;
+ *   - en bas, le vocabulaire du produit et la maison (ce qu'on signe).
+ *
+ * LE MÉDIA N'EST PAS DANS LE CODE : `NEXT_PUBLIC_HERO_VIDEO` reçoit l'adresse de la vidéo
+ * de fond (`/hero.mp4` déposée dans `public`, ou une URL absolue), et
+ * `NEXT_PUBLIC_HERO_PHOTO` celle d'une image fixe. La vidéo passe au-dessus de l'image, qui
+ * lui sert d'affiche — et qui reste seule si la personne a demandé moins d'animation
+ * (`motion-reduce`). Sans aucune des deux, le champ est dessiné — ciel chaud, soleil haut à
+ * droite, grain — pour que l'écran soit fini sans dépendre d'un asset. Dans tous les cas,
+ * un voile sombre monte du bas : il ne filtre pas l'image, il garantit que le titre reste
+ * lisible dessus.
+ *
+ * Aucune animation au défilement, aucun carrousel : la première page doit être lisible
+ * avant que React n'ait fini de s'hydrater. Le titre ne tourne pas non plus — `leadRotating`
+ * ne sert ici que sa première entrée, la phrase étant désormais une signature, pas une
+ * accroche changeante.
  */
+const PHOTO = process.env.NEXT_PUBLIC_HERO_PHOTO;
+const VIDEO = process.env.NEXT_PUBLIC_HERO_VIDEO;
+
+/** Le type MIME suit l'extension : un `.webm` annoncé en `mp4` n'est pas lu par Safari. */
+const VIDEO_TYPE = VIDEO?.endsWith(".webm")
+  ? "video/webm"
+  : VIDEO?.endsWith(".mov")
+    ? "video/quicktime"
+    : "video/mp4";
+
 export default function HomeHero() {
   const { dict, locale } = useDictionary();
-  const { hero, ui } = dict;
+  const { hero, ui, site } = dict;
+
+  /* La seconde ligne du titre CHANGE, comme une signature qui se cherche : « sans le
+     chaos », « au bon rythme », « sous contrôle ». Trois phrases du dictionnaire, une
+     toutes les 3,6 s, en fondu-glissé vertical — et rien du tout si la personne a demandé
+     moins d'animation. Le premier rendu est toujours la première phrase : le serveur et le
+     client peignent la même chose. */
+  const lines = hero.leadRotating;
+  const [activeLine, setActiveLine] = useState(0);
+
+  useEffect(() => {
+    if (lines.length < 2 || prefersReducedMotion()) return;
+
+    const timer = window.setInterval(() => {
+      setActiveLine((current) => (current + 1) % lines.length);
+    }, 3600);
+
+    return () => window.clearInterval(timer);
+  }, [lines.length]);
   const href = (p: string) => `/${locale}${p === "/" ? "" : p}`;
-  /* La vitrine de démonstration est celle du salon configuré : si la variable
-     n'est pas posée, on renvoie vers la page fonctionnalités plutôt que vers
-     une adresse qui n'existerait pas. */
+
+  /* La vitrine de démonstration est celle du salon configuré : si la variable n'est pas
+     posée, on renvoie vers la page fonctionnalités plutôt que vers une adresse qui
+     n'existerait pas. */
   const demoSlug = process.env.NEXT_PUBLIC_DEMO_SALON_SLUG;
   const demoHref = href(demoSlug ? `/s/${demoSlug}` : "/services");
 
   return (
-    <section className="relative overflow-hidden border-b border-ink/10 bg-paper text-ink">
-      <div className="container-x grid min-h-[90svh] items-center gap-14 pb-14 pt-32 lg:grid-cols-12 lg:gap-10 lg:pb-20 lg:pt-36">
-        {/* ——— Le propos. */}
-        <div className="flex flex-col lg:col-span-7">
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-            <span className="text-[0.66rem] font-medium uppercase tracking-[0.24em] text-ink/45">
-              {ui.agency}
-            </span>
-            <span aria-hidden className="h-px w-8 bg-ink/20" />
-            <span className="inline-flex items-center gap-2 text-[0.66rem] uppercase tracking-[0.18em] text-ink/45">
-              <span className="relative flex h-1.5 w-1.5">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand opacity-60" />
-                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-brand" />
-              </span>
-              {hero.liveLabel}
-            </span>
-          </div>
-
-          <h1 className="mt-7 max-w-3xl font-display text-[clamp(2.9rem,7.2vw,5.9rem)] leading-[0.94] tracking-[-0.02em]">
-            {hero.leadStatic}
-            <span className="block italic text-brand">{hero.leadRotating[0]}</span>
-          </h1>
-
-          <p className="mt-7 max-w-lg text-[0.98rem] leading-relaxed text-ink/65">
-            {hero.body}
-          </p>
-
-          <div className="mt-9 flex flex-wrap items-center gap-x-8 gap-y-4">
-            <Link
-              href={href("/register")}
-              className="group inline-flex items-center gap-3 bg-ink px-7 py-4 text-[0.72rem] font-medium uppercase tracking-[0.18em] text-paper transition-colors hover:bg-brand"
-            >
-              {ui.freeQuote}
-              <ArrowUpRight className="h-4 w-4 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
-            </Link>
-
-            <Link
-              href={demoHref}
-              className="text-[0.72rem] uppercase tracking-[0.16em] text-ink/55 underline-offset-8 transition-colors hover:text-ink hover:underline"
-            >
-              {ui.auth.panel.demo}
-            </Link>
-          </div>
-
-          {/* Trois repères de lecture, pas trois promesses marketing. */}
-          <dl className="mt-14 grid max-w-xl grid-cols-3 gap-px border-t border-ink/15 pt-6">
-            {hero.reassurances.map((item) => (
-              <div key={item.label} className="pr-4">
-                <dt className="font-display text-2xl leading-none text-ink">{item.value}</dt>
-                <dd className="mt-2 text-[0.68rem] uppercase tracking-[0.14em] text-ink/45">
-                  {item.label}
-                </dd>
-              </div>
-            ))}
-          </dl>
-        </div>
-
-        {/* ——— La pièce de produit. Annoncée comme un aperçu : aucune donnée
-                n'est présentée comme réelle. */}
-        <div className="relative lg:col-span-5">
-          <div
-            aria-hidden
-            className="absolute -inset-x-6 -inset-y-6 border border-ink/10 lg:-inset-x-10 lg:-inset-y-10"
+    <section
+      aria-labelledby="hero-title"
+      className="relative isolate overflow-hidden bg-ink text-paper"
+    >
+      {/* ——— Le champ : la photo si elle est fournie, sinon un ciel dessiné (ciel chaud,
+              soleil haut à droite, grain). Dans les deux cas, le même voile par-dessus. */}
+      <div aria-hidden className="absolute inset-0 -z-20">
+        {PHOTO ? (
+          // eslint-disable-next-line @next/next/no-img-element -- photo fournie par l'exploitant (chemin local ou URL), hors liste blanche de `next/image`
+          <img
+            src={PHOTO}
+            alt=""
+            fetchPriority="high"
+            decoding="async"
+            className="absolute inset-0 h-full w-full object-cover"
           />
+        ) : (
+          <>
+            <div className="h-full w-full bg-[linear-gradient(168deg,#e9d1ac_0%,#d9b283_26%,#b9865a_56%,#6b4a31_82%,#33251b_100%)]" />
+            <div className="absolute inset-0 bg-[radial-gradient(62%_48%_at_74%_8%,rgba(255,243,218,0.95),rgba(255,236,200,0.35)_38%,transparent_72%)]" />
+            <div className="absolute inset-0 bg-[radial-gradient(120%_90%_at_12%_96%,rgba(29,20,14,0.65),transparent_58%)]" />
+          </>
+        )}
 
-          <div className="relative bg-navy text-paper shadow-[0_30px_80px_-40px_rgba(21,17,14,0.55)]">
-            <div className="flex items-center justify-between border-b border-paper/10 px-6 py-5">
-              <div>
-                <p className="text-[0.62rem] uppercase tracking-[0.2em] text-paper/40">
-                  {hero.previewLabel}
-                </p>
-                <p className="mt-1 font-display text-xl">{hero.previewDay}</p>
-              </div>
-              <span className="inline-flex items-center gap-2 text-[0.62rem] uppercase tracking-[0.16em] text-turquoise">
-                <span className="h-1.5 w-1.5 rounded-full bg-turquoise" />
-                4 · 7
-              </span>
-            </div>
+        {/* La vidéo, au-dessus de l'image qui lui sert d'affiche : muette, en boucle,
+            sans commandes (elle est décorative), et retirée si l'on a demandé moins
+            d'animation. */}
+        {VIDEO && (
+          <video
+            className="absolute inset-0 h-full w-full object-cover motion-reduce:hidden"
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="metadata"
+            poster={PHOTO}
+            aria-hidden
+            tabIndex={-1}
+          >
+            <source src={VIDEO} type={VIDEO_TYPE} />
+          </video>
+        )}
 
-            <ul className="divide-y divide-paper/[0.08]">
-              {hero.previewRows.map((row) => (
-                <li key={row.time} className="flex items-center gap-4 px-6 py-4">
-                  <span className="w-12 shrink-0 font-display text-base tabular-nums text-paper/45">
-                    {row.time}
-                  </span>
-                  <span className="min-w-0 flex-1">
-                    <span className="block truncate text-sm text-paper">{row.service}</span>
-                    <span className="block text-[0.68rem] text-paper/40">{row.staff}</span>
-                  </span>
-                  <span className="shrink-0 text-[0.6rem] uppercase tracking-[0.14em] text-turquoise">
-                    {row.status}
-                  </span>
-                </li>
-              ))}
-            </ul>
-
-            <div className="flex items-center justify-between border-t border-paper/10 px-6 py-4">
-              <span className="text-[0.62rem] uppercase tracking-[0.16em] text-paper/40">
-                {hero.previewTotal}
-              </span>
-              <span className="font-display text-lg tabular-nums text-turquoise">186 €</span>
-            </div>
-          </div>
-
-          <div className="relative mt-4 ml-auto w-[86%] border border-ink/15 bg-paper p-5">
-            <p className="text-[0.6rem] uppercase tracking-[0.18em] text-ink/40">
-              {hero.previewBooking}
-            </p>
-            <p className="mt-2 text-sm text-ink/75">{hero.previewBookingBody}</p>
-          </div>
+        {/* Le voile : bas sombre pour le titre, haut à peine touché pour l'en-tête. */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_top,rgba(21,17,14,0.94)_0%,rgba(21,17,14,0.55)_34%,rgba(21,17,14,0.12)_62%,rgba(21,17,14,0.18)_100%)]" />
+        {/* Le grain vit dans son propre cadre : `grain` pose `position: relative`, ce qui
+            écraserait l'`absolute` du calque. */}
+        <div className="absolute inset-0">
+          <div className="grain h-full w-full" />
         </div>
       </div>
 
-      {/* ——— Bandeau de bas de hero : le vocabulaire produit, une fois. */}
-      <div className="border-t border-ink/10">
-        <div className="container-x flex flex-wrap items-center gap-x-8 gap-y-2 py-5 text-[0.62rem] uppercase tracking-[0.22em] text-ink/40">
-          {hero.ticker.map((item, index) => (
-            <span key={item} className="flex items-center gap-8">
-              {index > 0 && <span aria-hidden className="h-1 w-1 rounded-full bg-brand/60" />}
-              {item}
+      <div className="container-x relative flex min-h-svh flex-col pb-7 pt-28 sm:pb-9 lg:pb-11 lg:pt-32">
+        {/* ——— L'action, à droite : une phrase, un bouton, une sortie discrète vers la
+                démonstration. C'est le seul endroit du premier écran qui demande un geste. */}
+        <div className="ml-auto w-full max-w-[21rem] lg:absolute lg:right-0 lg:top-[22%] lg:mt-0">
+          <p className="text-[0.95rem] leading-[1.6] text-paper/85">{hero.aside}</p>
+
+          <Link
+            href={href("/register")}
+            className="mt-6 inline-flex items-center gap-2 bg-paper px-6 py-3.5 text-[0.66rem] font-medium uppercase tracking-[0.16em] text-ink transition-colors hover:bg-brand hover:text-paper"
+          >
+            {ui.freeQuote}
+          </Link>
+
+          <Link
+            href={demoHref}
+            className="mt-5 block w-fit text-[0.62rem] uppercase tracking-[0.16em] text-paper/55 underline decoration-paper/25 underline-offset-[6px] transition-colors hover:text-paper hover:decoration-paper/60"
+          >
+            {ui.auth.panel.demo}
+          </Link>
+        </div>
+
+        {/* ——— Trois lignes de petites capitales : la définition, pas le slogan. */}
+        <p className="mt-16 text-[0.6rem] uppercase leading-[2.1] tracking-[0.26em] text-paper/65 sm:mt-20 lg:mt-auto lg:pb-12">
+          {hero.manifesto.map((line) => (
+            <span key={line} className="block">
+              {line}
             </span>
           ))}
-          <span aria-hidden className="ml-auto hidden h-px flex-1 bg-ink/10 sm:block" />
-          <span className="hidden text-ink/30 sm:inline">{dict.site.address}</span>
+        </p>
+
+        {/* ——— Le titre. Il est déjà la phrase entière pour les lecteurs d'écran : les deux
+                lignes ne sont qu'un découpage typographique. */}
+        <h1
+          id="hero-title"
+          aria-label={hero.lead}
+          className="mt-7 max-w-[14ch] font-display text-[clamp(3rem,8.4vw,8.2rem)] leading-[0.88] tracking-[-0.03em] text-paper"
+        >
+          <span aria-hidden>{hero.leadStatic}</span>
+
+          {/* La ligne qui tourne : toutes les phrases occupent la même cellule de grille,
+              donc la hauteur du titre ne bouge pas quand l'une s'efface. */}
+          <span aria-hidden className="mt-1 block overflow-hidden">
+            <span className="grid">
+              {lines.map((line, index) => (
+                <span
+                  key={line}
+                  className={`col-start-1 row-start-1 block italic transition-[opacity,transform] duration-700 ease-out ${
+                    index === activeLine
+                      ? "translate-y-0 opacity-100"
+                      : "translate-y-[0.5em] opacity-0"
+                  }`}
+                >
+                  {line}
+                </span>
+              ))}
+            </span>
+          </span>
+        </h1>
+
+        {/* ——— La signature : le vocabulaire du produit d'un côté, la maison de l'autre. */}
+        <div className="mt-9 flex flex-wrap items-center justify-between gap-x-8 gap-y-2 border-t border-paper/20 pt-4 text-[0.56rem] uppercase tracking-[0.2em] text-paper/50 sm:mt-11">
+          <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
+            {hero.ticker.map((item, index) => (
+              <span key={item} className="flex items-center gap-3">
+                {index > 0 && <span aria-hidden className="h-[3px] w-[3px] rounded-full bg-paper/30" />}
+                {item}
+              </span>
+            ))}
+          </span>
+
+          <span className="text-paper/40">
+            © {new Date().getFullYear()} {site.name}
+          </span>
         </div>
       </div>
     </section>

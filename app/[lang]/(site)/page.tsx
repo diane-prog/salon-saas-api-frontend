@@ -16,11 +16,12 @@ import { isLocale, getDictionary } from "@/lib/dictionaries";
  * ORDRE ET CE QUI A CHANGÉ PAR RAPPORT AU SITE PRÉCÉDENT :
  *
  *  1. `HomeHero` — la promesse ;
- *  2. `WhyStatements` — les cinq raisons, réécrites pour un salon ;
+ *  2. `WhyStatements` — les trois raisons, réécrites pour un salon ;
  *  3. `ServicesEditorial` + `LiveStats` — les six fonctionnalités en liste
  *     numérotée, puis les CHIFFRES du salon de démonstration, **servis par
  *     l'API** (`LiveStats`), en bande d'encre ;
- *  4. `SalonDemo` — la vitrine d'un vrai salon, couleurs comprises, en direct ;
+ *  4. `SalonDemo` — le salon de démonstration en direct : son nom, ses couleurs,
+ *     ses prestations et son équipe, sans maquette d'écran ;
  *  5. `PricingSection` — les quatre forfaits ;
  *  6. `CtaBand` — ouvrir un salon.
  *
@@ -51,9 +52,8 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
     <>
       <HomeHero />
 
-      {/* Section « Pourquoi Belora » : grille éditoriale de huit tuiles — une
-          en-tête (sur-titre + titre), cinq raisons numérotées 01 → 05 et deux
-          photos insérées dans le flux. */}
+      {/* Section « Pourquoi Belora » : l'en-tête hors grille, puis trois raisons
+          numérotées 01 → 03 et l'illustration qui ferme la dernière ligne. */}
       <WhyStatements />
 
       {/* Les six fonctionnalités, en liste éditoriale numérotée. */}
@@ -62,7 +62,8 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
       {/* La preuve : les chiffres du salon de démonstration, lus en direct. */}
       <LiveStats linkHref={href("/services")} linkLabel={ui.viewAllServices} />
 
-      {/* Vitrine du salon de démonstration, chargée depuis l'API. */}
+      {/* Le salon de démonstration, en direct depuis l'API : nom, couleurs,
+          prestations et équipe, présentés en éditorial. */}
       <SalonDemo />
 
       {/* Forfaits — valeurs statiques : l'API des tarifs refuse les requêtes

@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 
 import WorkspaceGuard from "./_guard";
+import WorkspaceHeader from "@/components/workspace/WorkspaceHeader";
 import WorkspaceNav, { type WorkspaceGroup } from "./_nav";
 import { isLocale } from "@/lib/dictionaries";
 
@@ -8,9 +9,11 @@ import { isLocale } from "@/lib/dictionaries";
  * Coquille de l'ESPACE SALON.
  *
  * Deux colonnes : la navigation sur l'encre à gauche (fixe), le travail sur le
- * papier à droite. Aucun en-tête marketing, aucune barre d'actions flottante,
- * et surtout **pas de défilement lissé** : Lenis est monté dans `(site)`, donc
- * les tableaux de l'espace se parcourent au défilement natif.
+ * papier à droite — surmonté de la barre de contexte (`WorkspaceHeader`), qui dit
+ * où l'on est, quel jour on regarde et ce qui demande une action. Aucun en-tête
+ * marketing, aucune barre d'actions flottante, et surtout **pas de défilement
+ * lissé** : Lenis est monté dans `(site)`, donc les tableaux de l'espace se
+ * parcourent au défilement natif.
  *
  * `GROUPS` ne contient que les écrans réellement construits, rangés par moment
  * de travail : le jour, les clientes, le salon, le compte. Le dictionnaire
@@ -75,8 +78,14 @@ export default async function WorkspaceLayout({
           <WorkspaceNav groups={GROUPS} />
         </aside>
 
-        <main className="min-w-0 bg-paper px-5 py-8 sm:px-8 sm:py-12 lg:px-12">
-          <div className="mx-auto w-full max-w-5xl">{children}</div>
+        <main className="min-w-0 bg-paper">
+          {/* La barre reste collante pendant qu'on descend un écran : le contexte, le jour,
+              les notifications non lues et le geste « nouveau rendez-vous » suivent. */}
+          <WorkspaceHeader groups={GROUPS} />
+
+          <div className="mx-auto w-full max-w-5xl px-5 py-8 sm:px-8 sm:py-12 lg:px-12">
+            {children}
+          </div>
         </main>
       </div>
     </WorkspaceGuard>

@@ -1,166 +1,130 @@
 "use client";
 
+import Link from "next/link";
+
 import Reveal from "@/components/Reveal";
-import { ProductPanel } from "@/components/ProductPanel";
 import { useDictionary } from "@/components/DictionaryProvider";
 
 /**
- * Section « Pourquoi nous choisir » de l'accueil.
+ * Section « Pourquoi Belora » — la composition de la référence, à la lettre.
  *
- * UNE seule liste de raisons, DEUX mises en page — les mêmes textes, lus de la façon qui
- * convient à l'écran :
+ * Quatre choses seulement, et rien d'autre :
  *
- * - GRAND ÉCRAN (≥ lg) : la grille éditoriale de huit tuiles encadrées d'un filet fin. La
- *   première porte le sur-titre et le titre de la section, les cinq suivantes sont les
- *   raisons numérotées (01 → 05 : numéro en haut, titre et texte calés en bas), et deux
- *   photos s'insèrent dans le flux (l'une en fin de première ligne, l'autre en tête de
- *   seconde). L'ordre du DOM suit la lecture : titre, 01, 02, photo, photo, 03, 04, 05 —
- *   en grille de quatre colonnes cela donne exactement la disposition de la maquette, sans
- *   placement explicite.
+ *   1. le TITRE, seul, en haut à gauche, sur deux lignes, sans sur-titre ni filet ;
+ *   2. la SORTIE entre crochets, en petites capitales, en haut à droite — `[ MÉTHODE ]` ;
+ *   3. une GRILLE de TROIS cases réparties en L inversé : `[ 01 ]` en haut à gauche,
+ *      `[ 02 ]` à sa droite, `[ 03 ]` DIRECTEMENT SOUS `[ 02 ]`. La case sous `[ 01 ]`
+ *      reste volontairement vide ;
+ *   4. l'ILLUSTRATION en bas à droite, à la hauteur de `[ 03 ]`, avec la pastille posée
+ *      dessus.
  *
- * - TÉLÉPHONE ET TABLETTE : un SOMMAIRE, sur le modèle de la vue liste des réalisations —
- *   une ligne par raison, un filet entre elles, numéro à gauche, titre et texte à droite.
- *   En tuiles de 10:11 empilées, la section faisait près de trois mille pixels de haut avec
- *   les trois quarts de chaque tuile vides ; c'est ce qui s'affichait bizarrement sur un
- *   téléphone. Une ligne de sommaire dit la même chose en un quart de la hauteur.
+ * La trame est une grille de TROIS colonnes et DEUX lignes, pas deux colonnes : sans la
+ * troisième colonne, l'image retomberait sous `[ 03 ]` et la composition en L serait
+ * perdue. Les emplacements sont donc posés explicitement (`col-start` / `row-start`), et
+ * les deux cases vides (dessous `[ 01 ]`, au-dessus de l'image) ne sont pas rendues du
+ * tout : c'est le blanc qui les tient.
  *
- *   Une SEULE photo y est conservée : celle qui ferme la première ligne sur grand écran
- *   (la deuxième, recolorée en orange, ne sert qu'à équilibrer la grille — sur un sommaire
- *   elle n'aurait plus rien à équilibrer et couperait la liste en deux). Elle est
- *   volontairement en 4:3 et non en 10:11 : en bandeau, elle respire entre deux raisons.
+ * Les cases sont SÉPARÉES par un blanc, pas collées : chacune porte son propre filet
+ * d'un pixel (référence), et le blanc du fond fait la respiration entre elles.
  *
- * Structure : `Reveal` (l'entrée au scroll) reste sur le `<li>`, l'habillage — filet,
- * proportions, effet de survol — sur une boîte interne, comme `glow-card` ailleurs sur le
- * site. C'est nécessaire ici : l'entrée GSAP écrit un `transform` sur le `<li>` et
- * écraserait le soulèvement du survol (GSAP rend la main à la fin, mais l'ordre des
- * couches reste plus simple à lire ainsi).
+ * Pas d'ombre, pas d'arrondi, pas de carte flottante, pas de grande case d'en-tête dans la
+ * grille : l'en-tête est HORS grille, comme sur la référence.
  *
- * Les deux photos glissent en parallaxe dans leur tuile.
+ * L'illustration est un champ chaud dessiné (soleil + grain) tant qu'aucune image n'est
+ * fournie ; `NEXT_PUBLIC_WHY_IMAGE` reçoit `/why.jpg` ou une URL absolue, et remplace le
+ * champ sans toucher au reste. La pastille reste au-dessus dans les deux cas.
  */
-
-/**
- * Habillage commun aux tuiles : filet, fond beige très clair, proportions et effet de
- * survol sur grand écran ; sur téléphone, un simple filet BAS, qui fait la ligne de
- * sommaire. Les deux vivent dans la même chaîne : la bascule se fait à `lg`, il n'y a donc
- * jamais deux éléments à garder d'accord.
- *
- * Le rapport 10:11 (un peu plus haut que large) est celui de la maquette : des carrés
- * légèrement verticaux à toutes les largeurs, jamais des bandes. `h-full` égalise les
- * tuiles d'une même ligne ; `why-tile` (globals.css) n'ajoute que l'effet de survol.
- *
- * `relative` et `overflow-hidden` sont écrits ICI, et pas seulement dans l'utilitaire :
- * la photo en `fill` a besoin d'un parent positionné, et sans lui elle se cale sur
- * l'ancêtre positionné le plus proche — c'est-à-dire la page (l'image remontait sur le
- * hero) tandis que la tuile restait vide. Une CSS servie en retard (dev) ne doit pas
- * pouvoir casser la mise en page, seulement l'effet.
- */
-const TILE =
-  "why-tile group relative h-full border-b border-navy/10 lg:aspect-[10/11] lg:overflow-hidden lg:border lg:border-navy/10 lg:bg-beige/35 lg:hover:border-navy/25";
-const TILE_INNER =
-  "flex h-full gap-4 py-5 lg:flex-col lg:justify-between lg:gap-10 lg:p-7";
+const IMAGE = process.env.NEXT_PUBLIC_WHY_IMAGE;
 
 export default function WhyStatements() {
-  const { dict } = useDictionary();
+  const { dict, locale } = useDictionary();
   const why = dict.aboutPage;
-  /* Les deux premières raisons ferment la première ligne du grand écran, les trois autres
-     suivent les photos : la grille reproduit la maquette sans placer chaque tuile à la main. */
-  const [first, second, ...rest] = why.whyCards;
+  const { ui } = dict;
 
   return (
-    <section className="border-y border-navy/8 bg-white">
-      <div className="mx-auto w-full max-w-[95rem] px-5 py-20 sm:px-8 sm:py-24">
-        {/* Aucune gouttière sur téléphone : les lignes du sommaire se touchent, séparées par
-            leur filet — c'est la mise en page de la vue liste des réalisations. La grille
-            ne prend ses quatre colonnes qu'à partir de `lg`. */}
-        <ol className="grid grid-cols-1 gap-0 lg:grid-cols-4 lg:gap-3">
-          {/* Tuile d'en-tête : sur-titre discret en haut, titre en bas, comme la réf. Sur
-              téléphone, elle ouvre le sommaire sans cadre — c'est le titre de la section,
-              pas une ligne de plus. */}
-          <Reveal as="li" className="h-full">
-            <div className="why-tile group relative flex h-full flex-col justify-between gap-4 border-b border-navy/10 pb-7 lg:aspect-[10/11] lg:gap-10 lg:overflow-hidden lg:border lg:border-navy/10 lg:bg-white lg:p-7 lg:hover:border-navy/25">
-              <p className="text-[0.62rem] font-medium uppercase tracking-[0.2em] text-navy/55 sm:text-[0.68rem] sm:tracking-[0.24em]">
-                {why.whyEyebrow}
-              </p>
-              <h2 className="max-w-[13ch] text-2xl leading-[1.08] tracking-tight text-navy sm:text-3xl lg:max-w-[11ch] lg:text-4xl">
-                {why.whyHeadline}
-              </h2>
-            </div>
-          </Reveal>
+    <section className="bg-white text-ink">
+      <div className="mx-auto w-full max-w-[95rem] px-5 py-20 sm:px-8 sm:py-24 lg:py-28">
+        {/* ——— En-tête : le titre à gauche, la sortie à droite, sur la même ligne haute. */}
+        <div className="flex flex-wrap items-start justify-between gap-x-12 gap-y-4">
+          <h2 className="max-w-[16ch] text-[clamp(1.9rem,3.9vw,3.2rem)] font-light leading-[1.06] tracking-[-0.03em]">
+            {why.whyHeadline}
+          </h2>
 
-          <ReasonCard index={0} card={first} delay={60} />
-          <ReasonCard index={1} card={second} delay={120} />
+          <Link
+            href={`/${locale}/services`}
+            className="mt-1 shrink-0 text-[0.6rem] font-medium uppercase tracking-[0.14em] text-ink/45 transition-colors hover:text-ink"
+          >
+            [ {ui.methodology} ]
+          </Link>
+        </div>
 
-          {/* Deux panneaux produit à la place des photographies : l'agenda du jour et le
-              parcours de réservation. C'est le produit qui illustre le propos, pas un
-              portrait d'équipe — et rien à télécharger. */}
-          <MediaTile delay={180}>
-            <ProductPanel variant="agenda" />
-          </MediaTile>
+        {/* ——— La trame : trois colonnes, deux lignes, un blanc entre les cases.
+                Positions posées à la main — `01` (1,1), `02` (1,2), `03` (2,2),
+                image (2,3). Les cases vides ne sont pas rendues : le blanc les tient.
+                Sur téléphone, tout s'empile dans l'ordre de lecture 01 → 02 → 03 → image. */}
+        <ol className="mt-8 grid grid-cols-1 gap-2.5 sm:mt-10 sm:grid-cols-[1fr_1fr_1.15fr] sm:gap-3">
+          {why.whyCards.map((card, index) => {
+            /* L'escalier : la première au coin haut gauche, les suivantes une colonne plus
+               loin, en descendant d'une ligne à chaque fois. */
+            const placement = [
+              "sm:col-start-1 sm:row-start-1",
+              "sm:col-start-2 sm:row-start-1",
+              "sm:col-start-2 sm:row-start-2",
+            ][index];
 
-          <MediaTile delay={240} desktopOnly>
-            <ProductPanel variant="booking" />
-          </MediaTile>
+            return (
+              <li key={card.title} className={placement}>
+                <Reveal as="div" delay={index * 60} className="h-full">
+                  <article className="flex h-full min-h-[12.5rem] flex-col border border-ink/12 p-5 sm:min-h-[16rem] sm:p-6 lg:min-h-[18rem] lg:p-7">
+                    <span className="text-[0.62rem] font-medium tabular-nums tracking-[0.14em] text-ink/40">
+                      [ {String(index + 1).padStart(2, "0")} ]
+                    </span>
 
-          {rest.map((card, i) => (
-            <ReasonCard key={card.title} index={i + 2} card={card} delay={300 + i * 60} />
-          ))}
+                    <h3 className="mt-3 max-w-[24ch] text-[1.05rem] font-light leading-[1.25] text-ink lg:text-[1.15rem]">
+                      {card.title}
+                    </h3>
+
+                    <p className="mt-auto max-w-[34ch] pt-8 text-[0.8rem] leading-[1.6] text-ink/55">
+                      {card.body}
+                    </p>
+                  </article>
+                </Reveal>
+              </li>
+            );
+          })}
+
+          {/* ——— L'illustration : elle ferme la grille en bas à droite, à la hauteur de
+                  `03`, laissant le coin bas gauche vide. La pastille est posée dessus. */}
+          <li className="min-h-[12.5rem] sm:col-start-3 sm:row-start-2 sm:min-h-[16rem] lg:min-h-[18rem]">
+            <Reveal as="div" delay={why.whyCards.length * 60} className="h-full">
+              <div className="relative h-full min-h-[12.5rem] overflow-hidden bg-ink sm:min-h-[16rem] lg:min-h-[18rem]">
+                {IMAGE ? (
+                  // eslint-disable-next-line @next/next/no-img-element -- image fournie par l'exploitant (chemin local ou URL), hors liste blanche de `next/image`
+                  <img src={IMAGE} alt="" className="absolute inset-0 h-full w-full object-cover" />
+                ) : (
+                  <>
+                    <div className="absolute inset-0 bg-[linear-gradient(150deg,#e8cda4_0%,#cfa271_42%,#96693e_78%,#5d422b_100%)]" />
+                    <div className="absolute inset-0 bg-[radial-gradient(58%_58%_at_68%_18%,rgba(255,242,216,0.8),transparent_72%)]" />
+                  </>
+                )}
+
+                {/* Le grain dans son propre cadre : `grain` pose `position: relative`. */}
+                <div className="absolute inset-0">
+                  <div className="grain h-full w-full" />
+                </div>
+
+                <Link
+                  href={`/${locale}/register`}
+                  className="absolute bottom-4 right-4 inline-flex items-center gap-2 rounded-full bg-turquoise px-4 py-2 text-[0.56rem] font-medium uppercase tracking-[0.14em] text-ink transition-colors hover:bg-paper"
+                >
+                  {ui.freeQuote}
+                  <span aria-hidden>→</span>
+                </Link>
+              </div>
+            </Reveal>
+          </li>
         </ol>
       </div>
     </section>
-  );
-}
-
-/** Une raison : numéro à gauche sur téléphone (haut de la tuile sur grand écran), titre et texte. */
-function ReasonCard({
-  index,
-  card,
-  delay,
-}: {
-  index: number;
-  card: { title: string; body: string };
-  delay: number;
-}) {
-  return (
-    <Reveal as="li" delay={delay} className="h-full">
-      <div className={`${TILE} ${TILE_INNER}`}>
-        <span className="w-6 shrink-0 text-[0.7rem] font-medium tracking-[0.14em] text-navy/45 tabular-nums transition-colors duration-300 group-hover:text-navy/80 lg:w-auto lg:text-base">
-          {String(index + 1).padStart(2, "0")}
-        </span>
-        <div className="min-w-0">
-          <h3 className="text-base leading-snug text-navy lg:text-lg">{card.title}</h3>
-          <p className="mt-1.5 text-sm leading-relaxed text-muted lg:mt-2">{card.body}</p>
-        </div>
-      </div>
-    </Reveal>
-  );
-}
-
-/**
- * Tuile illustration : remplit la case de la grille sur grand écran ; sur téléphone, un
- * bandeau entre deux raisons, avec l'air qu'un bandeau demande. Ce n'est plus une photo
- * mais un panneau produit dessiné (`ProductPanel`), posé sur le papier avec un filet.
- */
-function MediaTile({
-  children,
-  delay,
-  desktopOnly = false,
-}: {
-  children: React.ReactNode;
-  delay: number;
-  /** Panneau qui n'existe qu'à partir de `lg` (équilibre de la grille). */
-  desktopOnly?: boolean;
-}) {
-  return (
-    <Reveal
-      as="li"
-      delay={delay}
-      className={`h-full border-b border-navy/10 py-5 lg:border-0 lg:py-0 ${
-        desktopOnly ? "hidden lg:block" : ""
-      }`}
-    >
-      <div className="flex h-full items-center justify-center border border-navy/10 bg-white p-4 lg:aspect-[10/11] lg:p-6">
-        <div className="w-full">{children}</div>
-      </div>
-    </Reveal>
   );
 }

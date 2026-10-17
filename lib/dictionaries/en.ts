@@ -243,6 +243,11 @@ export const hero = {
   leadStatic: "Your salon,",
   leadRotating: ["without the chaos.", "at the right pace.", "under control."],
   body: "The calendar, online booking, client files, the till and your team in one gesture. Clients book at any hour, you see the day at a glance, and every slot earns what it should.",
+  /* The hero is a poster: the line on the right stays short, and the three lines of
+     capitals on the left name the product instead of praising it. */
+  aside:
+    "The calendar, online booking and client files in one place — including when the salon is closed.",
+  manifesto: ["Calendar & booking", "Clients, services, team", "Your salon, held in one hand"],
   liveLabel: "Live demonstration",
   reassurances: [
     { value: "24/7", label: "Online booking" },
@@ -360,28 +365,21 @@ export const aboutPage = {
   ],
   whyEyebrow: "Why Belora",
   whyHeadline: "What Belora changes",
-  /* One card per reason: the home grid shows these five numbered entries
-     (01 → 05). */
+  /* One card per reason: the home grid shows these THREE numbered entries
+     (01 → 03), the fourth cell being the illustration. Three short titles, three
+     sentences: that is the reference composition, not a pitch. */
   whyCards: [
     {
       title: "A calendar that fills itself",
-      body: "Clients book at night, at the weekend and while you are cutting: the page is always open.",
+      body: "Clients book at night, at the weekend, while you are cutting: the page never closes.",
     },
     {
       title: "Everything in one place",
-      body: "Appointments, clients, services, till and team share one source. No double entry, no paper book.",
+      body: "Appointments, clients, services, till and team share one source. No double entry.",
     },
     {
-      title: "Slots that are truly free",
-      body: "Times offered online are the ones your team can genuinely absorb — never invented.",
-    },
-    {
-      title: "Your salon, your colours",
-      body: "Each page carries the salon's name, colours and hours. A page, not a template.",
-    },
-    {
-      title: "Every slot accounted for",
-      body: "Price, duration, commission and monthly revenue come out of the appointment, with no spreadsheet.",
+      title: "Slots that are real",
+      body: "Times offered online are the ones your team can absorb — never invented.",
     },
   ],
   mission: {
@@ -1203,6 +1201,23 @@ export const ui = {
           user: "Author",
           ip: "IP",
         },
+        /* Pipeline view: the journal reads top to bottom as a sequence of steps, with a rail, a
+           node per action and days separated. */
+        families: {
+          create: "Created",
+          update: "Updated",
+          delete: "Deleted",
+          session: "Session",
+          other: "Other",
+        },
+        today: "Today",
+        yesterday: "Yesterday",
+        by: "by",
+        machine: "Salon task",
+        legend: "Families",
+        periodLabel: "Period",
+        authorsLabel: "Authors",
+        agentLabel: "Browser",
         emptyTitle: "Empty journal",
         emptyBody: "Actions (sign-in, creation, update) are recorded here as they happen.",
       },
@@ -1371,13 +1386,12 @@ export const ui = {
      the API returns and nothing else. */
   demo: {
     eyebrow: "Live",
-    title: "A real salon's page, loaded while you look at it",
+    title: "A real salon, read live",
     body:
-      "Nothing is staged: name, colours, services, team and rating come from the product's API, on the demo salon.",
+      "Nothing is staged: the name, colours, services and team belong to the demo salon and are served by the product's API while the page loads.",
+    salonLabel: "The salon",
     servicesLabel: "Services",
     teamLabel: "Team",
-    ratingLabel: "Rating",
-    bookingLabel: "Booking",
     bookingOpen: "Open 24/7",
     bookingClosed: "Closed for now",
     min: "min",
