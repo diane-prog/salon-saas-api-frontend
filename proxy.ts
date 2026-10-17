@@ -21,7 +21,7 @@ export function proxy(request: NextRequest) {
   if (hasLocale) return NextResponse.next();
 
   const locale = detectLocale(
-    request.cookies.get("leegi-locale")?.value,
+    request.cookies.get("belora-locale")?.value,
     request.headers.get("accept-language") ?? undefined,
   );
   const url = request.nextUrl.clone();

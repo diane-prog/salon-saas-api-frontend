@@ -1,14 +1,7 @@
-import ActionDock from "@/components/ActionDock";
+import Providers from "@/app/providers";
 import { DictionaryProvider } from "@/components/DictionaryProvider";
-import Footer from "@/components/Footer";
-import Header from "@/components/Header";
 import { JsonLd } from "@/components/JsonLd";
-import PageFade from "@/components/PageFade";
-import PageTransition from "@/components/PageTransition";
-import SmoothScroll from "@/components/SmoothScroll";
-import VideoIntro from "@/components/VideoIntro";
 import { getDictionary, isLocale, localePath, locales, localeTags } from "@/lib/dictionaries";
-import { INTRO_SCRIPT } from "@/lib/intro";
 import { SITE_URL } from "@/lib/seo";
 import type { Metadata } from "next";
 import { Sora } from "next/font/google";
@@ -49,17 +42,19 @@ export async function generateMetadata({ params }: LayoutProps<"/[lang]">): Prom
   return {
     metadataBase: SITE_URL,
     title: {
-      default: `${dict.site.name} — Agence de communication digitale à Dakar`,
+      default: `${dict.site.name} — Le logiciel de gestion des salons`,
       template: `%s | ${dict.site.name}`,
     },
     description: dict.site.tagline,
     applicationName: dict.site.name,
     keywords: [
-      "agence communication digitale Dakar",
-      "branding Sénégal",
-      "création site web Dakar",
-      "SEO Afrique",
-      "LEEGI Group",
+      "logiciel salon de coiffure",
+      "logiciel institut de beauté",
+      "gestion salon",
+      "réservation en ligne salon",
+      "agenda coiffeur",
+      "logiciel barbier",
+      dict.site.name,
     ],
     authors: [{ name: dict.site.name, url: localePath(lang) }],
     creator: dict.site.name,
@@ -72,7 +67,7 @@ export async function generateMetadata({ params }: LayoutProps<"/[lang]">): Prom
       siteName: dict.site.name,
       locale: lang === "fr" ? "fr_FR" : "en_US",
       url: localePath(lang),
-      title: `${dict.site.name} — Agence de communication digitale à Dakar`,
+      title: `${dict.site.name} — ${dict.site.tagline}`,
       description: dict.site.tagline,
       /* Pas d'`images` ici : l'image de partage vient du FICHIER `app/opengraph-image.png`
          (convention de Next), qui pose aussi son type et ses dimensions réels — et son texte
@@ -106,12 +101,18 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[la
     "@context": "https://schema.org",
     "@graph": [
       {
-        "@type": ["Organization", "ProfessionalService"],
+        /* `SoftwareApplication` et non `ProfessionalService` : le site ne présente
+           plus une agence mais un logiciel. Le type décide de ce que les moteurs
+           comprennent et de ce qu'ils affichent ; le laisser sur l'ancien métier
+           décrirait la mauvaise chose. */
+        "@type": ["Organization", "SoftwareApplication"],
         "@id": `${SITE_URL}/#organization`,
+        applicationCategory: "BusinessApplication",
+        operatingSystem: "Web",
         name: dict.site.name,
         url: localePath(lang),
-        logo: `${SITE_URL}/img/logo.png`,
-        image: `${SITE_URL}/img/logo.png`,
+        logo: `${SITE_URL}/icon.png`,
+        image: `${SITE_URL}/icon.png`,
         description: dict.site.tagline,
         email: dict.site.email,
         telephone: dict.site.phone,
@@ -138,9 +139,6 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[la
     <html lang={localeTags[lang]} className={`${jakarta.variable} h-full antialiased`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: jsFlag }} />
-        {/* Ouverture vidéo : décidée ici, AVANT la première peinture, plutôt qu'après
-            hydratation — sinon on voit la page une à deux frames avant la vidéo. */}
-        <script dangerouslySetInnerHTML={{ __html: INTRO_SCRIPT }} />
         <link rel="alternate" hrefLang="x-default" href={`${SITE_URL}${localePath(defaultLang)}`} />
         {locales.map((l) => (
           <link
@@ -153,24 +151,13 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[la
       </head>
       <body className="flex min-h-full flex-col">
         <JsonLd data={jsonLd} />
-        <DictionaryProvider dict={dict as never} locale={lang}>
-          {/* Rendue AVANT le reste : tant que l'ouverture est à l'écran, son bouton « Passer »
-              est le premier arrêt de tabulation — et le seul élément atteignable qui fasse
-              quelque chose, puisque l'écran couvre le site. Elle se monte sur toutes les
-              routes : ce qui décide, c'est la session, pas la page d'arrivée. */}
-          <VideoIntro />
-          <SmoothScroll />
-          <PageTransition>
-            <Header />
-            <main className="flex-1">
-              <PageFade>{children}</PageFade>
-            </main>
-            <Footer />
-            {/* Barre d'actions flottante : dans `PageTransition`, donc sous le rideau comme
-                le reste de la page — elle n'a rien à faire au-dessus d'une transition. */}
-            <ActionDock />
-          </PageTransition>
-        </DictionaryProvider>
+        {/* React Query + notifications : l'enveloppe la PLUS EXTERNE, parce que tout
+            écran qui lit l'API en dépend (vitrine, accès, tableau de bord, CMS). */}
+        <Providers>
+          <DictionaryProvider dict={dict as never} locale={lang}>
+            {children}
+          </DictionaryProvider>
+        </Providers>
       </body>
     </html>
   );

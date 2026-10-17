@@ -38,6 +38,19 @@ const CHEVRON = {
   dark: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E\")",
 };
 
+/**
+ * Un champ texte.
+ *
+ * Il sert DEUX régimes, et c'est voulu : sans `value`, c'est un champ non
+ * contrôlé (les formulaires marketing de `ContactSheet` et `DevisSheet`, qui
+ * postent leur contenu et n'ont rien à valider avant) ; avec `value` et
+ * `onChange`, c'est un champ contrôlé (les écrans d'accès, qui valident à la
+ * saisie). Les props de contrôle sont donc optionnelles — aucun appelant
+ * existant n'a été touché pour les ajouter.
+ *
+ * `error` et `hint` s'affichent sous le champ, et le cadre passe au rouge
+ * d'échec : le message est au plus près de ce qu'il faut corriger.
+ */
 export function Field({
   label,
   name,
@@ -46,6 +59,15 @@ export function Field({
   placeholder,
   autoComplete,
   tone = "light",
+  value,
+  onChange,
+  error,
+  hint,
+  autoFocus = false,
+  inputMode,
+  maxLength,
+  disabled = false,
+  list,
 }: {
   label: string;
   name: string;
@@ -54,7 +76,22 @@ export function Field({
   placeholder?: string;
   autoComplete?: string;
   tone?: Tone;
+  value?: string;
+  onChange?: (value: string) => void;
+  error?: string;
+  hint?: string;
+  autoFocus?: boolean;
+  inputMode?: "text" | "numeric" | "tel" | "email" | "url";
+  maxLength?: number;
+  disabled?: boolean;
+  /**
+   * Identifiant d'un `<datalist>` du même formulaire : le champ reste libre,
+   * mais propose des valeurs déjà connues (`GET /salon-services/categories`).
+   */
+  list?: string;
 }) {
+  const invalid = Boolean(error);
+
   return (
     <label className="flex flex-col gap-2">
       <span className={`text-xs font-medium uppercase tracking-wider ${LABEL_TONE[tone]}`}>
@@ -66,8 +103,33 @@ export function Field({
         required={required}
         placeholder={placeholder}
         autoComplete={autoComplete}
-        className={INPUT_TONE[tone]}
+        value={value}
+        onChange={onChange ? (event) => onChange(event.target.value) : undefined}
+        autoFocus={autoFocus}
+        inputMode={inputMode}
+        maxLength={maxLength}
+        list={list}
+        disabled={disabled}
+        aria-invalid={invalid || undefined}
+        aria-describedby={error || hint ? `${name}-note` : undefined}
+        className={`${INPUT_TONE[tone]} ${
+          invalid ? "border-destructive focus:border-destructive focus:ring-destructive/10" : ""
+        } ${disabled ? "opacity-60" : ""}`}
       />
+      {(error || hint) && (
+        <span
+          id={`${name}-note`}
+          className={`text-xs leading-relaxed ${
+            invalid
+              ? "text-destructive"
+              : tone === "dark"
+                ? "text-paper/45"
+                : "text-muted"
+          }`}
+        >
+          {error ?? hint}
+        </span>
+      )}
     </label>
   );
 }

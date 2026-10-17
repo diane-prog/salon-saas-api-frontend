@@ -14,6 +14,23 @@ const loaders = {
 
 export type Dictionary = Awaited<ReturnType<(typeof loaders)["fr"]>>;
 
+/**
+ * Contrôle de compilation : l'anglais doit porter TOUTES les clés du français.
+ *
+ * Pourquoi il existe : `getDictionary` est typé sur `fr`, et l'anglais est chargé
+ * dynamiquement puis converti (`as Promise<Dictionary>`). Une clé oubliée dans
+ * `en.ts` ne se verrait donc qu'à l'écran, sous la forme d'un libellé `undefined`.
+ * Ici, TypeScript compare les deux formes : si `en` n'est pas assignable au
+ * dictionnaire français, la compilation échoue.
+ *
+ * L'import est `import type` : il disparaît du bundle, le chargement reste
+ * paresseux.
+ */
+import type enDictionary from "./en";
+type EnglishIsComplete = typeof enDictionary extends Dictionary ? true : never;
+const _englishIsComplete: EnglishIsComplete = true;
+void _englishIsComplete;
+
 export async function getDictionary(locale: Locale): Promise<Dictionary> {
   return loaders[locale]() as Promise<Dictionary>;
 }

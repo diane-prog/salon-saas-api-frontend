@@ -59,10 +59,11 @@ export function ButtonLink({
   className?: string;
 }) {
   const base =
-    "group inline-flex items-center justify-center gap-2 rounded-full px-6 py-3.5 text-sm font-light transition-all duration-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-turquoise";
+    "group inline-flex items-center justify-center gap-3 px-7 py-4 text-[0.7rem] font-medium uppercase tracking-[0.16em] transition-colors duration-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand";
   const styles = {
-    primary:
-      "bg-gradient-to-r from-brand to-turquoise text-white shadow-soft hover:shadow-lift hover:-translate-y-0.5",
+    /* Action principale : l'encre du site, qui passe au laiton au survol. Aucun
+       dégradé, aucun relief — le site est une maison, pas un gabarit. */
+    primary: "bg-ink text-paper hover:bg-brand",
     ghost: "bg-white/10 text-white ring-1 ring-white/25 backdrop-blur hover:bg-white/20",
     outline: "bg-white text-navy ring-1 ring-navy/12 hover:ring-brand hover:text-brand",
     /* Sur média sombre (hero) : TRANSPARENT au repos, le fond n'apparaît qu'au
@@ -139,7 +140,7 @@ export function CheckList({ items, tone = "light" }: { items: string[]; tone?: "
             tone === "dark" ? "bg-white/[0.06] text-slate-200 ring-1 ring-white/10" : "bg-brand/[0.05] text-navy"
           }`}
         >
-          <span className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full bg-gradient-to-br from-brand to-turquoise text-white">
+          <span className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full bg-brand text-white">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3.5} strokeLinecap="round" strokeLinejoin="round" className="h-3 w-3" aria-hidden>
               <path d="m5 13 4 4L19 7" />
             </svg>

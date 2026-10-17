@@ -1,5 +1,4 @@
 import { Suspense } from "react";
-import Image from "next/image";
 import { cookies, headers } from "next/headers";
 import { ButtonLink } from "@/components/ui";
 import {
@@ -28,7 +27,7 @@ import "./globals.css";
  * next.config.ts) un tel accès HORS frontière `<Suspense>` empêche la route d'être prérendue
  * et fait échouer le build.
  *
- * D'où la découpe : l'image, le « 404 » et les deux liens de langue — qui ne dépendent PAS de
+ * D'où la découpe : le « 404 » et les deux liens de langue — qui ne dépendent PAS de
  * la langue, puisque les noms de langue s'écrivent dans leur langue — sont dans la coquille
  * prérendue. Seuls le titre et la phrase sont isolés dans la frontière, avec pour repli le
  * texte de la langue par défaut : la page est donc complète avant même que la requête ne soit
@@ -37,23 +36,15 @@ import "./globals.css";
  */
 export default function NotFound() {
   return (
-    <section className="relative flex min-h-[80vh] items-center overflow-hidden bg-[#f1f2f2] pt-36 pb-24">
-      <div aria-hidden className="pointer-events-none absolute inset-0">
-        <Image
-          src="/img/other-hero.png"
-          alt=""
-          fill
-          priority
-          sizes="100vw"
-          className="object-cover object-center"
-        />
-        <div className="absolute inset-0 bg-[#f1f2f2]/80" />
-        <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-black/70 via-black/45 to-transparent" />
-      </div>
-
-      <div className="container-x relative flex flex-col items-center gap-6 text-center">
-        <span className="text-7xl font-light text-navy/10 sm:text-9xl">404</span>
-
+    /* Page introuvable : plus de photo d'ambiance ni de voile noir. Une grande encre, un
+       filet de laiton, une phrase — la même main que le reste du site. Le « 404 » est
+       décoratif (`aria-hidden`) : le titre, lui, se lit. */
+    <section className="relative flex min-h-[80vh] items-center bg-paper pt-32 pb-24 text-ink">
+      <div className="container-x relative flex flex-col items-start gap-6">
+        <span aria-hidden className="font-display text-[clamp(4rem,16vw,9rem)] leading-[0.8] text-ink/15">
+          404
+        </span>
+        <span aria-hidden className="h-px w-12 bg-brand/70" />
         <Suspense
           fallback={
             <Notice title={defaultDict.ui.notFoundTitle} body={defaultDict.ui.notFoundBody} />
@@ -61,10 +52,9 @@ export default function NotFound() {
         >
           <LocalizedNotice />
         </Suspense>
-
         <div className="mt-2 flex flex-col gap-3 sm:flex-row">
           {locales.map((l) => (
-            <ButtonLink key={l} href={localePath(l)} variant="outline">
+            <ButtonLink key={l} href={localePath(l)} variant="primary">
               {localeNames[l]}
             </ButtonLink>
           ))}
@@ -72,13 +62,14 @@ export default function NotFound() {
       </div>
     </section>
   );
+
 }
 
 /** Lit la langue de la requête, puis le dictionnaire correspondant. */
 async function LocalizedNotice() {
   const [store, head] = await Promise.all([cookies(), headers()]);
   const dict = await getDictionary(
-    detectLocale(store.get("leegi-locale")?.value, head.get("accept-language") ?? undefined),
+    detectLocale(store.get("belora-locale")?.value, head.get("accept-language") ?? undefined),
   );
   return <Notice title={dict.ui.notFoundTitle} body={dict.ui.notFoundBody} />;
 }
@@ -91,8 +82,10 @@ async function LocalizedNotice() {
 function Notice({ title, body }: { title: string; body: string }) {
   return (
     <>
-      <h1 className="text-3xl text-navy sm:text-4xl">{title}</h1>
-      <p className="max-w-md text-base text-muted">{body}</p>
+      <h1 className="font-display text-[clamp(1.8rem,3.4vw,2.6rem)] leading-[1.05] tracking-[-0.015em]">
+        {title}
+      </h1>
+      <p className="max-w-md text-[0.98rem] leading-relaxed text-ink/60">{body}</p>
     </>
   );
 }

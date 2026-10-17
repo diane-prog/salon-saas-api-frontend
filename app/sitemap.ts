@@ -4,7 +4,12 @@ import { absoluteUrl } from "@/lib/seo";
 
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const routes = ["", "/a-propos", "/services", "/realisations", "/contact", "/devis"];
+  /* Toutes les pages du site public, tarifs compris : la page qui porte les prix
+     était absente du plan de site, donc invisible pour les moteurs alors qu'elle
+     est liée depuis le header. Les vitrines de salons (`/s/[slug]`) n'y figurent
+     pas : la liste des salons n'est pas publique, et une entrée inventée serait
+     une URL morte. */
+  const routes = ["", "/a-propos", "/services", "/tarifs", "/realisations", "/contact", "/devis"];
 
   const entries = await Promise.all(
     locales.map(async (lang) => {

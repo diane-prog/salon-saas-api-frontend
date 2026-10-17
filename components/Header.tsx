@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
+import { ProductPanel } from "@/components/ProductPanel";
 import { usePathname } from "next/navigation";
 import { Close, Menu, ChevronDown, ArrowRight } from "@/components/Icons";
 import { switchLocalePath, type Locale } from "@/lib/dictionaries";
@@ -73,7 +73,7 @@ export default function Header() {
     setOpen(false);
     setServicesOpen(false);
     setServicesPanel(false);
-    document.cookie = `leegi-locale=${next};path=/;max-age=31536000;samesite=lax`;
+    document.cookie = `belora-locale=${next};path=/;max-age=31536000;samesite=lax`;
     /* `hard: true` : navigation PLEINE PAGE sous le rideau, et non `router.push`. Un
        changement de langue remonte tout `app/[lang]` — donc le rideau lui-même. En doux,
        l'ancienne instance partait en laissant son rideau posé, et l'écran restait couvert
@@ -98,34 +98,37 @@ export default function Header() {
           une fois la page défilée — parce que le hero de l'accueil est sombre et que la barre y
           doit s'effacer. */}
       <header
-        className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${
+        className={`fixed inset-x-0 top-0 z-50 border-b border-ink/10 transition-all duration-300 ${
           scrolled
-            ? "border-b border-paper/10 bg-bg-white/85 py-2 backdrop-blur-xl lg:border-navy/8 lg:bg-white/85 lg:shadow-soft"
-            : "border-b border-paper/10 bg-transparent py-3 lg:border lg:bg-transparent lg:py-4"
+            ? "bg-paper/90 py-2 backdrop-blur-xl"
+            : "bg-paper/70 py-3 backdrop-blur-md lg:py-4"
         }`}
       >
         <div className="max-w-[91rem] mx-auto flex items-center justify-between gap-4 px-4 sm:gap-6 sm:px-6 lg:px-0">
-          <Link href={href("/")} aria-label="LEEGI Group" className="relative z-10 flex items-center">
-            {/* Deux logos, un par terrain : le clair dans la barre d'encre du téléphone, et
-                celui qui suit l'état de la barre sur grand écran. Un `src` ne se change pas en
-                CSS, donc les deux images coexistent et l'une est masquée. */}
-            <Image
-              src="/img/logo.png"
-              alt="LEEGI Group"
-              width={180}
-              height={80}
-              priority
-              className="h-9 w-auto lg:hidden"
-            />
-            <Image
-              src={scrolled ? "/img/logo-navy.png" : "/img/logo.png"}
-              alt=""
-              width={180}
-              height={80}
-              priority
-              aria-hidden
-              className="hidden h-16 w-auto transition-all duration-300 lg:block"
-            />
+          <Link
+            href={href("/")}
+            aria-label={dict.site.name}
+            className="relative z-10 flex items-center"
+          >
+            {/* Le nom de la maison, écrit — pas un logo emprunté à une autre activité. Sur
+                téléphone la barre est toujours sur l'encre (texte clair) ; sur grand écran il
+                suit l'état de la barre : clair au-dessus du hero, encre une fois collé. */}
+            <span
+              className={`font-display text-[1.4rem] leading-none tracking-[-0.015em] transition-colors lg:hidden ${
+                "text-ink"
+              }`}
+            >
+              {dict.site.name}
+            </span>
+
+            <span
+              className={`hidden font-display text-[1.45rem] leading-none tracking-[-0.015em] transition-colors lg:inline ${
+                "text-ink"
+              }`}
+            >
+              {dict.site.name}
+              <span aria-hidden className="ml-1 inline-block h-1.5 w-1.5 rounded-full bg-brand" />
+            </span>
           </Link>
 
           <nav className="hidden items-center gap-1 lg:flex" aria-label={dict.ui.navLabel}>
@@ -143,7 +146,7 @@ export default function Header() {
                   aria-expanded={servicesPanel}
                   onClick={() => setServicesPanel(true)}
                   className={`flex items-center cursor-pointer gap-1 rounded-full px-4 py-2 transition-colors ${
-                    scrolled ? "text-navy hover:text-brand" : "text-white/85 hover:text-white"
+                    "text-ink/75 hover:text-brand"
                   }`}
                 >
                   <span className="text-md font-light">{item.label}</span>
@@ -158,7 +161,7 @@ export default function Header() {
                   key={item.href}
                   href={href(item.href)}
                   className={`rounded-full px-4 py-2 text-md font-light transition-colors ${
-                    scrolled ? "text-navy hover:text-brand" : "text-white/85 hover:text-white"
+                    "text-ink/75 hover:text-brand"
                   }`}
                 >
                   {item.label}
@@ -170,12 +173,11 @@ export default function Header() {
           <div className="flex items-center gap-2 sm:gap-3">
             <LocaleSwitch
               locale={locale}
-              scrolled={scrolled}
               onChange={changeLocale}
               label={dict.ui.languageLabel}
             />
 
-            <HeaderSearch scrolled={scrolled} />
+            <HeaderSearch />
 
             <button
               type="button"
@@ -269,30 +271,29 @@ export default function Header() {
                 ))}
               </ul>
 
-              {/* Le bloc image de l'ancien bandeau, gardé tel quel : photo, dégradé navy,
-                  étiquette d'expertise, accroche, action « Devis gratuit ». Il referme le
-                  panneau au clic, comme tout lien du menu. */}
-              <div className="relative hidden overflow-hidden lg:block">
-                <Image
-                  src="/img/partenaires.jpg"
-                  alt=""
-                  fill
-                  sizes="360px"
-                  className="object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-navy-deep/90 via-navy-deep/45 to-navy-deep/10" />
-                <div className="relative flex h-full min-h-[20rem] flex-col justify-end gap-3 p-6">
+              {/* Le panneau de droite du méga-menu : plus de photo de partenaires,
+                  mais l'agenda du jour dessiné (`ProductPanel`). Le menu montre ce qu'on
+                  vient chercher — la journée du salon — au lieu d'une image d'ambiance. */}
+              <div className="relative hidden flex-col justify-between gap-6 bg-ink p-6 lg:flex">
+                <div>
                   <span className={`${LABEL} text-turquoise`}>{dict.ui.expertise}</span>
-                  <p className="text-xl font-light leading-snug text-white">{dict.ui.talkToUs}</p>
-                  <Link
-                    href={href("/devis")}
-                    onClick={closeServicesPanel}
-                    className="group inline-flex w-fit items-center gap-2 rounded-full bg-white px-4 py-2 text-xs font-light text-navy transition-transform duration-300 hover:-translate-y-0.5"
-                  >
-                    {dict.ui.freeQuote}
-                    <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-0.5" />
-                  </Link>
+                  <p className="mt-3 font-display text-2xl leading-tight text-paper">
+                    {dict.ui.talkToUs}
+                  </p>
                 </div>
+
+                <div className="text-ink">
+                  <ProductPanel variant="agenda" />
+                </div>
+
+                <Link
+                  href={href("/devis")}
+                  onClick={closeServicesPanel}
+                  className="group inline-flex w-fit items-center gap-2 border-b border-paper/30 pb-1 text-[0.7rem] uppercase tracking-[0.16em] text-paper/80 transition-colors hover:border-paper hover:text-paper"
+                >
+                  {dict.ui.freeQuote}
+                  <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-0.5" />
+                </Link>
               </div>
             </div>
           </div>
@@ -305,7 +306,9 @@ export default function Header() {
               croix cerclée. Les trois surfaces du site (recherche, formulaire, menu) se
               ressemblent, on ne change pas de vocabulaire en changeant de panneau. */}
           <div className="container-x flex items-center justify-between py-4">
-            <Image src="/img/logo.png" alt="LEEGI Group" width={150} height={60} className="h-9 w-auto" priority />
+            <span className="font-display text-[1.4rem] leading-none tracking-[-0.015em] text-paper">
+              {dict.site.name}
+            </span>
             <button
               type="button"
               onClick={() => setOpen(false)}
@@ -385,7 +388,6 @@ export default function Header() {
             <div className="mt-8 flex items-center gap-3">
               <LocaleSwitch
                 locale={locale}
-                scrolled={false}
                 onChange={changeLocale}
                 label={dict.ui.languageLabel}
                 size="lg"
@@ -418,25 +420,22 @@ export default function Header() {
 
 function LocaleSwitch({
   locale,
-  scrolled,
   onChange,
   label,
   size = "sm",
 }: {
   locale: Locale;
-  scrolled: boolean;
   onChange: (l: Locale) => void;
   label: string;
   size?: "sm" | "lg";
 }) {
   const labels = switchLabels[locale];
+  /* La barre est claire en toutes circonstances (hero papier) : la pastille est donc
+     encre sur papier, sans variante de défilement — une seule apparence, partout. */
   const base =
-    "inline-flex items-center rounded-full p-0.5 text-[0.68rem] font-light transition-colors bg-white/10 text-white/70";
-  /* Le fond de la barre change sur GRAND ÉCRAN (blanc une fois défilé) et jamais sur
-     téléphone (encre, toujours) : le ton de la pastille suit donc la barre, mais seulement à
-     partir de `lg` — et en clair la pastille active reste blanche dans les deux cas. */
-  const tone = scrolled ? "lg:bg-navy/[0.06] lg:text-muted" : "";
-  const active = scrolled ? "bg-white text-navy lg:shadow-soft" : "bg-white text-navy";
+    "inline-flex items-center rounded-full p-0.5 text-[0.68rem] font-light transition-colors bg-ink/[0.06] text-ink/60";
+  const tone = "";
+  const active = "bg-ink text-paper";
   const pad = size === "lg" ? "py-2 px-1" : "py-1";
 
   return (
@@ -446,7 +445,7 @@ function LocaleSwitch({
         onClick={() => onChange("fr")}
         aria-current={locale === "fr" ? "true" : undefined}
         className={`rounded-full px-2.5 py-1 transition-colors ${
-          locale === "fr" ? active : `hover:text-white hover:opacity-80 ${scrolled ? "lg:hover:text-navy" : ""}`
+          locale === "fr" ? active : "hover:text-ink"
         }`}
       >
         {labels.fr}
@@ -456,7 +455,7 @@ function LocaleSwitch({
         onClick={() => onChange("en")}
         aria-current={locale === "en" ? "true" : undefined}
         className={`rounded-full px-2.5 py-1 transition-colors ${
-          locale === "en" ? active : `hover:text-white ${scrolled ? "lg:hover:text-navy" : ""}`
+          locale === "en" ? active : "hover:text-ink"
         }`}
       >
         {labels.en}

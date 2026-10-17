@@ -422,7 +422,7 @@ function CurtainPanel({ phase, label }: { phase: Exclude<Phase, "idle">; label: 
     >
       <div className="relative flex h-full flex-col items-center justify-center gap-5 px-6 text-center">
         <span className="text-[0.68rem] font-medium uppercase tracking-[0.3em] text-paper/60">
-          LEEGI GROUP
+          BELORA
         </span>
 
         <SplitText

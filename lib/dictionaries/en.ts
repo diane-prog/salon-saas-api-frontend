@@ -1,28 +1,34 @@
 export const site = {
-  name: "LEEGI Group",
-  tagline: "Digital communication agency based in Dakar. We turn your ambitions into digital success.",
+  /* The PRODUCT's name and promise.
+
+     ⚠️ The contact block just below (phone, email, address, socials) still belongs
+     to the former agency identity: it must be replaced with Belora's real details,
+     which cannot be invented. Until then the footer and the structured data
+     announce a contact that is not the right one. */
+  name: "Belora",
+  tagline:
+    "The software for salons: calendar, online booking, clients, till and team, in one place.",
   phone: "+221 78 122 93 05",
   phoneRaw: "tel:+221781229305",
   /* WhatsApp: a single address across the whole site (footer, fan, assistant), derived from
      the phone number — so changing the number happens in one place only. */
   whatsapp: "https://wa.me/221781229305",
-  email: "contact@leegigroup.com",
+  /* Product contact address. Replace with the real mailbox before launch; no social
+     profiles are listed until Belora accounts exist. WhatsApp is derived from the phone
+     number (`components/SocialIcons`). */
+  email: "bonjour@belora.app",
   address: "Dakar, Senegal",
   hours: "Mon–Fri, 9am–6pm",
-  socials: [
-    { label: "LinkedIn", href: "https://www.linkedin.com/company/leegi-group/" },
-    { label: "Facebook", href: "https://www.facebook.com/profile.php?id=61579376777474" },
-    { label: "X", href: "https://x.com/Leegigroup" },
-    { label: "TikTok", href: "https://www.tiktok.com/@leegigroup" },
-    { label: "Instagram", href: "https://www.instagram.com/leegigroup/" },
-  ],
+  socials: [] as { label: string; href: string }[],
 };
 
+/* Navigation: real routes only — never a link to a page that does not exist.
+   The `/services` entry is what opens the mega menu (the Header keys off that
+   exact href). */
 export const nav = [
   { label: "Home", href: "/" },
-  { label: "About", href: "/a-propos" },
-  { label: "Services", href: "/services" },
-  { label: "Work", href: "/realisations" },
+  { label: "Features", href: "/services" },
+  { label: "Pricing", href: "/tarifs" },
   { label: "Contact", href: "/contact" },
 ];
 
@@ -40,480 +46,388 @@ export type Service = {
   steps: { title: string; body: string }[];
   ctaTitle: string;
   ctaBody: string;
-  image: string;
 };
 
 export const services: Service[] = [
   {
-    slug: "branding",
-    title: "Branding",
-    short: "Logos, brand guidelines and memorable brand identities that stick in people's minds.",
-    heroTitle: "Branding",
-    heroSubtitle: "Build a strong, memorable identity",
-    whyTitle: "Why branding?",
-    whyBody:
-      "Your brand is far more than a logo. We create complete visual identities that tell your story and captivate your audience. From logo design to a full brand guideline, every element is crafted to express who you are, inspire trust and win a place in your customers' minds.",
-    offerings: [
-      "Logo design",
-      "Complete brand guidelines",
-      "Visual identity",
-      "Mockups & adaptations",
-      "Brand guide",
-    ],
-    processLabel: "How it works",
-    processIntro: "A proven process for guaranteed results.",
-    steps: [
-      { title: "Discovery", body: "Analysis of your market, your values and your goals" },
-      { title: "Creation", body: "Design of original, creative concepts" },
-      { title: "Refinement", body: "Adjustments and fine-tuning of the chosen design" },
-      { title: "Delivery", body: "Final files and complete brand guidelines" },
-    ],
-    ctaTitle: "Ready to level up your branding?",
-    ctaBody:
-      "Let's talk about your project and build together a brand identity that looks like you and sets you apart.",
-    image: "/img/projet-setna.jpg",
-  },
-  {
-    slug: "site-web",
-    title: "Website Development",
+    slug: "agenda",
+    title: "Calendar & appointments",
     short:
-      "Responsive, high-performance websites optimised to convert your visitors.",
-    heroTitle: "Websites",
-    heroSubtitle: "Your high-performance digital storefront",
-    whyTitle: "Why a website?",
+      "The salon's whole day at a glance: booked slots, availability, statuses and reschedules.",
+    heroTitle: "Calendar & appointments",
+    heroSubtitle: "Your salon's day, in a single look",
+    whyTitle: "Why a calendar?",
     whyBody:
-      "Your website is your best salesperson. We build modern, fast websites optimised to turn visitors into customers. Responsive, SEO-friendly and engineered to perform.",
+      "A forgotten appointment, an empty slot, a client waiting: the day is decided here. Belora shows who does what, where and for how long, moves every appointment from booked to completed, and frees the slot the moment something is rescheduled. Front desk only has to read the screen.",
     offerings: [
-      "Showcase websites",
-      "E-commerce",
-      "Responsive design",
-      "Performance optimisation",
-      "Maintenance & support",
+      "Day, week and month views",
+      "Occupied slots and open availability",
+      "Rescheduling without losing anything",
+      "Statuses: pending, confirmed, completed, cancelled, no-show",
+      "Notes visible to the whole team",
     ],
     processLabel: "How it works",
-    processIntro: "A proven process for guaranteed results.",
+    processIntro: "From the first call to the client walking out.",
     steps: [
-      { title: "Wireframes", body: "Architecture and information structure" },
-      { title: "Design", body: "Creation of modern, ergonomic mockups" },
-      { title: "Development", body: "Technical integration and development" },
-      { title: "Launch", body: "Testing, optimisation and go-live" },
+      {
+        title: "Booking",
+        body: "The client books online, or the desk takes the appointment",
+      },
+      {
+        title: "Confirmation",
+        body: "The status follows the exchange, with no double entry anywhere",
+      },
+      {
+        title: "The day",
+        body: "The slot moves from booked to in progress, then completed",
+      },
+      {
+        title: "Afterwards",
+        body: "The appointment feeds the client file and the statistics",
+      },
     ],
-    ctaTitle: "Ready to boost your website?",
+    ctaTitle: "Your calendar deserves better than a paper book.",
     ctaBody:
-      "Let's talk about your project and build together a website that works for you around the clock.",
-    image: "/img/projet-emf.jpg",
+      "Open a salon, publish your services, and watch the bookings arrive on their own.",
   },
   {
-    slug: "seo",
-    title: "SEO",
-    short: "Audit, optimisation and strategy to dominate search results.",
-    heroTitle: "SEO",
-    heroSubtitle: "Dominate search results",
-    whyTitle: "Why SEO?",
-    whyBody:
-      "Being invisible on Google is like not existing. Our SEO expertise pushes you to the top of search results, bringing a steady stream of qualified leads to your website. We optimise your site, your content and your strategy to improve your positioning durably. The result: more visibility, more traffic and more opportunities for your business.",
-    offerings: [
-      "Full SEO audit",
-      "Keyword research",
-      "On-page optimisation",
-      "Strategic link building",
-      "Local SEO",
-      "Tracking & reporting",
-    ],
-    processLabel: "How it works",
-    processIntro: "A proven process for guaranteed results.",
-    steps: [
-      { title: "Audit", body: "Technical and semantic analysis of your site" },
-      { title: "Strategy", body: "Personalised, prioritised action plan" },
-      { title: "Optimisation", body: "Implementation of technical and content recommendations" },
-      { title: "Tracking", body: "Monthly reports and continuous adjustments" },
-    ],
-    ctaTitle: "Ready to boost your SEO?",
-    ctaBody: "Let's talk about your project and make Google your best salesperson.",
-    image: "/img/projet-comprint.jpg",
-  },
-  {
-    slug: "contenu-reels-spots",
-    title: "Content, Reels & Ads",
+    slug: "reservation-en-ligne",
+    title: "Online booking",
     short:
-      "Punchy visuals, articles and videos designed to capture attention and engage your audience.",
-    heroTitle: "Content, Reels & Ad Spots",
-    heroSubtitle: "Engage and make an impact",
-    whyTitle: "Why content, Reels and ad spots?",
+      "A page per salon, open 24/7, with your services, your team and your real availability.",
+    heroTitle: "Online booking",
+    heroSubtitle: "Clients book while you work",
+    whyTitle: "Why accept online bookings?",
     whyBody:
-      "Capturing attention is no longer enough: you need to make an impact. At LEEGI Group, we create visual content and videos designed to attract, engage and convince your audience. From social media content to dynamic Reels and impactful ad spots, every creation elevates your brand and delivers your message with force.",
+      "A booking taken at 11 pm is one you did not have. Belora publishes your page with your services, your team and your live availability: the client picks, the calendar fills, and nobody had to pick up the phone. Each salon wears its own colours on its page.",
     offerings: [
-      "Social media visuals",
-      "Editorial strategy",
-      "Blog articles",
-      "Post-production",
-      "Motion design",
-      "Storyboarding",
-      "Corporate videos",
+      "Public page in your own colours",
+      "Four-step journey: service, expert, slot, details",
+      "Only genuinely free slots are offered",
+      "Immediate confirmation on the client's side",
+      "A page at an address you choose",
     ],
     processLabel: "How it works",
-    processIntro: "A proven process for guaranteed results.",
+    processIntro: "Four screens, one minute, no app to install.",
     steps: [
-      { title: "Strategy", body: "Definition of your editorial line and content planning" },
-      { title: "Creation", body: "Production of visuals, Reels and impactful ad spots" },
-      { title: "Distribution", body: "Scheduling and publication optimised for each platform" },
-      { title: "Analysis", body: "Performance measurement and continuous optimisation" },
+      { title: "Service", body: "The client picks what they need and sees the price" },
+      { title: "Expert", body: "They pick the person, or let the salon decide" },
+      { title: "Slot", body: "Only the times that are really free are offered" },
+      { title: "Details", body: "Name, phone, confirmation: the appointment is set" },
     ],
-    ctaTitle: "Ready to captivate your audience?",
+    ctaTitle: "Give your salon an address that works for you.",
     ctaBody:
-      "Let's talk about your project and create content that attracts, engages and converts.",
-    image: "/img/projet-etincelles.jpg",
+      "Every salon gets its own page, its colours and its hours. You only manage one thing: the calendar.",
   },
   {
-    slug: "evenementiel",
-    title: "Events",
-    short: "Planning and coordination of events that make an impact.",
-    heroTitle: "Events",
-    heroSubtitle: "Create unforgettable experiences",
-    whyTitle: "Why events?",
-    whyBody:
-      "A successful event can transform your image and create lasting connections. We design and organise bespoke events that make an impact and strengthen your reputation.",
-    offerings: [
-      "Seminars & conferences",
-      "Product launches",
-      "Corporate evenings",
-      "Team building",
-      "Digital events",
-    ],
-    processLabel: "How it works",
-    processIntro: "A proven process for guaranteed results.",
-    steps: [
-      { title: "Brief", body: "Understanding of your goals and your audience" },
-      { title: "Concept", body: "Concept creation and detailed planning" },
-      { title: "Production", body: "Vendor coordination and logistics" },
-      { title: "Showtime", body: "Event management and hosting" },
-    ],
-    ctaTitle: "Ready to boost your events?",
-    ctaBody:
-      "Let's talk about your project and build together an event that will make an impact",
-    image: "/img/projet-escda.jpg",
-  },
-  {
-    slug: "strategie-communication",
-    title: "Strategy & Marketing",
+    slug: "fiches-clients",
+    title: "Client files",
     short:
-      "Analysis, positioning and action plan to grow your visibility and strengthen your communication.",
-    heroTitle: "Communication & Marketing Strategy",
-    heroSubtitle: "Turn your communication into results",
-    whyTitle: "Why a communication and marketing strategy?",
+      "Visit history, details, preferences and loyalty: your salon's memory.",
+    heroTitle: "Client files",
+    heroSubtitle: "Your salon's memory, within reach",
+    whyTitle: "Why a client file?",
     whyBody:
-      "Communication without strategy is like talking into the void. We build clear, effective strategies that attract the right customers, position your brand and turn your actions into measurable results.",
+      "Finding the colour, the last package or the regular's usual preference in three seconds is what brings people back. Every client keeps their visits, their habits and what matters to you. Same name, same person, from one appointment to the next.",
     offerings: [
-      "Audit & analysis",
-      "Strategic positioning",
-      "Marketing action plan",
-      "Content & campaigns",
-      "Optimisation",
-      "Reporting",
+      "Complete file, instant search",
+      "History of every visit",
+      "Preferences and team notes",
+      "Tags and acquisition sources",
+      "Visits and spend tracked",
     ],
     processLabel: "How it works",
-    processIntro: "A proven process for guaranteed results.",
+    processIntro: "The file fills itself in as appointments happen.",
     steps: [
-      { title: "Analysis", body: "Understanding of your brand, your goals and your audience" },
-      { title: "Strategy", body: "Definition of positioning, messaging and marketing plan" },
-      { title: "Execution", body: "Rollout of content, campaigns and marketing actions" },
-      { title: "Optimisation", body: "Performance tracking and adjustments to maximise impact" },
+      { title: "Arrival", body: "First visit: name, phone and where they came from" },
+      { title: "Follow-up", body: "Every appointment joins the history" },
+      { title: "Preferences", body: "The team notes what matters for this client" },
+      { title: "Return", body: "They come back with their history already there" },
     ],
-    ctaTitle: "Ready to boost your communication?",
-    ctaBody:
-      "Let's talk about your project and build together a strategy that turns your communication into concrete results.",
-    image: "/img/projet-comprint.jpg",
+    ctaTitle: "Clients will come back, and you'll know why.",
+    ctaBody: "Open your workspace and add your first client in a minute.",
+  },
+  {
+    slug: "prestations",
+    title: "Services & pricing",
+    short:
+      "Your catalogue: duration, price, category, online visibility and what each one earns.",
+    heroTitle: "Services & pricing",
+    heroSubtitle: "Your catalogue, kept current",
+    whyTitle: "Why a clean catalogue?",
+    whyBody:
+      "A service with no duration is a mis-sized slot; a stale price is a conversation at the till. Belora files your services by category, with their duration and price, and lets you decide which one is bookable online. What you publish is what clients book.",
+    offerings: [
+      "Categories and grouping",
+      "Duration and price per service",
+      "Online visibility, service by service",
+      "Images and descriptions",
+      "Catalogue status at a glance",
+    ],
+    processLabel: "How it works",
+    processIntro: "From catalogue to till, one single source of truth.",
+    steps: [
+      { title: "Definition", body: "Name, category, duration and price for each service" },
+      { title: "Publishing", body: "You decide what can be booked online" },
+      { title: "Booking", body: "The client books the service at the right price" },
+      { title: "Review", body: "The most requested services rise to the top of the numbers" },
+    ],
+    ctaTitle: "Your catalogue, finally readable.",
+    ctaBody: "Describe a service, give it a duration: it is bookable straight away.",
+  },
+  {
+    slug: "equipe",
+    title: "Team & commissions",
+    short:
+      "Stylists, practitioners, hours, availability and commissions: who does what this week.",
+    heroTitle: "Team & commissions",
+    heroSubtitle: "Who does what, and when",
+    whyTitle: "Why frame the team?",
+    whyBody:
+      "Availability gets split, commissions get calculated, and nobody has to remember anything. Belora keeps each member's hours, keeps bookings inside what they can actually absorb, and keeps track of what belongs to whom.",
+    offerings: [
+      "A file for each member",
+      "Weekly availability",
+      "Specialties and roles",
+      "Bookings limited to real working hours",
+      "Commission tracking",
+    ],
+    processLabel: "How it works",
+    processIntro: "Publish one availability, the calendar obeys the rule.",
+    steps: [
+      { title: "Role", body: "Each member has a position and its responsibilities" },
+      { title: "Hours", body: "Working windows are set once and for all" },
+      { title: "Assignment", body: "An appointment lands on someone genuinely free" },
+      { title: "Month end", body: "Commissions are computed on what was completed" },
+    ],
+    ctaTitle: "Your team is your product.",
+    ctaBody: "Add your experts, publish their hours, and let the calendar do the rest.",
+  },
+  {
+    slug: "pilotage",
+    title: "Analytics & control",
+    short:
+      "Today's view, monthly numbers, subscription, accounts and journal: direction, not guesswork.",
+    heroTitle: "Analytics & control",
+    heroSubtitle: "Know what your salon does, not what it assumes",
+    whyTitle: "Why look at the numbers?",
+    whyBody:
+      "Month's revenue, most requested services, no-shows, your subscription status: a decision taken on a feeling costs money. Belora puts the day's view, the statistics and the action journal in one place, so the question is settled by data.",
+    offerings: [
+      "Today's view: appointments, clients, alerts",
+      "Monthly statistics and revenue",
+      "Appointments by service",
+      "Subscription and its limits",
+      "Access accounts and action journal",
+    ],
+    processLabel: "How it works",
+    processIntro: "One page per decision, always backed by the data.",
+    steps: [
+      { title: "Measure", body: "Every completed appointment feeds the counters" },
+      { title: "Read", body: "The month compares itself to the last one, no spreadsheet" },
+      { title: "Decide", body: "You see where to adjust: hours, offer, team" },
+      { title: "Trace", body: "Who changed what, and when, stays readable" },
+    ],
+    ctaTitle: "Decide on numbers, not on impressions.",
+    ctaBody: "Your dashboard fills in from the first appointment you record.",
   },
 ];
 
 export const hero = {
-  keywords: ["Branding", "SEO", "Websites", "Content", "Events", "Ad Spots"],
-  /* The hero title is split in TWO: `leadStatic` stays put, `leadRotating` cycles in the
-     brand colour (see components/HomeHero.tsx). `lead` keeps the whole sentence — it is what
-     screen readers, search engines and share previews read, so it must stand on its own. */
-  lead: "Make your brand shine.",
-  leadStatic: "Make your brand",
-  leadRotating: ["shine.", "glow.", "soar.", "stand out."],
-  body: "LEEGI GROUP turns your visibility into customers, credibility and growth. Through strategy, creativity and digital expertise, your communication becomes a powerful lever to attract, convince and retain your customers.",
+  keywords: ["Calendar", "Booking", "Clients", "Services", "Team", "Analytics"],
+  /* The hero title is split in TWO: `leadStatic` stays put, the second line
+     carries the house italic (see components/HomeHero.tsx). `lead` keeps the
+     whole sentence — it is what screen readers, search engines and share
+     previews read, so it must stand on its own. */
+  lead: "Your salon, without the chaos.",
+  leadStatic: "Your salon,",
+  leadRotating: ["without the chaos.", "at the right pace.", "under control."],
+  body: "The calendar, online booking, client files, the till and your team in one gesture. Clients book at any hour, you see the day at a glance, and every slot earns what it should.",
+  liveLabel: "Live demonstration",
+  reassurances: [
+    { value: "24/7", label: "Online booking" },
+    { value: "One", label: "Appointment book" },
+    { value: "0", label: "Double entry" },
+  ],
+  previewLabel: "Product preview",
+  previewDay: "Today",
+  previewRows: [
+    { time: "09:30", service: "Cut and blow-dry", staff: "Awa", status: "Confirmed" },
+    { time: "11:00", service: "Full colour", staff: "Fatou", status: "In progress" },
+    { time: "14:15", service: "Beard and line-up", staff: "Moussa", status: "Confirmed" },
+    { time: "16:00", service: "Deep treatment", staff: "Awa", status: "Pending" },
+  ],
+  previewTotal: "Expected revenue",
+  previewBooking: "Online booking",
+  previewBookingBody: "A client just booked at 9:47 pm, for tomorrow at 10 am.",
+  ticker: ["Calendar", "Online booking", "Client files", "Services", "Team", "Till"],
 };
 
+/**
+ * Labels for the four figures — the VALUES do not come from here.
+ *
+ * They are served live by the demo salon's API through
+ * `components/LiveStats.tsx`: services published, experts, published reviews,
+ * average rating. These four are the only things the product can actually
+ * demonstrate here; the former figures (120 projects, 40 clients …) belonged to
+ * an agency that no longer exists on this site.
+ *
+ * Until the API answers, the section is not rendered: it would only show zeros,
+ * which would be a false claim.
+ */
 export const stats = [
-  { value: 120, suffix: "+", label: "Projects delivered" },
-  { value: 40, suffix: "+", label: "Satisfied clients" },
-  { value: 98, suffix: "%", label: "Client satisfaction" },
-  { value: 10, suffix: "+", label: "Years of experience" },
-  { value: 60, suffix: "+", label: "Partners" },
+  { value: 0, suffix: "", label: "Services published" },
+  { value: 0, suffix: "", label: "Experts on the team" },
+  { value: 0, suffix: "", label: "Published reviews" },
+  { value: 0, suffix: "/5", label: "Average rating" },
 ];
 
 export const about = {
   title: "About",
-  heading: "Your trusted digital partner",
-  body: "Based in Senegal, Leegi Group is a digital communication agency passionate about the digital transformation of African businesses. We combine creativity, technical expertise and deep knowledge of African markets to deliver exceptional results.",
+  heading: "The software for salons that work",
+  body: "Belora was born from a simple observation: a salon does not need another piece of software, it needs its day to hold together. We bring the calendar, online booking, client files, the till and the team into one tool, built to be run with one hand while you work with the other.",
   points: [
-    "A strategic, tailored approach",
-    "A team 100% dedicated to your projects",
-    "Measurable, transparent results",
-    "Constant innovation and tech monitoring",
+    "One appointment book for the whole salon",
+    "A public page in your colours, open around the clock",
+    "Every slot accounted for: duration, price, commission",
+    "A team you can reach, answering in your language",
   ],
 };
 
 /**
  * Projects. Each one carries three levels of reading: `body` (a single line, for the tile and
  * the search index), then `summary` + `scope` (the story and the scope), shown by the
- * full-screen sheet — see `components/ProjectModal.tsx`.
  *
  * Everything here is DERIVED from the project, never invented: the `client` comes from the
  * title or the body, the rest restates the work already described. No date, no figure, no
  * measured outcome was added — a sheet that invents a number is worse than a short sheet. If
  * a figure ever belongs here, it comes from the client, not from us.
  */
-export const projects = [
-  {
-    title: "ESCDA 2025 event visual identity",
-    body: "Design and production of visual assets to strengthen the event's impact.",
-    category: "Events",
-    image: "/img/projet-escda.jpg",
-    client: "ESCDA",
-    summary:
-      "A yearly gathering of students, teachers and partners: the visual system had to hold up for a whole day without ever losing the school's thread. Signage, stage screens, print pieces and social media adaptations were drawn as one graphic family, produced and delivered within the tight deadlines of the event.",
-    scope: [
-      "Art direction of the visual system",
-      "Signage and printed materials",
-      "Stage screen graphics",
-      "Social media adaptations",
-    ],
-  },
-  {
-    title: "EMF website design",
-    body: "A modern, well-structured website to strengthen EMF's digital presence.",
-    category: "Websites",
-    image: "/img/projet-emf.jpg",
-    client: "EMF Consulting",
-    summary:
-      "A digital presence worthy of a consulting firm: the site had to explain a demanding offer in seconds and earn trust before the first conversation. The architecture was tightened around three entry points — expertise, references, contact — and every page ends on a clear way out.",
-    scope: [
-      "Site structure and visitor journey",
-      "Design and responsive build",
-      "Content hierarchy",
-      "Go-live and search basics",
-    ],
-  },
-  {
-    title: "Comprint ad mockups",
-    body: "Visuals created to capture attention and maximise campaign impact.",
-    category: "Digital content",
-    image: "/img/projet-comprint.jpg",
-    client: "Comprint",
-    summary:
-      "Visuals built for a feed: catch the eye in the first second, say one thing, stay readable on a phone screen. The series applies a single compositional principle across several formats, so future campaigns only have to change the message.",
-    scope: [
-      "Design of the visual series",
-      "Multi-format adaptations",
-      "Usage rules for upcoming campaigns",
-    ],
-  },
-  {
-    title: "Setna Services",
-    body: "Logo presented in real-world settings through professional mockups.",
-    category: "Branding",
-    image: "/img/projet-setna.jpg",
-    client: "Setna Services",
-    summary:
-      "A logo on its own convinces no one: what wins the decision is seeing it in real life. The brand was presented in context — stationery, vehicles, uniforms, signage — so the team could picture it before signing off, and so the rules of use were set from the start.",
-    scope: [
-      "Real-world mockups",
-      "High-fidelity renders",
-      "Brand application rules",
-    ],
-  },
-  {
-    title: "Social media content",
-    body: "Visual created for the 8 March digital campaign for Étincelles des Marques.",
-    category: "Digital content",
-    image: "/img/projet-etincelles.jpg",
-    client: "Étincelles des Marques",
-    summary:
-      "A campaign for International Women's Day: a visual that asserts without caricature, made to travel from one screen to the next. The message fits in a single image, the typography carries the tone, and the palette stays the brand's own.",
-    scope: [
-      "Campaign visual design",
-      "Social media format adaptations",
-      "Publication support",
-    ],
-  },
-  {
-    title: "ESCDA first edition coverage",
-    body: "Photo and video coverage to showcase the event's key moments.",
-    category: "Events",
-    image: "/img/projet-emf.jpg",
-    client: "ESCDA",
-    summary:
-      "A first edition: the images had to keep working long after the event. Photo and video coverage on the day, then editing into a short film and a selection of stills, delivered within the week to feed the school's communication.",
-    scope: [
-      "Photo and video coverage",
-      "Editing of the recap film",
-      "Photo selection and retouching",
-    ],
-  },
-];
+/**
+ * Exemples de réalisations — **volontairement vides**.
+ *
+ * Cette liste portait six études de cas d'agence. C'étaient de vrais projets, mais ce ne
+ * sont pas ceux d'un logiciel de salon : les afficher reviendrait à vendre autre chose que
+ * le produit. La preuve est désormais la page elle-même, alimentée par l'API réelle du
+ * salon de démonstration (voir `components/ProductShowcase.tsx`).
+ *
+ * Le tableau et son type restent : le jour où un client accepte d'être cité, il suffit
+ * d'ajouter une entrée ici, sans toucher aux composants.
+ */
+export type ShowcaseProject = {
+  title: string;
+  body: string;
+  category: string;
+  image: string;
+  client: string;
+  summary: string;
+  scope: string[];
+};
 
-export const filters = ["All", "Branding", "Websites", "Events", "Digital content"];
+export const projects: ShowcaseProject[] = [];
 
-export const testimonials = [
-  {
-    name: "Lamine SECK",
-    role: "Managing Director",
-    company: "Com&print Multiservices",
-    quote:
-      "Very professional and highly impactful. A high-quality job with very convincing results. If you want to talk about marketing and improve your brand image, trust Leegi Group.",
-    image: "/img/temoignage-lamine.jpg",
-  },
-  {
-    name: "Nestor DIATTA",
-    role: "Managing Director",
-    company: "SENTRAS SARL",
-    quote:
-      "I highly recommend Leegi Group. Professional, rigorous and adaptable, the team delivers high-quality results and brings real added value to every ambitious project.",
-    image: "/img/temoignage-nestor.jpg",
-  },
-  {
-    name: "Hamidou DIALLO",
-    role: "Managing Director",
-    company: "Houda Ingénierie BTP",
-    quote:
-      "I highly recommend Leegi Group. Professional and effective, the team supports businesses and brings real value to every project",
-    image: "/img/temoignage-hamidou.jpg",
-  },
-  {
-    name: "Seydina A. GAYE",
-    role: "Project Manager",
-    company: "Project Manager, community & eco development",
-    quote:
-      "I highly recommend Leegi Group. Creative and dynamic, the team delivers effective digital marketing solutions ",
-    image: "/img/temoignage-seydina.jpg",
-  },
-];
+export const filters: string[] = [];
+
+/**
+ * Témoignages — **volontairement vides**.
+ *
+ * Les entrées précédentes étaient des recommandations adressées à une agence de
+ * communication. Les réutiliser pour parler d'un logiciel de salon aurait été un faux
+ * témoignage : on attend de vrais salons.
+ */
+export type Testimonial = {
+  name: string;
+  role: string;
+  company: string;
+  quote: string;
+  image: string;
+};
+
+export const testimonials: Testimonial[] = [];
 
 export const aboutPage = {
   /* Hero headline, taken word for word from the reference site; “Who are we?” (`title`)
      stays the heading of the first content block, as it does there. */
-  heroHeadline: "The agency that makes your brand unmissable.",
+  heroHeadline: "The software that holds a salon's day together.",
   title: "Who are we?",
-  lead: "LEEGI Group boosts your visibility through targeted strategy and impactful creativity.",
-  body: "We support brands to capture attention, win over their audience and grow their influence.",
+  lead: "Belora is management software for salons and spas: the calendar, online booking, client files, the till and the team, in one tool.",
+  body: "We build it with salon owners, on their real days: one gesture, one piece of information, no bouncing between tools.",
   pillarsTitle: "Our foundations",
   pillars: [
-    { title: "Targeted strategy", body: "Precise actions for maximum impact." },
-    { title: "Impactful creativity", body: "Content that attracts and stays in people's minds." },
-    { title: "Concrete results", body: "Increased visibility and stronger credibility." },
+    { title: "The trade first", body: "Every screen starts from a real gesture in the salon, not from a feature list." },
+    { title: "One source", body: "An appointment entered once feeds the calendar, the till, the client file and the numbers." },
+    { title: "Built to last", body: "Your data stays yours and can be exported; the service does not stop with a plan." },
   ],
-  whyEyebrow: "Why work with us",
-  whyHeadline: "Why choose us",
-  /* One card per reason: the home grid shows these five numbered entries (01 → 05),
-     framed by two photos. */
+  whyEyebrow: "Why Belora",
+  whyHeadline: "What Belora changes",
+  /* One card per reason: the home grid shows these five numbered entries
+     (01 → 05). */
   whyCards: [
     {
-      title: "Strategy built around you",
-      body: "Every plan starts from your goals, your market and your constraints, never from a template.",
+      title: "A calendar that fills itself",
+      body: "Clients book at night, at the weekend and while you are cutting: the page is always open.",
     },
     {
-      title: "Content that lands",
-      body: "Visuals and videos designed to stop the scroll and stay in people's minds.",
+      title: "Everything in one place",
+      body: "Appointments, clients, services, till and team share one source. No double entry, no paper book.",
     },
     {
-      title: "A dedicated team",
-      body: "A small team that knows your brand and follows your project from brief to delivery.",
+      title: "Slots that are truly free",
+      body: "Times offered online are the ones your team can genuinely absorb — never invented.",
     },
     {
-      title: "Measured results",
-      body: "Clear objectives and tracked indicators: you know what each action delivers.",
+      title: "Your salon, your colours",
+      body: "Each page carries the salon's name, colours and hours. A page, not a template.",
     },
     {
-      title: "Lasting visibility",
-      body: "A presence that builds over time and keeps carrying your growth.",
+      title: "Every slot accounted for",
+      body: "Price, duration, commission and monthly revenue come out of the appointment, with no spreadsheet.",
     },
   ],
-  whyImage: "/img/partenaires.jpg",
-  whyImageAlt: "The LEEGI Group team on site with a client",
-  whyImage2: "/img/equipe-mareme.jpg",
-  whyImage2Alt: "A member of the LEEGI Group team",
   mission: {
     title: "Our mission",
-    body: "To help businesses become visible, credible and impactful. We believe every brand deserves a strategy that matches its ambitions.",
+    body: "To give salons their day back. A salon that no longer has to copy an appointment three times, or call a client back to confirm, has time for what it does well.",
   },
   vision: {
     title: "Our vision",
-    body: "To build strong, lasting brands. We aim to be the go-to partner for any company that wants to stand out.",
+    body: "That every salon, from a single chair to a ten-person spa, has the toolkit of a big house: a page that takes bookings at any hour, and numbers that tell the truth.",
   },
-  initiatives: {
-    /* Proper noun: identical in both languages. */
-    name: "Étincelles des Marques",
-    title: "Our initiatives",
-    body: "Among our actions, we lead Étincelles des Marques, a Leegi Group initiative dedicated to revealing, celebrating and amplifying the voice of African talent, brands and businesses.",
-    body2:
-      "Through authentic portraits, in-depth interviews and immersive podcasts, we tell real, inspiring stories that spotlight the careers driving innovation and impact across the African continent.",
-  },
+  productTitle: "The product, shown rather than told.",
+  productBody:
+    "This panel is a salon's control screen: the month's appointments, revenue, return rate. Every number comes from a real appointment — never an estimate.",
   valuesTitle: "Our values",
   values: [
     {
-      title: "Innovation",
-      body: "We develop original ideas and impactful solutions to make your brand shine.",
+      title: "The floor decides",
+      body: "A feature that does not save the front desk a gesture does not make it into the product.",
     },
     {
-      title: "Clarity",
-      body: "Every action is thought through to hit a precise goal and maximise the impact of your communication.",
+      title: "Few, but right",
+      body: "Each screen shows what you need to act, and nothing more. No decorative dashboard.",
     },
     {
-      title: "Excellence",
-      body: "We create memorable brand experiences that capture your audience's attention.",
+      title: "Numbers that are true",
+      body: "Revenue shown is revenue taken. When a value is missing the screen prints “—”; it does not invent one.",
     },
     {
-      title: "Commitment",
-      body: "We support every project with rigour, seriousness and a real sense of results.",
-    },
-  ],
-  teamLabel: "Our team",
-  teamIntro: "A multidisciplinary team serving your digital ambition.",
-  team: [
-    {
-      name: "Mareme SYLLA",
-      role: "Managing Director & Co-founder – LEEGI Group",
-      image: "/img/equipe-mareme.jpg",
-      bio: [
-        "Mareme SYLLA is Managing Director and co-founder of LEEGI Group.",
-        "Passionate about marketing and strategic communication, she supports local and international companies in developing their brand image, digital visibility and positioning.",
-        "Her expertise was built across a wide range of sectors, notably construction, real estate, automotive, furniture, oil and gas industries, as well as services, hospitality, printing and training, with strong market knowledge and mastery.",
-        "Through her career in marketing, sales and digital communication, she works on structuring brands, from set-up to the implementation of strategies adapted to market realities.",
-        "Convinced that a brand is built on clarity, consistency and impact, she defends a results-oriented strategic approach.",
-        "She is also behind the Étincelles des Marques project, dedicated to promoting African entrepreneurs and brands.",
-      ],
-    },
-    {
-      name: "Ndeye Anta Ndiaye",
-      role: "Graphic Designer | Web Developer & Digital Content Officer",
-      image: "/img/equipe-ndeye.jpg",
-      bio: [],
-    },
-    {
-      name: "Cheikh Bamba Bâ",
-      role: "Graphic Designer & Digital Content Officer",
-      image: "/img/equipe-cheikh.jpg",
-      bio: [],
+      title: "Your data stays yours",
+      body: "It can be exported, it is not used for anything else, and leaving does not require a registered letter.",
     },
   ],
   why: {
-    title: "Why choose us?",
+    title: "Why Belora?",
     items: [
       {
-        title: "Proven experience",
-        body: "More than 10 years supporting brands across every sector..",
+        title: "Built with salons",
+        body: "Screens are drawn on real salon days, not in an office.",
       },
       {
-        title: "Concrete results",
-        body: "We don't sell dreams, we sell numbers and growth.",
+        title: "One tool",
+        body: "Calendar, booking, clients, till and team share one source: nothing to copy over.",
       },
       {
-        title: "End-to-end support",
-        body: "From strategy to execution, we're by your side.",
+        title: "No lock-in",
+        body: "A fourteen-day trial, month to month, and your data exportable at any time.",
       },
     ],
   },
@@ -521,7 +435,7 @@ export const aboutPage = {
 
 export const servicesPage = {
   title: "Our services",
-  lead: "A complete offer to grow your brand online. Every service is designed to deliver concrete results.",
+  lead: "Six ways to run your salon: book, welcome, take payment, decide. Every feature maps to a real endpoint of the product.",
 };
 
 export const contactPage = {
@@ -530,7 +444,7 @@ export const contactPage = {
   /* Right-hand column blocks: a discreet label above, the value in bold (email and
      phone are clickable). */
   info: [
-    { label: "Email", value: "contact@leegigroup.com", href: "mailto:contact@leegigroup.com" },
+    { label: "Email", value: "bonjour@belora.app", href: "mailto:bonjour@belora.app" },
     { label: "Phone", value: "221 78 122 93 05", href: "tel:+221781229305" },
     { label: "Address", value: "Dakar, Senegal", href: null },
     { label: "Opening hours", value: "Mon–Fri, 9am–6pm", href: null },
@@ -539,7 +453,7 @@ export const contactPage = {
      site's social profiles (dictionary `site.socials`) follow it. */
   /* Heading of the left-hand column. Deliberately different from the page title
      ("Contact"), which the hero already displays. */
-  heading: "Let's talk about your project",
+  heading: "Let's talk about your salon",
   cta: "Get in touch",
   /* Contents of the side sheet. */
   form: {
@@ -558,23 +472,22 @@ export const contactPage = {
 };
 
 export const devisPage = {
-  title: "Tell us about your project",
-  lead: "Get a proposal tailored to your goals.",
+  title: "Let's talk about your salon",
+  lead: "A demo, a question about plans, a migration from your current calendar: tell us where you are.",
   jsNote: "Please enable JavaScript in your browser to fill in this form.",
-  servicePlaceholder: "Select a service",
+  servicePlaceholder: "What brings you here",
   serviceOptions: [
-    "Branding",
-    "Websites",
-    "SEO",
-    "Content, Reels & Ads",
-    "Events",
-    "Strategy & Marketing",
+    "Discover the product",
+    "Migrate my calendar",
+    "Several salons",
+    "Billing and plans",
+    "Something else",
   ],
-  submit: "Get my quote",
-  formTitle: "Your project in a few fields",
-  formBody: "The more precise your information, the more tailored our proposal.",
+  submit: "Send my request",
+  formTitle: "Your salon in a few fields",
+  formBody: "The name, the size of the team, what you use today: enough to prepare a useful conversation.",
   successTitle: "Request sent",
-  successBody: "Thank you! Your quote request is on its way. We'll get back to you within 48 business hours.",
+  successBody: "Thank you! Your request is on its way. We'll get back to you within 48 business hours.",
   /* Field labels live here and not in the page: both the page AND the quote panel render
      them — one source, no divergence. */
   fields: {
@@ -582,10 +495,10 @@ export const devisPage = {
     lastName: "Last name",
     email: "Email",
     phone: "Phone",
-    service: "Service required",
+    service: "What brings you here",
     timeline: "Desired timeline",
     description: "Project description",
-    descriptionPlaceholder: "Tell us about your project…",
+    descriptionPlaceholder: "Your salon, your team, what you use today…",
   },
   includeTitle: "What's included",
   includes: [
@@ -597,49 +510,66 @@ export const devisPage = {
 };
 
 export const finalCta = {
-  title: "Ready to make your brand indispensable?",
-  body: "Get in touch to discuss your project and receive a tailored proposal.",
-  primary: "Request a quote",
+  title: "Open your salon today.",
+  body: "Your workspace is ready in two minutes. Your first online bookings can arrive tomorrow.",
+  primary: "Open a salon",
   secondary: "Contact us",
 };
 
-export const clients = [
-  "EMF Consulting",
-  "Comprint",
-  "SENTRAS",
-  "Houda Ingénierie",
-  "Setna Services",
-  "ESCDA",
-];
+/**
+ * Mur de logos — **volontairement vide**.
+ *
+ * Il listait les logos de clients d'une agence de communication. Les présenter comme des
+ * salons utilisateurs du logiciel serait faux ; on n'affiche donc rien tant que de vrais
+ * salons n'ont pas donné leur accord.
+ */
+export type ClientLogo = { name: string; src: string; width: number; height: number };
+
+export const clients: ClientLogo[] = [];
+
+/* “The product for real” page (formerly /realisations): everything written here describes
+   data READ from the demo salon's API, never sample values. */
+export const showcase = {
+  eyebrow: "The product for real",
+  title: "Not a mock-up: a salon that runs.",
+  lead: "This page queries the demo salon's API while you read it. Services, team, photos, reviews: its real data, not sample values.",
+  demoLabel: "Demo salon",
+  demoPlace: "Dakar, Senegal",
+  openSalon: "Open the page",
+  servicesTitle: "Its services, exactly as they are booked.",
+  servicesBody:
+    "Name, category, duration, price: the public page shows exactly these lines, and only offers slots that are genuinely free.",
+  teamTitle: "The team, and who does what.",
+  teamBody:
+    "Each member carries their specialities. The client picks their person, or lets the salon assign one.",
+  galleryTitle: "Its photos, published from the workspace.",
+  galleryBody:
+    "It is the same Gallery screen as in the workspace: what is published here is what shows on the public page.",
+  reviewsTitle: "What clients say.",
+  reviewsBody: "Average rating and published comments, served by the API. No review is written by hand.",
+  unavailable: "The demo salon's data is not available right now.",
+  empty: "Nothing to show yet.",
+};
 
 export const ui = {
-  viewDetails: "View details",
-  discover: "Discover",
-  learnMore: "Learn more about us",
+  /* Action feedback: two sentences read by the write notifications (see
+     `lib/feedback.ts`) that live outside the React tree. */
+  feedback: {
+    success: "Saved.",
+    error: "The change could not be saved. Try again in a moment.",
+  },
   viewAllProjects: "View all our work",
-  viewAllServices: "View all services",
-  discussProject: "Let's discuss your project",
+  viewAllServices: "View all features",
+  discussProject: "Let's talk about your salon",
   presentation: "Overview",
   ourOffer: "Our offer",
-  portfolio: "Portfolio",
-  projectsHeading: "Projects that transformed our clients' presence",
-  projectsBody:
-    "From brand identity to websites, every project is a tailor-made answer to a precise goal.",
-  references: "References",
-  testimonialTitle: "Testimonials",
-  testimonialBody: "See what our clients say about working with LEEGI Group.",
-  clientsTitle: "Our clients",
-  clientsLink: "Discover our clients' projects",
+  portfolio: "Product",
   methodology: "Method",
-  expertise: "Expertise",
-  agency: "Digital communication agency — Dakar",
-  freeQuote: "Free quote",
+  expertise: "Feature",
+  agency: "Salon & spa management software",
+  freeQuote: "Create my salon",
   talkToUs: "Let's talk",
-  teamEyebrow: "Our team",
   whatDrivesUs: "What drives us",
-  ourStrengths: "Our strengths",
-  top: "Top",
-  bottom: "Bottom",
   footerQuickLinks: "Quick links",
   footerService: "Service",
   rights: "All rights reserved.",
@@ -657,25 +587,16 @@ export const ui = {
   searchCloseLabel: "Close search",
   formCloseLabel: "Close form",
   otherServices: "Other services",
-  /* Full-screen sheet for a project (`components/ProjectModal.tsx`). `projectDetailLabel`
+  /* Historic project-gallery labels. `viewAllProjects` is still read by the feature pages;
+     the rest lost its consumer when `ProjectsGallery` and `ProjectModal` were removed
+     (agency content).
      names the dialog for screen readers, the others are visible. */
-  projectDetailLabel: "Project details",
-  projectCloseLabel: "Close project details",
-  projectDeliverables: "What we delivered",
-  projectClient: "Client",
-  projectCategory: "Category",
-  projectCta: "A project like this?",
-  /* Label of the blue flower in the testimonials section: two lines, so two entries — the
-     break is a layout decision, not an accident. */
-  clientStories: ["Client", "Stories"],
-  /* Home Services section: both sentences were written in clear in the page, doubled by a
-     ternary on the locale. */
-  servicesTitle: "Our Services",
+  servicesTitle: "Features",
   servicesBody:
-    "We support African companies and their partners at every stage of their digital development.",
-  statsTitle: "Proven results, not promises.",
+    "Six building blocks, one single source of data: the calendar, online booking, client files, services, team and analytics. Nothing is ever typed in twice.",
+  statsTitle: "A real salon's numbers, served live.",
   statsBody:
-    "A decade of campaigns, websites and brand identities for African companies and their partners. Here is what that looks like, in numbers.",
+    "This page queries the product's API while you read it: the services, team and reviews below belong to the demo salon — they are not sample values.",
   searchLabel: "Search the site",
   searchPlaceholder: "Search a service, a project…",
   searchNoResults: "No results",
@@ -685,16 +606,6 @@ export const ui = {
   searchSuggestions: "Suggestions",
   /* Keyboard hint in the footer of a full-screen panel (search, contact form). */
   panelHint: "Esc to close",
-  /* Site opening: the logo video, played once per session (see `components/VideoIntro.tsx`).
-     The label names the region for screen readers — the video is decorative (no sound, no
-     captions), so there is nothing else to announce. */
-  intro: {
-    /* The opening screen in two parts: its label (read by screen readers) and the word shown
-       before the video. There is no longer a "skip" button label — that exit now goes
-       through the gesture itself. */
-    label: "Welcome animation",
-    welcome: "Welcome to",
-  },
   /* Floating action bar (bottom of the screen, after the first scroll) and the social fan it
      opens. The labels double as `aria-label`s: one word, both what you see and what a screen
      reader announces. */
@@ -721,28 +632,976 @@ export const ui = {
   },
   /* Conversational assistant: the chat window labels. */
   chat: {
-    title: "LEEGI assistant",
-    subtitle: "An instant answer about our services",
+    title: "Belora assistant",
+    subtitle: "An instant answer about the product",
     placeholder: "Ask your question…",
     send: "Send",
     greeting:
-      "Hi 👋 I'm the LEEGI assistant. Ask me anything about our services, timelines or pricing.",
+      "Hi 👋 I'm the Belora assistant. Ask me how the calendar, online booking or plans work.",
     suggestions: [
-      "Which services do you offer?",
-      "How much does a website cost?",
-      "How do I get a quote?",
+      "How does online booking work?",
+      "What does the salon calendar do?",
+      "How much does Belora cost?",
     ],
     error: "The assistant is temporarily unavailable. Write to us at",
     close: "Close the assistant",
   },
-  /* Gallery displays on the home page (projects). */
-  galleryViews: { grid: "Grid", list: "List", feed: "Feed" },
-  galleryDisplay: "Layout",
-  galleryViewLabel: "Projects view mode",
+  /* Auth screens (`app/[lang]/(auth)`). Software vocabulary, not agency copy:
+     you don't “get in touch”, you open a workspace. The field labels live here,
+     shared by the three screens, so a field is never named two different things. */
+  auth: {
+    backToSite: "Back to the site",
+    loading: "One moment…",
+    fields: {
+      email: "Email",
+      password: "Password",
+      firstName: "First name",
+      lastName: "Last name",
+      phone: "Phone",
+    },
+    passwordHint: "At least 8 characters, one letter and one digit.",
+    login: {
+      eyebrow: "Salon workspace",
+      title: "Your salon is waiting",
+      body: "Enter your email and password: we send a 6-digit code to confirm it's really you.",
+      submit: "Send me the code",
+      noAccount: "No salon yet?",
+      createAccount: "Open a salon",
+      error: "Sign-in failed. Check your credentials and try again.",
+    },
+    otp: {
+      eyebrow: "Verification",
+      title: "Enter the code you received",
+      body: "A 6-digit code was just sent to",
+      code: "6-digit code",
+      submit: "Open my workspace",
+      resend: "Send a new code",
+      resendIn: "New code in",
+      seconds: "s",
+      sent: "A new code has just been sent.",
+      changeEmail: "Use another address",
+      error: "Code rejected or expired. Ask for a new one.",
+      missingEmail: "Missing address: start the sign-in again.",
+      backToLogin: "Back to sign-in",
+    },
+    register: {
+      eyebrow: "New salon",
+      title: "Open your salon in two minutes",
+      body: "Your workspace is created immediately. A code is then sent to confirm your address.",
+      salonTitle: "Your salon",
+      accountTitle: "Your account",
+      tenantName: "Salon name",
+      tenantSlug: "Address of your page",
+      slugHint: "Your public page, bookable online. Editable at any time.",
+      firstName: "First name",
+      lastName: "Last name",
+      phone: "Phone",
+      submit: "Create my salon",
+      haveAccount: "Already have a salon?",
+      signIn: "Sign in",
+      error: "Creation failed. Check your details or try again.",
+      terms: "By creating your salon you accept our terms of use.",
+    },
+    /* Right-hand column, on the ink: three short claims, never a sales pitch —
+       the sign-in screen is not a landing page. */
+    panel: {
+      title: "Your calendar, your clients and your till, in one place.",
+      points: [
+        "Online booking, 24/7",
+        "Client file and visit history",
+        "Till, team and today's numbers",
+      ],
+      demo: "See a demo salon page",
+    },
+  },
+
+  /* Salon workspace (`app/[lang]/(app)`).
+
+     Every navigation label lives here, including the ones whose screen does not
+     exist yet: the day a route opens, one line is added to the shell and no copy
+     is touched.
+
+     The wording is the trade's, not the API's: a salon says “Services” where the
+     backend says `salon-services`, and “Team” where it says `staff`. */
+  dashboard: {
+    brand: "Salon workspace",
+    logout: "Sign out",
+    viewSite: "View the site",
+    nav: {
+      overview: "Today",
+      appointments: "Appointments",
+      calendar: "Calendar",
+      customers: "Clients",
+      services: "Services",
+      staff: "Team",
+      gallery: "Gallery",
+      reviews: "Reviews",
+      messages: "Messages",
+      notifications: "Notifications",
+      analytics: "Analytics",
+      billing: "Subscription",
+      team: "Accounts & access",
+      audit: "Journal",
+      settings: "Settings",
+    },
+    groups: {
+      day: "The day",
+      clients: "Clients",
+      salon: "The salon",
+      account: "The account",
+    },
+    overview: {
+      eyebrow: "Today",
+      greeting: "Hello",
+      actions: {
+        title: "To do now",
+        confirmTitle: "To confirm",
+        confirmLabel: "appointments are waiting for a confirmation",
+        confirmHint: "Booked online: one call and they move to confirmed in the calendar.",
+        confirmNone: "everything is confirmed for today.",
+        confirmCta: "Open appointments",
+        nextTitle: "Next appointment",
+        nextNone: "No upcoming appointment.",
+        nextCta: "Open the calendar",
+        siteTitle: "Your public page",
+        siteBody: "Your page is live and takes bookings around the clock.",
+        siteNoSlug: "Set your public page address to publish it.",
+        siteCta: "Open the page",
+        siteSettings: "Open settings",
+      },
+      body: "Here is the state of your salon. The working screens open from the left column.",
+      salonLabel: "Your salon",
+      accountLabel: "Your account",
+      roleLabel: "Role",
+      signedInAs: "Signed in as",
+      /* Overview: what you look at on arrival. The four figures come from
+         `/dashboard`, the counters from `/tenant/stats`. */
+      /* Setup: the one part of the screen that says where you are in getting the
+         salon running. Every step is checked against real data (`/tenant/me`,
+         `/tenant/stats`) — never against a remembered click. */
+      setupTitle: "Getting set up",
+      setupBody:
+        "Five steps, in the order of the day: at the end, your page takes bookings and your calendar fills itself.",
+      setupDone: "Done",
+      setupTodo: "To do",
+      setupCta: "Open",
+      setupAllDone: "Everything is in place. Your salon can go to work.",
+      setupSteps: [
+        {
+          key: "slug",
+          title: "Page address",
+          hint: "The link your clients open to book.",
+        },
+        {
+          key: "services",
+          title: "Published services",
+          hint: "Price, duration and online booking, service by service.",
+        },
+        {
+          key: "staff",
+          title: "Team",
+          hint: "Who works, and when they are available.",
+        },
+        {
+          key: "gallery",
+          title: "Salon photos",
+          hint: "What the page shows before the first appointment.",
+        },
+        {
+          key: "booking",
+          title: "First appointment",
+          hint: "Proof that the whole chain works.",
+        },
+      ],
+      todayAppointments: "Today's appointments",
+      todayPending: "Pending",
+      todayCompleted: "Completed",
+      todayRevenue: "Today's revenue",
+      upcoming: "Upcoming",
+      recent: "Latest appointments",
+      noneUpcoming: "No upcoming appointment.",
+      noneRecent: "No past appointment yet.",
+      countsTitle: "The salon at a glance",
+      countsCustomers: "clients",
+      countsServices: "services",
+      countsStaff: "members",
+      countsGallery: "photos",
+      nextStepsTitle: "Your working screens",
+      nextStepsBody:
+        "Appointments, clients, services and team sit in the left column, wired to the salon's API. Each screen shows what the server returns, and says so when there is nothing to show.",
+    },
+    /* Data screens: appointments, clients, services, team. The wording is the
+       trade's, never the API's (`customers`, `salon-services`). Columns are named
+       here because the four screens share them word for word. */
+    screens: {
+      appointments: {
+        title: "Appointments",
+        lead: "The chosen day, hour by hour.",
+        dateLabel: "Day",
+        count: "appointments",
+        columns: {
+          time: "Time",
+          customer: "Client",
+          service: "Service",
+          staff: "With",
+          price: "Price",
+          status: "Status",
+          actions: "Actions",
+        },
+        actions: {
+          confirm: "Confirm",
+          start: "Start",
+          complete: "Complete",
+          cancel: "Cancel",
+          noShow: "No-show",
+        },
+        statuses: {
+          PENDING: "Pending",
+          CONFIRMED: "Confirmed",
+          IN_PROGRESS: "In progress",
+          COMPLETED: "Completed",
+          CANCELLED: "Cancelled",
+          NO_SHOW: "No-show",
+        },
+        add: "New appointment",
+        reschedule: "Reschedule",
+        remove: "Delete",
+        removeQuestion: "Delete this appointment?",
+        removeBusy: "Deleting…",
+        form: {
+          addTitle: "New appointment",
+          editTitle: "Reschedule the appointment",
+          body: "The service sets the duration and the price; you pick the slot.",
+          fields: {
+            customer: "Client",
+            service: "Service",
+            staff: "With",
+            date: "Day",
+            time: "Time",
+            notes: "Notes",
+          },
+          choose: "Choose…",
+          save: "Save",
+          saving: "Saving…",
+          cancel: "Cancel",
+          required: "Required field",
+        },
+        unknownCustomer: "Unknown client",
+        unknownService: "Deleted service",
+        emptyTitle: "No appointment that day",
+        emptyBody:
+          "Pick another date, or let clients book online: appointments land here on their own.",
+      },
+      customers: {
+        title: "Clients",
+        lead: "The salon's records, searchable in one keystroke.",
+        searchLabel: "Search",
+        searchPlaceholder: "A name, a phone number, an email…",
+        count: "clients",
+        columns: {
+          name: "Name",
+          phone: "Phone",
+          email: "Email",
+          visits: "Visits",
+          spent: "Spent",
+          source: "Source",
+        },
+        sources: {
+          WALK_IN: "Walk-in",
+          ONLINE: "Online",
+          REFERRAL: "Referral",
+          SOCIAL: "Social",
+          OTHER: "Other",
+        },
+        emptyTitle: "No client yet",
+        emptyBody:
+          "Records appear with the first online booking, or by hand from the calendar.",
+        noResultsTitle: "No result",
+        noResultsBody: "Try another name, another number or another address.",
+        add: "Add a client",
+        edit: "Edit",
+        remove: "Delete",
+        removeQuestion: "Delete this client and their history?",
+        removeBusy: "Deleting…",
+        form: {
+          addTitle: "New client",
+          editTitle: "Edit record",
+          body: "First name, last name and phone: the rest fills in as visits happen.",
+          fields: {
+            firstName: "First name",
+            lastName: "Last name",
+            phone: "Phone",
+            email: "Email",
+            notes: "Notes",
+            tags: "Tags",
+            source: "Source",
+          },
+          tagsHint: "Separated by commas",
+          save: "Save",
+          saving: "Saving…",
+          cancel: "Cancel",
+          required: "Required field",
+          invalidEmail: "Invalid email address",
+        },
+      },
+      services: {
+        title: "Services",
+        lead: "The catalogue, duration and price included.",
+        count: "services",
+        columns: {
+          name: "Service",
+          category: "Category",
+          duration: "Duration",
+          price: "Price",
+          online: "Online",
+          state: "State",
+        },
+        online: "Bookable",
+        inPerson: "In person",
+        active: "Active",
+        inactive: "Inactive",
+        add: "Add a service",
+        edit: "Edit",
+        remove: "Delete",
+        removeQuestion: "Remove this service from the catalogue?",
+        removeBusy: "Deleting…",
+        form: {
+          addTitle: "New service",
+          editTitle: "Edit service",
+          body: "A name, a duration, a price: that is what the public page shows and what booking relies on.",
+          categoryHint: "Categories already in use are suggested",
+          fields: {
+            name: "Service",
+            category: "Category",
+            duration: "Duration (min)",
+            price: "Price",
+            description: "Description",
+          },
+          active: "Live in the catalogue",
+          bookableOnline: "Bookable online",
+          save: "Save",
+          saving: "Saving…",
+          cancel: "Cancel",
+          required: "Required field",
+          invalidNumber: "A number is expected",
+        },
+        emptyTitle: "The catalogue is empty",
+        emptyBody:
+          "A service describes what the salon sells: a name, a duration, a price. It becomes bookable as soon as it is published.",
+      },
+      staff: {
+        title: "Team",
+        lead: "Who works here, and in what role.",
+        count: "members",
+        columns: {
+          name: "Name",
+          role: "Role",
+          specialties: "Specialties",
+          commission: "Commission",
+          state: "State",
+        },
+        active: "Active",
+        inactive: "Inactive",
+        add: "Add a member",
+        edit: "Edit",
+        remove: "Delete",
+        removeQuestion: "Remove this member from the team?",
+        removeBusy: "Deleting…",
+        availability: "Availability",
+        form: {
+          addTitle: "New member",
+          editTitle: "Edit member",
+          body: "First and last name are enough; the role and specialties place the person within the team.",
+          fields: {
+            firstName: "First name",
+            lastName: "Last name",
+            title: "Role",
+            email: "Email",
+            phone: "Phone",
+            specialties: "Specialties",
+            commission: "Commission (%)",
+          },
+          specialtiesHint: "Separated by commas",
+          active: "Active on the rota",
+          save: "Save",
+          saving: "Saving…",
+          cancel: "Cancel",
+          required: "Required field",
+          invalidNumber: "A percentage is expected",
+        },
+        availabilitySheet: {
+          title: "Availability",
+          body: "The hours this member works, week after week.",
+          closed: "No slot",
+          addSlot: "Add a slot",
+          removeSlot: "Remove",
+          from: "From",
+          to: "To",
+          open: "Open",
+          save: "Save",
+          saving: "Saving…",
+          cancel: "Cancel",
+          invalid: "The end time must come after the start time.",
+          hint: "The week you send replaces the previous one; a day with no slot stays closed online.",
+        },
+        emptyTitle: "No team member",
+        emptyBody:
+          "A member receives their appointments and availability; without a team, online booking stays closed.",
+      },
+      reviews: {
+        title: "Reviews",
+        lead: "What clients say, before and after publication.",
+        count: "reviews",
+        tabs: { pending: "Pending", published: "Published", all: "All" },
+        columns: {
+          client: "Client",
+          rating: "Rating",
+          comment: "Comment",
+          source: "Source",
+          state: "State",
+        },
+        states: { pending: "To publish", published: "Published" },
+        approve: "Publish",
+        add: "Record a review",
+        remove: "Delete",
+        removeQuestion: "Delete this review?",
+        removeBusy: "Deleting…",
+        form: {
+          title: "Review given at the desk",
+          body: "The rating first, the comment if they left one. The review goes to moderation.",
+          fields: {
+            rating: "Rating",
+            customerName: "Person's name",
+            comment: "Comment",
+          },
+          customerNameHint: "Leave empty for an anonymous review",
+          save: "Save",
+          saving: "Saving…",
+          cancel: "Cancel",
+        },
+        anonymous: "Anonymous client",
+        sources: { PUBLIC: "Public page", INTERNAL: "Salon" },
+        stats: { total: "Reviews", pending: "To publish", average: "Average" },
+        note: "A review left on the public page appears only after it is published.",
+        emptyTitle: "No review in this tab",
+        emptyBody: "Reviews left on the public page land here, waiting to be published.",
+      },
+      messages: {
+        title: "Messages",
+        lead: "Enquiries sent from the salon's public page.",
+        count: "messages",
+        tabs: { unread: "Unread", all: "All" },
+        markRead: "Mark as read",
+        remove: "Delete",
+        removeQuestion: "Delete this message?",
+        removeBusy: "Deleting…",
+        read: "Read",
+        unread: "New",
+        noSubject: "(no subject)",
+        emptyTitle: "No message",
+        emptyBody: "Contact requests sent from the public page appear here.",
+        emptyUnreadTitle: "All caught up",
+        emptyUnreadBody: "No unread message is left in the inbox.",
+      },
+      gallery: {
+        title: "Gallery",
+        lead: "Photos published on the salon's public page.",
+        count: "photos",
+        noCaption: "No caption",
+        add: "Add a photo",
+        remove: "Delete",
+        removeQuestion: "Delete this photo?",
+        removeBusy: "Deleting…",
+        uploadTitle: "New photo",
+        uploadBody:
+          "JPEG, PNG or WebP, 10 MB at most. The photo reaches the public page as soon as it is sent.",
+        fields: {
+          file: "Image",
+          caption: "Caption",
+          tags: "Tags",
+        },
+        tagsHint: "Separated by commas",
+        chooseFile: "Choose an image",
+        upload: "Upload",
+        uploading: "Uploading…",
+        cancel: "Cancel",
+        noFile: "Choose an image.",
+        tooBig: "This image is over 10 MB.",
+        notImage: "This file is not an image.",
+        emptyTitle: "The gallery is empty",
+        emptyBody: "Photos added to the salon show on its public page and here.",
+        note: "Photos are added from this screen and appear on the public page straight away.",
+      },
+      billing: {
+        title: "Subscription",
+        lead: "The current plan and its history.",
+        current: "Current plan",
+        fields: { plan: "Plan", status: "State", price: "Monthly amount", start: "Since", trial: "Trial until", end: "Ends" },
+        statuses: {
+          ACTIVE: "Active",
+          SUSPENDED: "Suspended",
+          CANCELLED: "Cancelled",
+          TRIAL: "Trial",
+          EXPIRED: "Expired",
+        },
+        history: "History",
+        limits: {
+          title: "What the plan allows",
+          customers: "Clients",
+          staff: "Team members",
+          gallery: "Photos",
+          appointments: "Appointments / month",
+        },
+        unlimited: "unlimited",
+        columns: { plan: "Plan", status: "State", start: "From", end: "To", price: "Amount" },
+        emptyTitle: "No active subscription",
+        emptyBody: "The salon's subscription will appear here once it is taken out.",
+        note: "No payment can be made from the app: the plan is changed with the Belora team.",
+      },
+      analytics: {
+        title: "Analytics",
+        lead: "The chosen period, in figures — no spreadsheet.",
+        from: "From",
+        to: "To",
+        revenue: "Revenue",
+        averageTicket: "Average ticket",
+        appointments: "Appointments",
+        completed: "Completed",
+        cancelled: "Cancelled",
+        clients: "Clients",
+        newClients: "New",
+        retention: "Retention",
+        topServices: "Most requested services",
+        topStaff: "Busiest team members",
+        columns: { name: "Name", count: "Appointments", revenue: "Amount" },
+        byDay: "Revenue by day",
+        emptyTitle: "Nothing to measure over this period",
+        emptyBody: "Pick a wider period, or record a first appointment.",
+        noData: "—",
+      },
+      calendar: {
+        title: "Calendar",
+        lead: "What is taken, and what is still free.",
+        dateLabel: "Day",
+        staffLabel: "Member",
+        allStaff: "Whole team",
+        busy: "Busy",
+        free: "Free slots",
+        emptyBusy: "No appointment that day.",
+        emptyFree: "No free slot: no published hours and no room left.",
+      },
+      audit: {
+        title: "Journal",
+        lead: "Actions recorded on the salon.",
+        count: "entries",
+        authorLabel: "Author",
+        allAuthors: "The whole salon",
+        columns: {
+          date: "Date",
+          action: "Action",
+          entity: "Object",
+          user: "Author",
+          ip: "IP",
+        },
+        emptyTitle: "Empty journal",
+        emptyBody: "Actions (sign-in, creation, update) are recorded here as they happen.",
+      },
+      notifications: {
+        title: "Notifications",
+        lead: "What the salon flagged for you.",
+        count: "notifications",
+        markRead: "Mark as read",
+        statuses: {
+          PENDING: "Pending",
+          SENT: "Sent",
+          FAILED: "Failed",
+          READ: "Read",
+        },
+        channels: {
+          EMAIL: "Email",
+          SMS: "SMS",
+          PUSH: "Push",
+          IN_APP: "In the app",
+        },
+        emptyTitle: "No notification",
+        emptyBody: "Confirmations and reminders sent by the salon will appear here.",
+      },
+      accounts: {
+        title: "Accounts & access",
+        lead: "Who can sign in to the salon, and in what role.",
+        count: "accounts",
+        columns: {
+          name: "Person",
+          role: "Role",
+          lastLogin: "Last sign-in",
+          state: "State",
+        },
+        roles: {
+          OWNER: "Owner",
+          ADMIN: "Administrator",
+          MANAGER: "Manager",
+          STAFF: "Team",
+          SUPER_ADMIN: "Platform",
+        },
+        you: "you",
+        active: "Active",
+        inactive: "Inactive",
+        neverLoggedIn: "Never signed in",
+        add: "Open an access",
+        edit: "Edit",
+        remove: "Delete",
+        removeQuestion: "Delete this access?",
+        removeBusy: "Deleting…",
+        form: {
+          addTitle: "New access",
+          editTitle: "Edit access",
+          body: "An access is an address, a password and a role: what this person can do in the salon.",
+          fields: {
+            firstName: "First name",
+            lastName: "Last name",
+            email: "Email",
+            phone: "Phone",
+            role: "Role",
+            password: "Password",
+            newPassword: "New password",
+          },
+          passwordHint: "At least 8 characters",
+          newPasswordHint: "Leave empty to keep the current one",
+          activeLabel: "Access open",
+          save: "Save",
+          saving: "Saving…",
+          cancel: "Cancel",
+          required: "Required field",
+          invalidEmail: "Invalid email address",
+          shortPassword: "At least 8 characters",
+        },
+        emptyTitle: "No account",
+        emptyBody: "Only the owner account exists for now.",
+      },
+      settings: {
+        title: "Settings",
+        lead: "The salon's identity, appearance and what it published.",
+        identity: "Identity",
+        impactIdentity:
+          "The name and address appear on your public page, in this workspace's sidebar and on your booking page. Save, and the sidebar updates without a reload.",
+        impactAppearance:
+          "Colours apply to your public page AND to this workspace. Save: the left column changes colour immediately.",
+        appearance: "Appearance & socials",
+        socials: "Social networks",
+        counters: "Published content",
+        colors: {
+          primary: "Primary colour",
+          secondary: "Secondary colour",
+          accent: "Accent",
+        },
+        fields: {
+          name: "Name",
+          slug: "Address",
+          email: "Email",
+          phone: "Phone",
+          address: "Postal address",
+          city: "City",
+          country: "Country",
+          timezone: "Time zone",
+          plan: "Plan",
+          description: "Description",
+          website: "Website",
+          users: "Accounts",
+          customers: "Clients",
+          staff: "Team",
+          services: "Services",
+          appointments: "Appointments",
+          gallery: "Photos",
+        },
+        editIdentity: "Edit identity",
+        editAppearance: "Edit appearance",
+        form: {
+          identityTitle: "Salon identity",
+          identityBody:
+            "The name and slug are public: they make up the public page address. The rest is used when talking to clients.",
+          appearanceTitle: "Appearance & socials",
+          appearanceBody:
+            "Colours apply to the public page. Logo, favicon and banner are hosted image addresses.",
+          fields: {
+            name: "Name",
+            slug: "Address",
+            email: "Email",
+            phone: "Phone",
+            address: "Postal address",
+            city: "City",
+            country: "Country",
+            timezone: "Time zone",
+            logo: "Logo (URL)",
+            favicon: "Favicon (URL)",
+            heroImage: "Banner (URL)",
+            description: "Description",
+            primaryColor: "Primary colour",
+            secondaryColor: "Secondary colour",
+            accentColor: "Accent",
+            facebook: "Facebook",
+            instagram: "Instagram",
+            tiktok: "TikTok",
+            twitter: "X",
+            website: "Website",
+            whatsapp: "WhatsApp",
+          },
+          save: "Save",
+          saving: "Saving…",
+          cancel: "Cancel",
+          required: "Required field",
+          invalidEmail: "Invalid email address",
+          invalidColor: "Hex colour expected (#0F172A)",
+          slugHint: "Lowercase letters, digits and hyphens",
+        },
+      },
+    },
+
+    /* States shared by every workspace screen: a loading state that says nothing,
+       an empty state that says what to do, an error that says what to retry. */
+    loading: "Loading…",
+    cancel: "Cancel",
+    errorTitle: "This page could not load",
+    errorBody: "The request did not go through. Check your connection, then try again.",
+    retry: "Try again",
+    emptyTitle: "Nothing to show yet",
+    emptyBody: "This place fills up as soon as the first record is saved.",
+  },
+
+  /* Home “demo” section: the demo salon's page, loaded live. The labels name what
+     the API returns and nothing else. */
+  demo: {
+    eyebrow: "Live",
+    title: "A real salon's page, loaded while you look at it",
+    body:
+      "Nothing is staged: name, colours, services, team and rating come from the product's API, on the demo salon.",
+    servicesLabel: "Services",
+    teamLabel: "Team",
+    ratingLabel: "Rating",
+    bookingLabel: "Booking",
+    bookingOpen: "Open 24/7",
+    bookingClosed: "Closed for now",
+    min: "min",
+    cta: "See this page for my salon",
+    empty: "Nothing is published on this salon yet.",
+    unavailable: "The demo salon is unreachable right now.",
+  },
 };
+/**
+ * Plans — VALUES WRITTEN IN THE FILE, on purpose.
+ *
+ * `GET /subscriptions/plans` answers **401** without a token, even though the
+ * Swagger documents it as public (checked 2026-10-16): a marketing page cannot
+ * read its own prices before sign-in. The amounts and quotas below are the
+ * backend's, taken from its authenticated endpoint. If they move server-side,
+ * they move HERE too — and above all, nothing is sold online (the API has no
+ * checkout): the buttons lead to sign-up, never to a transaction.
+ */
+export const pricing = {
+  eyebrow: "Pricing",
+  recommended: "Most popular",
+  title: "Four plans, one single tool.",
+  lead:
+    "The price is written in plain sight: no plan hides behind “get in touch” to tell you what Belora costs.",
+  note: "The quotas below are the plan's own; they are restated when you create your salon.",
+  facts: [
+    { value: "14 days", label: "To try it" },
+    { value: "No", label: "Commitment" },
+    { value: "1 salon", label: "Per account" },
+  ],
+  plans: [
+    {
+      name: "Free",
+      price: "€0",
+      period: "forever",
+      tagline: "To open your page",
+      features: ["1 stylist", "50 clients", "20 photos", "Online booking"],
+      recommended: false,
+    },
+    {
+      name: "Basic",
+      price: "€29",
+      period: "/ month",
+      tagline: "For a growing business",
+      features: ["5 stylists", "300 clients", "200 photos", "Custom colours"],
+      recommended: true,
+    },
+    {
+      name: "Pro",
+      price: "€79",
+      period: "/ month",
+      tagline: "For established salons",
+      features: [
+        "Unlimited team and appointments",
+        "Advanced analytics",
+        "SMS notifications",
+        "API access",
+      ],
+      recommended: false,
+    },
+    {
+      name: "Enterprise",
+      price: "€199",
+      period: "/ month",
+      tagline: "For salon groups",
+      features: ["Everything in Pro", "Custom domain", "Dedicated support"],
+      recommended: false,
+    },
+  ],
+  cta: "Open a salon",
+};
+
+/**
+ * FAQ — placed right AFTER pricing, where the objections actually surface. The same block
+ * feeds the home page's `FAQPage` JSON-LD: what we show and what we declare cannot diverge.
+ */
+export const faq = {
+  eyebrow: "Frequently asked",
+  title: "What owners ask before moving their salon to Belora.",
+  lead:
+    "Five straight answers to the questions we hear most from owners before they open their page.",
+  items: [
+    {
+      q: "Does Belora replace my paper agenda?",
+      a: "Yes. Services, team and clients are entered once; the calendar fills itself at every booking, and each client card keeps the full history of appointments.",
+    },
+    {
+      q: "Can my clients book at night?",
+      a: "Yes. Your booking page answers 24/7: a client can book at 11 pm, and you see it on the first screen of your dashboard.",
+    },
+    {
+      q: "What does a stylist see when she signs in?",
+      a: "Her own calendar and her clients — nothing else. Prices, statistics and salon settings stay with you.",
+    },
+    {
+      q: "Can I try it before paying?",
+      a: "The Free plan is free forever, no credit card: it opens your page with one stylist, fifty clients and online booking.",
+    },
+    {
+      q: "What happens to my data?",
+      a: "It stays yours: export on request, never shared with third parties, and nothing is lost if you change plan.",
+    },
+  ],
+};
+
+/**
+ * A salon's public page — `/[lang]/s/[slug]`.
+ *
+ * This is where the home page's promise comes true: each salon gets ITS page, in
+ * ITS colours, with ITS services and ITS slots. The labels name what the API
+ * returns, the empty states say what to do, and nothing promises what the
+ * contract does not carry (no online payment, reviews published after approval).
+ */
+export const storefront = {
+  book: "Book",
+  bookOnline: "Book online",
+  bookingClosed: "This salon does not take online bookings yet.",
+  poweredBy: "Page powered by",
+  backHome: "Back to home",
+  notFoundTitle: "This salon does not exist — or no longer does.",
+  notFoundBody:
+    "The address you followed does not match any salon page. Check the link you were given.",
+  unavailableTitle: "The page is temporarily unavailable",
+  unavailableBody: "The salon's server is not answering. Try again in a moment.",
+  loading: "Loading the salon page…",
+  retry: "Try again",
+  sections: {
+    services: "Services",
+    team: "The team",
+    gallery: "Gallery",
+    reviews: "Reviews",
+    booking: "Booking",
+    contact: "Contact",
+  },
+  servicesIntro: "Durations and prices as published by the salon.",
+  servicesEmpty: "The salon has not published its services yet.",
+  teamEmpty: "The team is not presented yet.",
+  galleryEmpty: "No photo published yet.",
+  reviewsEmpty: "No review published yet.",
+  reviewsNote: "Reviews are published once the salon approves them.",
+  average: "average",
+  reviewsCount: "reviews",
+  priceCurrency: "€",
+  breadcrumb: "Salon page",
+  booking: {
+    title: "Book an appointment",
+    lead: "Three steps: the service, the time, your details.",
+    steps: { service: "Service", slot: "Slot", details: "Details" },
+    stepLabel: "Step",
+    of: "of",
+    min: "min",
+    chooseService: "Pick a service",
+    chooseStaff: "With whom?",
+    anyStaff: "Anyone",
+    chooseDay: "Pick a day",
+    chooseTime: "Pick a time",
+    noSlots: "No slot is free that day. Try another date.",
+    slotsError: "The slots could not be loaded.",
+    slotsLoading: "Looking for slots…",
+    next: "Continue",
+    back: "Back",
+    confirm: "Confirm the appointment",
+    sending: "Sending…",
+    fields: {
+      firstName: "First name",
+      lastName: "Last name",
+      phone: "Phone",
+      email: "Email (optional)",
+      notes: "Anything we should know (optional)",
+      notesPlaceholder: "A preference, an allergy, a late arrival…",
+    },
+    required: "Required field",
+    invalidEmail: "Invalid email address",
+    invalidPhone: "Invalid phone number",
+    noStaff: "The team is not published yet: online booking opens as soon as a member is added.",
+    phoneHint: "The salon calls you on this number if anything changes.",
+    summary: "Summary",
+    at: "at",
+    change: "Change",
+    successTitle: "Appointment sent",
+    successBody: "The salon received your request. It confirms the appointment by phone.",
+    newBooking: "Book another appointment",
+    error: "The booking did not go through. Check your details, then try again.",
+    slotTaken: "That slot has just been taken. Pick another one.",
+    closedError: "This salon does not accept online bookings right now.",
+  },
+  contact: {
+    lead: "A question about a service, a price or a time? Write to the salon.",
+    name: "Name",
+    email: "Email",
+    phone: "Phone (optional)",
+    subject: "Subject (optional)",
+    message: "Message",
+    required: "Required field",
+    invalidEmail: "Invalid email address",
+    requiredHint: "* required fields",
+    submit: "Send the message",
+    sending: "Sending…",
+    successTitle: "Message sent",
+    successBody: "The salon has received your message and will reply by email.",
+    again: "Write another message",
+    error: "The message could not be sent. Please try again in a moment.",
+  },
+  review: {
+    title: "Leave a review",
+    lead: "Your rating helps the next clients choose.",
+    rating: "Your rating",
+    name: "Your name (optional)",
+    comment: "Your comment (optional)",
+    commentPlaceholder: "What you liked, what could be improved…",
+    requiredRating: "Pick a rating between 1 and 5.",
+    submit: "Publish my review",
+    sending: "Sending…",
+    successTitle: "Thank you for your review",
+    successBody: "It will be published on the page once the salon approves it.",
+    again: "Leave another review",
+    error: "The review could not be sent. Please try again in a moment.",
+  },
+};
+
 const dictionary = {
   site, nav, services, hero, stats, about, projects, filters,
-  testimonials, aboutPage, servicesPage, contactPage, devisPage, finalCta, clients, ui,
+  testimonials, aboutPage, servicesPage, contactPage, devisPage, finalCta, clients, pricing, faq,
+  storefront, showcase, ui,
 };
 
 export default dictionary;

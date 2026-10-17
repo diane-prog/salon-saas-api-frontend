@@ -239,7 +239,7 @@ export default function ActionDock() {
                   setFan(false);
                 }}
                 aria-expanded={chatOpen}
-                aria-controls="leegi-chat"
+                aria-controls="belora-chat"
                 aria-label={dict.ui.dock.chat}
                 className={item}
               >

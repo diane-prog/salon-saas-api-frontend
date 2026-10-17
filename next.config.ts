@@ -1,12 +1,14 @@
 import type { NextConfig } from "next";
 
 const serviceRedirects: Record<string, string> = {
-  branding: "/services/branding",
-  "site-web": "/services/site-web",
-  seo: "/services/seo",
-  "creation-de-contenu-les-reels-et-les-spots-publicitaires": "/services/contenu-reels-spots",
-  evenementiel: "/services/evenementiel",
-  "strategie-de-communication-et-marketing": "/services/strategie-communication",
+  /* Anciennes adresses d'agence → les six fonctionnalités du produit. Les
+     destinations suivent les slugs du dictionnaire : si ceux-ci changent, ICI aussi. */
+  branding: "/services/agenda",
+  "site-web": "/services/reservation-en-ligne",
+  seo: "/services/fiches-clients",
+  "creation-de-contenu-les-reels-et-les-spots-publicitaires": "/services/prestations",
+  evenementiel: "/services/equipe",
+  "strategie-de-communication-et-marketing": "/services/pilotage",
 };
 
 /**

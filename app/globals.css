@@ -1,26 +1,37 @@
 @import "tailwindcss";
 
 @theme {
-  --color-brand: #2497be;
-  --color-brand-dark: #1c7699;
-  --color-navy: #0f172a;
-  --color-navy-deep: #00092a;
-  --color-turquoise: #19c6b7;
-  --color-orange: #ff622a;
-  --color-muted: #718096;
-  --color-line: #edf2f7;
+  /* ——— Direction « atelier » : cuir fumé, papier de soie, laiton.
+     Le bleu générique du logiciel laisse la place à une palette de maison —
+     chaude, tenue, sans dégradé. Un seul accent : le laiton (brand). */
+  --color-brand: #a67c4a;
+  --color-brand-dark: #8a6338;
+  --color-navy: #1a1613;
+  --color-navy-deep: #0d0b09;
+  /* Ancien nom de jeton conservé : il porte désormais le laiton clair, réservé
+     au texte posé sur l'encre (pied de page, colonne de l'espace). */
+  --color-turquoise: #d8c3a0;
+  --color-orange: #b4552d;
+  --color-muted: #7c7268;
+  --color-line: #e7dfd2;
   /* Sable chaud : fond du rideau de transition (page blanche + hero navy, il fallait
      un ton neutre qui n'appartienne à aucune des deux pages). */
   --color-beige: #e9e2d4;
   /* Thème éditorial « galerie » de la page À propos : papier chaud et encre franche.
      Deux jetons seulement, pour ne pas redéfinir `navy` / `muted`, qui restent le
      langage du reste du site ; l'accent est le bleu de marque, employé au compte-gouttes. */
-  --color-paper: #faf9f7;
-  --color-ink: #111111;
+  --color-paper: #f6f2ea;
+  --color-ink: #15110e;
+  /* Rouge d'échec des notifications (`components/ui/toast.tsx`). Le site n'avait
+     pas d'erreur à peindre jusqu'ici : les formulaires répondaient en texte. */
+  --color-destructive: #e11d48;
 
   --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  /* Le titre éditorial : un sérif de livre, disponible partout (aucun
+     téléchargement), qui donne le ton « maison » plutôt que « tableau de bord ». */
+  --font-display: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
 
-  --radius-card: 12px;
+  --radius-card: 2px;
 
   --shadow-soft: 0 1px 2px rgb(15 23 42 / 0.04), 0 8px 24px rgb(15 23 42 / 0.06);
   --shadow-lift: 0 2px 4px rgb(15 23 42 / 0.05), 0 18px 44px rgb(15 23 42 / 0.12);
@@ -486,117 +497,6 @@ html[data-js] .split-anim .split-word {
   transform: translateY(0);
 }
 
-/* Ouverture vidéo (voir `components/VideoIntro.tsx`).
-
-   Elle est dans le HTML servi, mais MASQUÉE ICI par défaut : c'est le script d'en-tête
-   (`lib/intro.ts`) qui découvre l'écran en posant `data-intro` sur <html>, pendant l'analyse
-   du <head> — donc avant la première peinture. Poser la classe après coup (effet React, état)
-   laissait voir la page une à deux frames avant la vidéo. Corollaire utile : sans JavaScript,
-   l'attribut n'est jamais posé et cet écran n'existe pas — le site s'affiche normalement.
-
-   `display` est réglé ICI et non par une classe utilitaire : une règle hors calque prime sur
-   les utilitaires de Tailwind v4, donc l'ouverture ne peut pas être révélée par accident.
-
-   LE FOND EST EXACTEMENT CELUI DE LA VIDÉO (#070707, MESURÉ image par image sur les coins
-   et le pourtour du cadre). C'est ce qui rend l'écran plein, sans bord : la vidéo est
-   affichée en `object-contain` (donc jamais rognée, le logo reste entier sur téléphone
-   comme sur écran large), et tout ce qu'elle ne couvre pas est peint de SA couleur. Il n'y a
-   donc aucune bande à voir — l'ouverture occupe la fenêtre entière quelle que soit sa forme.
-   L'ancienne valeur (#161616) était plus claire que le fond réel de la vidéo : le cadre se
-   détachait de l'écran, et la vidéo semblait ne pas être plein écran.
-
-   LE FONDU DE SORTIE DURE 620 ms, valeur de `INTRO_FADE_MS` (lib/intro.ts) : les deux
-   doivent rester d'accord — le composant retire l'écran du DOM à la fin de ce délai. */
-.intro-video {
-  display: none;
-  align-items: center;
-  justify-content: center;
-  background: #070707;
-  transition: opacity 620ms ease-out;
-}
-
-html[data-intro] .intro-video {
-  display: flex;
-}
-
-/* Mot de bienvenue de l'ouverture : « Welcome to » / « Bienvenue chez », selon la langue
-   (dictionnaire `ui.intro.welcome`).
-
-   Il est dans le HTML servi, donc peint dès la première frame, et son animation est purement
-   CSS : il apparaît même si React n'est pas encore monté — c'est la même raison qui fait
-   toute l'ouverture sans JavaScript.
-
-   Il dure 2 s : apparition (0 → 20 %), courte tenue (20 → 70 %), fondu de sortie
-   (70 → 100 %). LA VIDÉO DÉMARRE PENDANT CE FONDU DE SORTIE, à `INTRO_VIDEO_START_MS`
-   (lib/intro.ts) : le mot se dissout donc dans l'apparition du logo, sans temps mort.
-   Les deux valeurs sont jumelles — si l'une bouge, faire bouger l'autre.
-
-   Il est peint PAR-DESSUS la vidéo (elle est opaque, du fond plein) : dans le balisage il
-   vient après elle. */
-.intro-welcome {
-  animation: intro-welcome 2000ms cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-/* Mobile uniquement : agrandit la vidéo pour que le logo soit lisible. */
-@media (max-width: 767px) and (max-aspect-ratio: 1 / 1) {
-  .intro-video {
-    overflow: hidden;
-  }
-
-  .intro-video video {
-    transform: scale(3);
-    transform-origin: center;
-  }
-}
-
-/* Téléphone en portrait : la vidéo (dézoomée, logo ~14 % du cadre) tient dans la LARGEUR
-   de l'écran en `contain`, donc le logo ne ferait qu'~55 px. On l'agrandit autour du
-   centre : le surplus ne tombe que dans le fond uni #070707, invisible. */
-@media (max-aspect-ratio: 1 / 1) {
-  .intro-video video {
-    transform: scale(3);
-    transform-origin: center;
-  }
-}
-
-@keyframes intro-welcome {
-  0% {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  20% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  70% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  100% {
-    opacity: 0;
-    transform: translateY(-6px);
-  }
-}
-
-/* Sur un écran au moins aussi large que haut, l'ouverture REMPLIT la fenêtre : le logo est
-   centré et n'occupe que les ~14 % centraux du cadre (vidéo dézoomée), donc le recadrage de
-   `cover` ne tombe jamais sur lui — seulement dans le fond uni. Sur un écran plus haut que large (téléphone),
-   `cover` rognerait le logo : on y garde l'utilitaire `object-contain`, ce qui ne se voit pas,
-   le fond de la vidéo et celui de l'écran étant la même couleur.
-   Règle volontairement HORS `@layer` : elle doit primer sur l'utilitaire Tailwind porté par
-   l'élément, comme le `display` ci-dessus. */
-@media (min-aspect-ratio: 1 / 1) {
-  .intro-video video {
-    object-fit: cover;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .intro-video {
-    transition: none;
-  }
-}
-
 .curtain-cover {
   animation: curtain-cover var(--curtain-cover, 0.52s) cubic-bezier(0.22, 1, 0.36, 1) both;
 }
@@ -740,6 +640,49 @@ html[data-js] .page-enter {
 
 .sheet-overlay[data-state="closed"] {
   animation: sheet-overlay-out 0.25s ease both;
+}
+
+/* Notification (toast) — voir components/ui/toast.tsx.
+
+   L'entrée et la sortie sont ici, comme pour le panneau latéral : Radix monte
+   l'élément avec `data-state="open"` dès la première frame, donc une transition
+   ne se déclencherait jamais, alors que des `@keyframes` jouent même sur un
+   élément qui vient d'apparaître. */
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes toast-out {
+  from {
+    opacity: 1;
+    transform: none;
+  }
+  to {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+}
+
+.toast-item[data-state="open"] {
+  animation: toast-in 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.toast-item[data-state="closed"] {
+  animation: toast-out 0.25s ease both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toast-item[data-state="open"],
+  .toast-item[data-state="closed"] {
+    animation: none;
+  }
 }
 
 .counter-live {

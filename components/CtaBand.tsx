@@ -54,9 +54,11 @@ export default function CtaBand() {
             <SplitText as="h2" text={finalCta.title} className={CLOSING} />
             <p className={`mt-6 max-w-xl ${LEAD} text-ink/70`}>{finalCta.body}</p>
             <div className="mt-9 flex flex-wrap items-center gap-x-10 gap-y-4">
-              <TextLink href={href("/devis")} strong>
-                {finalCta.primary}
-              </TextLink>
+            {/* « Ouvrir un salon » pointe sur l'inscription, et non plus sur le formulaire
+                de devis : l'action principale d'un logiciel est l'entrée dans le produit. */}
+            <TextLink href={href("/register")} strong>
+              {finalCta.primary}
+            </TextLink>
               <TextLink href={href("/contact")}>{finalCta.secondary}</TextLink>
             </div>
           </div>

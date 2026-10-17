@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { ArrowUpRight } from "@/components/Icons";
 import { socialIcon, socialLinks } from "@/components/SocialIcons";
 import { useDictionary } from "@/components/DictionaryProvider";
@@ -16,9 +15,11 @@ export default function Footer() {
       <div className="container-x relative">
         <div className="grid gap-12 py-16 lg:grid-cols-12 lg:py-20">
           <div className="lg:col-span-4">
-            {/* Variante claire : la version foncée (`logo-navy.png`) ne se lit que sur du
-                papier, et le pied de page referme la page sur l'encre. */}
-            <Image src="/img/logo.png" alt="LEEGI Group" width={180} height={84} className="h-16 -ml-10 w-auto" />
+            {/* Le nom de la maison, écrit : le pied de page referme la page sur l'encre. */}
+            <span className="font-display text-[2.1rem] leading-none tracking-[-0.02em] text-paper">
+              {dict.site.name}
+              <span aria-hidden className="ml-1.5 inline-block h-2 w-2 rounded-full bg-brand" />
+            </span>
             <p className="mt-5 max-w-sm text-sm leading-relaxed text-paper/60">{dict.site.tagline}</p>
             {/* Les VRAIS logos des réseaux (WhatsApp compris, déduit du téléphone) : deux
                 lettres dans une pastille ne disent pas de quel réseau il s'agit, une marque si. */}
@@ -103,7 +104,7 @@ export default function Footer() {
         </div>
 
         <div className="flex flex-col items-center justify-between gap-3 border-t border-paper/10 py-6 text-xs text-paper/40 sm:flex-row">
-          <p>© 2026 leegigroup</p>
+          <p>© 2026 {dict.site.name}</p>
           <p>{dict.site.address}</p>
         </div>
       </div>

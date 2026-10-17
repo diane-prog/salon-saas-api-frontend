@@ -2,9 +2,9 @@
 
 import { useEffect, useLayoutEffect, useRef, type ReactNode } from "react";
 import { createPortal } from "react-dom";
-import Image from "next/image";
 import gsap from "gsap";
 import { Close } from "@/components/Icons";
+import { useDictionary } from "@/components/DictionaryProvider";
 import { lockScroll } from "@/lib/scroll";
 import { prefersReducedMotion } from "@/lib/motion";
 
@@ -68,6 +68,7 @@ export default function FullScreenPanel({
   tone?: "ink" | "glass";
   children: ReactNode;
 }) {
+  const { dict } = useDictionary();
   const panelRef = useRef<HTMLDivElement>(null);
   /* L'hôte du portail est lu au rendu : `<body>` n'existe pas au rendu serveur, et le
      panneau n'est de toute façon monté qu'à l'ouverture, donc jamais dans le HTML servi.
@@ -170,16 +171,11 @@ export default function FullScreenPanel({
         tone === "glass" ? "bg-ink/70 backdrop-blur-md" : "bg-ink"
       }`}
     >
-      {/* Barre haute : le logo clair, comme le menu mobile, et la fermeture cerclée. */}
+      {/* Barre haute : le nom de la maison, comme le menu mobile, et la fermeture cerclée. */}
       <div data-panel-in className="container-x flex items-center justify-between py-5">
-        <Image
-          src="/img/logo.png"
-          alt="LEEGI Group"
-          width={150}
-          height={60}
-          priority
-          className="h-16 -ml-9 w-auto"
-        />
+        <span className="font-display text-[1.6rem] leading-none tracking-[-0.015em] text-paper">
+          {dict.site.name}
+        </span>
         <button
           type="button"
           onClick={onClose}

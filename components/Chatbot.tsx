@@ -103,7 +103,7 @@ export default function Chatbot({ open, onClose }: { open: boolean; onClose: () 
 
   return (
     <div
-      id="leegi-chat"
+      id="belora-chat"
       role="dialog"
       aria-label={dict.ui.chat.title}
       aria-hidden={!open}

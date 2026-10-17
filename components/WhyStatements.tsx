@@ -1,8 +1,7 @@
 "use client";
 
-import Image from "next/image";
 import Reveal from "@/components/Reveal";
-import Parallax from "@/components/Parallax";
+import { ProductPanel } from "@/components/ProductPanel";
 import { useDictionary } from "@/components/DictionaryProvider";
 
 /**
@@ -91,12 +90,16 @@ export default function WhyStatements() {
           <ReasonCard index={0} card={first} delay={60} />
           <ReasonCard index={1} card={second} delay={120} />
 
-          <MediaTile src={why.whyImage} alt={why.whyImageAlt} delay={180} />
+          {/* Deux panneaux produit à la place des photographies : l'agenda du jour et le
+              parcours de réservation. C'est le produit qui illustre le propos, pas un
+              portrait d'équipe — et rien à télécharger. */}
+          <MediaTile delay={180}>
+            <ProductPanel variant="agenda" />
+          </MediaTile>
 
-          {/* Photo recolorée en orange (duotone maison) : elle répond à la photo sombre
-              de l'autre coin, comme dans la maquette. Sur téléphone elle disparaît — voir
-              l'en-tête du fichier. */}
-          <MediaTile src={why.whyImage2} alt={why.whyImage2Alt} delay={240} duotone desktopOnly />
+          <MediaTile delay={240} desktopOnly>
+            <ProductPanel variant="booking" />
+          </MediaTile>
 
           {rest.map((card, i) => (
             <ReasonCard key={card.title} index={i + 2} card={card} delay={300 + i * 60} />
@@ -133,21 +136,18 @@ function ReasonCard({
 }
 
 /**
- * Tuile photo : remplit la case de la grille sur grand écran ; sur téléphone, un bandeau
- * 4:3 entre deux raisons, avec l'air qu'un bandeau demande.
+ * Tuile illustration : remplit la case de la grille sur grand écran ; sur téléphone, un
+ * bandeau entre deux raisons, avec l'air qu'un bandeau demande. Ce n'est plus une photo
+ * mais un panneau produit dessiné (`ProductPanel`), posé sur le papier avec un filet.
  */
 function MediaTile({
-  src,
-  alt,
+  children,
   delay,
-  duotone = false,
   desktopOnly = false,
 }: {
-  src: string;
-  alt: string;
+  children: React.ReactNode;
   delay: number;
-  duotone?: boolean;
-  /** Photo qui n'existe qu'à partir de `lg` (équilibre de la grille). */
+  /** Panneau qui n'existe qu'à partir de `lg` (équilibre de la grille). */
   desktopOnly?: boolean;
 }) {
   return (
@@ -158,21 +158,8 @@ function MediaTile({
         desktopOnly ? "hidden lg:block" : ""
       }`}
     >
-      {/* Cadre fermé (`aspect-*`) : c'est l'échelle qui couvre le débattement (±4 % → 1,09),
-          la tuile garde exactement sa découpe. */}
-      <div className="why-tile group relative h-full aspect-[4/3] overflow-hidden lg:aspect-[10/11] lg:border lg:border-navy/10 lg:hover:border-navy/25">
-        <Parallax className="absolute inset-0" amount={4} scale={1.09}>
-          <Image
-            src={src}
-            alt={alt}
-            fill
-            sizes="(max-width: 1024px) 100vw, 25vw"
-            className="object-cover"
-          />
-        </Parallax>
-        {duotone ? (
-          <span aria-hidden className="absolute inset-0 bg-black/30 mix-blend-multiply" />
-        ) : null}
+      <div className="flex h-full items-center justify-center border border-navy/10 bg-white p-4 lg:aspect-[10/11] lg:p-6">
+        <div className="w-full">{children}</div>
       </div>
     </Reveal>
   );

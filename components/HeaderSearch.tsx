@@ -25,7 +25,7 @@ const SUGGESTIONS = 5;
  * recherche : l'index, la frappe, et le parcours au clavier des résultats — flèches pour
  * choisir, Entrée pour ouvrir.
  */
-export default function HeaderSearch({ scrolled }: { scrolled: boolean }) {
+export default function HeaderSearch() {
   const { dict, locale } = useDictionary();
   const { services, projects, nav, ui, site } = dict;
   const router = useRouter();
@@ -110,9 +110,7 @@ export default function HeaderSearch({ scrolled }: { scrolled: boolean }) {
         /* Sur téléphone la barre est d'encre, toujours : l'icône y reste donc claire, même
            une fois la page défilée. Sur grand écran, elle suit la barre (blanche translucide
            au défilement), d'où le décalage en `lg:`. */
-        className={`grid h-11 w-11 place-items-center rounded-full text-white transition-colors hover:bg-white/10 ${
-          scrolled ? "lg:text-navy lg:hover:bg-navy/5" : ""
-        }`}
+        className="grid h-11 w-11 place-items-center rounded-full text-ink transition-colors hover:bg-ink/[0.06]"
       >
         <Search />
       </button>

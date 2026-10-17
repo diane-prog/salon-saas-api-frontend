@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { ProductPanel } from "@/components/ProductPanel";
 import Reveal from "@/components/Reveal";
 import { HeroSection } from "@/components/sections";
 import { ArrowRight } from "@/components/Icons";
@@ -23,6 +24,16 @@ import { BODY, CLOSING, LABEL, LEAD, ROW, RULE, TITLE } from "@/lib/editorial";
  * `offerings`, `steps`, `ctaTitle`…) simplement remis en page. Les pages de service gardent
  * leur propre conclusion et n'appellent donc pas le bandeau commun `CtaBand`.
  */
+/** Le panneau produit qui accompagne chaque page : le dessin de l'écran dont parle la page. */
+const PANEL: Record<string, "agenda" | "booking" | "clients" | "catalogue" | "team" | "numbers"> = {
+  agenda: "agenda",
+  "reservation-en-ligne": "booking",
+  "fiches-clients": "clients",
+  prestations: "catalogue",
+  equipe: "team",
+  pilotage: "numbers",
+};
+
 export default function ServicePageTemplate({ service }: { service: Service }) {
   const { dict, locale } = useDictionary();
   const href = (p: string) => `/${locale}${p === "/" ? "" : p}`;
@@ -42,6 +53,13 @@ export default function ServicePageTemplate({ service }: { service: Service }) {
               <div className="lg:sticky lg:top-28">
                 <span className={`${LABEL} text-ink/45`}>{ui.presentation}</span>
                 <h2 className={`mt-4 max-w-sm ${TITLE}`}>{service.whyTitle}</h2>
+
+                {/* Le produit, au lieu d'une photo : la page décrit un écran, elle le
+                    montre. Décoratif (`aria-hidden` dans le panneau), le texte porte
+                    l'information. */}
+                <div className="mt-10 hidden lg:block">
+                  <ProductPanel variant={PANEL[service.slug] ?? "agenda"} />
+                </div>
               </div>
             </div>
 
