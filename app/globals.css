@@ -271,6 +271,70 @@
   color: transparent;
 }
 
+/* Balayage du carrousel d'images des écrans d'accès (components/AuthShowcase.tsx) :
+   l'image qui entre est DÉCOUVERTE depuis le bord droit, elle ne se dissout pas dans la
+   précédente. `inset()` s'interpole proprement (contrairement à un `polygon` à nombre de
+   points variable) et la courbe entre et sort franchement — c'est elle qui fait lire une
+   ligne qui balaie, et non un fondu de plus. */
+@keyframes auth-wipe {
+  from {
+    clip-path: inset(0 0 0 100%);
+  }
+  to {
+    clip-path: inset(0);
+  }
+}
+
+/*
+  Balayage du carrousel des écrans d'accès (`components/AuthShowcase.tsx`).
+
+  `inset(0 0 0 100%)` : le cadre est réduit à un trait sur le bord DROIT ; l'animation
+  élargit les deux bords gauche et droit vers 0, donc l'image se découvre de droite à
+  gauche. La courbe est franche au départ et à l'arrivée : le regard suit une ligne qui
+  accélère puis se pose, au lieu d'un fondu qui superpose deux photos.
+
+  `will-change: clip-path` : le navigateur garde le cadre sur sa propre couche pendant
+  la seconde que dure le mouvement — sans lui, chaque image plein écran repeint la
+  colonne entière. Une seule vue porte la classe à la fois (l'active), donc une seule
+  couche est réservée.
+*/
+@utility auth-wipe {
+  will-change: clip-path;
+  animation: auth-wipe 1200ms cubic-bezier(0.76, 0, 0.24, 1) both;
+}
+
+/*
+  Dérive lente de l'image pendant sa pose : 2 % d'échelle en trop au départ, 9 % à
+  l'arrivée. C'est ce qui distingue une image « posée » d'une image « morte » — et c'est
+  ce qui donne au balayage suivant l'impression de pousser un plan déjà en mouvement.
+
+  5,6 s pour une pose de 5,2 s : la dérive dépasse volontairement la pose, pour que
+  l'image ne s'immobilise jamais juste avant d'être remplacée. Mise à l'échelle pour la
+  pose, elle aurait marqué un temps d'arrêt d'une demi-seconde à chaque tour.
+
+  Elle vit sur l'`img`, pas sur le cadre : le `clip-path` du cadre reste net pendant que
+  l'image grandit dessous. `transform` est composé par le GPU, elle ne coûte rien.
+*/
+@keyframes auth-drift {
+  from {
+    transform: scale(1.02);
+  }
+  to {
+    transform: scale(1.09);
+  }
+}
+
+@utility auth-drift {
+  animation: auth-drift 5600ms cubic-bezier(0.25, 0.6, 0.3, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-wipe,
+  .auth-drift {
+    animation: none;
+  }
+}
+
 @utility grain {
   position: relative;
   isolation: isolate;
@@ -658,8 +722,9 @@ html[data-js] .page-enter {
    LA SCÈNE EST ÉPINGLÉE : elle fait `--stage-vh` hauteurs de fenêtre et la grille reste
    collée à `top` pendant qu'on la traverse. Sans cet épinglage, l'ouverture se jouait
    pendant les quelques centaines de pixels qui séparent l'entrée de la section de sa mise
-   en place — on ne la voyait pas (constaté le 2026-10-18). `top` et la constante `PIN` du
-   composant doivent rester d'accord : c'est la même position, lue des deux côtés.
+   en place — on ne la voyait pas (constaté le 2026-10-18). `top` vaut `--stack-pin`, une
+   valeur MESURÉE par le composant pour centrer la grille dans la fenêtre : c'est la même
+   valeur des deux côtés, et elle suit la hauteur de l'écran.
 
    `--open` vaut `1 - --stack` : c'est le seul calcul de la règle. `translate3d` et `scale`
    sont pris en charge par le compositeur, donc le défilement ne provoque ni recalcul de
@@ -672,14 +737,19 @@ html[data-js] .page-enter {
 
 [data-stack="on"] > .stack-grid {
   position: sticky;
-  top: 12vh;
+  /* Centrage vertical : la valeur est mesurée par le composant (`(innerHeight − hauteur
+     de la grille) / 2`, écrite dans `--stack-pin`). Épinglée à 12 vh, la composition
+     restait collée en haut et laissait tout le bas de l'écran vide — ce vide se lisait
+     comme un trou avant l'animation. 12 vh ne sert plus que de secours avant hydratation. */
+  top: var(--stack-pin, 12vh);
 }
 
 /* La vidéo de l'illustration ne sert QUE empilée : ouverte, la grille montre la photo, et
    rien ne justifie de continuer à décoder le plan animé derrière elle. `display: none`
    coupe le rendu ; le lecteur retrouve son état à la fermeture (`data-open` repasse à
    "false`). */
-[data-stack="on"][data-open="true"] video {
+[data-stack="on"][data-open="true"] video,
+[data-stack="off"][data-open="true"] video {
   display: none;
 }
 

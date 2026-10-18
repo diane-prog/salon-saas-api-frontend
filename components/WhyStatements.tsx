@@ -6,6 +6,7 @@ import type { CSSProperties } from "react";
 import AmbientVideo from "@/components/AmbientVideo";
 import Reveal from "@/components/Reveal";
 import ScrollStack from "@/components/ScrollStack";
+import WhyGrid from "@/components/WhyGrid";
 import { useDictionary } from "@/components/DictionaryProvider";
 
 /**
@@ -85,6 +86,19 @@ export default function WhyStatements() {
                 Positions posées à la main — `01` (1,1), `02` (1,2), `03` (2,2),
                 image (2,3). Les cases vides ne sont pas rendues : le blanc les tient.
                 Sur téléphone, tout s'empile dans l'ordre de lecture 01 → 02 → 03 → image. */}
+        {/* DEUX RENDUS, UN SEUL À L'ÉCRAN (`lg` est la charnière).
+
+            · Sous `lg`, `WhyGrid` : la grille finale, posée d'emblée. Aucune scène, aucun
+              épinglage, aucune révélation au défilement, aucune vidéo — donc aucun espace
+              vide à traverser avant de voir les cases.
+            · À partir de `lg`, la scène animée ci-dessous, telle quelle.
+
+            Le contenu ne dépend pas du rendu choisi : les deux lisent le même dictionnaire,
+            et l'illustration est passée en paramètre pour qu'il n'y ait qu'une lecture de
+            la variable d'environnement. */}
+        <WhyGrid image={IMAGE} className="mt-8 sm:mt-10 lg:hidden" />
+
+        <div className="hidden lg:block">
         <ScrollStack className="mt-8 grid grid-cols-1 gap-2.5 sm:mt-10 sm:grid-cols-[1fr_1fr_1.15fr] sm:gap-3">
           {why.whyCards.map((card, index) => {
             /* L'escalier : la première au coin haut gauche, les suivantes une colonne plus
@@ -146,12 +160,18 @@ export default function WhyStatements() {
               <div className="relative h-full min-h-[12.5rem] overflow-hidden bg-ink sm:min-h-[16rem] lg:min-h-[18rem]">
                 {/* La vidéo occupe le champ tant que la pile est fermée ; elle s'arrête
                     d'être rendue quand la grille est ouverte (voir `data-open` dans
-                    `globals.css`) pour ne pas décoder des images cachées. */}
+                    `globals.css`) pour ne pas décoder des images cachées.
+
+                    SUR TÉLÉPHONE, ELLE N'EST PAS AFFICHÉE DU TOUT : il n'y a pas d'ouverture
+                    à jouer sous `lg`, donc pas de fondu vidéo → photo à entretenir. Autant
+                    montrer la photo tout de suite. C'est un masquage CSS (le média reste
+                    monté, `preload="metadata"`, donc rien d'autre que l'en-tête n'est
+                    chargé) : la vidéo n'est ni peinte, ni décodée en boucle. */}
                 {VIDEO && (
                   <AmbientVideo
                     src={VIDEO}
                     poster={IMAGE || undefined}
-                    className="absolute inset-0 h-full w-full object-cover"
+                    className="absolute inset-0 h-full w-full object-cover max-lg:hidden"
                   />
                 )}
 
@@ -190,6 +210,7 @@ export default function WhyStatements() {
             </Reveal>
           </li>
         </ScrollStack>
+        </div>
       </div>
     </section>
   );

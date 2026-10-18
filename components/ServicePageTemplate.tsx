@@ -77,9 +77,13 @@ export default function ServicePageTemplate({ service }: { service: Service }) {
               {num(index)} / {num(dict.services.length - 1)} · {ui.expertise}
             </span>
 
+            {/* Sur téléphone, le hero ne garde que l'essentiel : l'étiquette de rang, le
+                titre, le sous-titre et un seul bouton. Ce lien de retour, le panneau produit
+                et le second lien sont retirés — comme sur l'accueil, où le hero mobile
+                s'arrête au titre et à l'action. La page de services reste dans le menu. */}
             <Link
               href={href("/services")}
-              className={`${LABEL} text-paper/50 transition-colors hover:text-paper`}
+              className={`${LABEL} max-lg:hidden text-paper/50 transition-colors hover:text-paper`}
             >
               {ui.ourOffer}
             </Link>
@@ -116,15 +120,17 @@ export default function ServicePageTemplate({ service }: { service: Service }) {
 
                     <Link
                       href={href("/realisations")}
-                      className="text-[0.64rem] uppercase tracking-[0.16em] text-paper/60 underline decoration-paper/25 underline-offset-[6px] transition-colors hover:text-paper"
+                      className="max-lg:hidden text-[0.64rem] uppercase tracking-[0.16em] text-paper/60 underline decoration-paper/25 underline-offset-[6px] transition-colors hover:text-paper"
                     >
                       {ui.viewAllProjects}
                     </Link>
                   </div>
                 </div>
 
-                {/* L'écran dont parle la page, montré plutôt que décrit. */}
-                <Reveal className="w-full justify-self-end lg:max-w-lg">
+                {/* L'écran dont parle la page, montré plutôt que décrit — sur grand écran
+                    seulement : empilé sous le texte sur téléphone, il doublait la hauteur du
+                    hero pour une information que la page détaille plus bas. */}
+                <Reveal className="hidden w-full justify-self-end lg:block lg:max-w-lg">
                   <ProductPanel variant={PANEL[service.slug] ?? "agenda"} />
                 </Reveal>
               </div>

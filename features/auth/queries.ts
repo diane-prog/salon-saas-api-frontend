@@ -1,12 +1,23 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { queryKeys } from "@/lib/query-key";
-import { getCurrentUser, login, logout, register, resendOtp, verifyOtp } from "./api";
+import {
+  forgotPassword,
+  getCurrentUser,
+  login,
+  logout,
+  register,
+  resendOtp,
+  resetPassword,
+  verifyOtp,
+} from "./api";
 import type {
+  ForgotPasswordCredentials,
   LoginCredentials,
   OtpCredentials,
   RegisterCredentials,
   ResendOtpCredentials,
+  ResetPasswordCredentials,
 } from "./types";
 
 /**
@@ -55,6 +66,32 @@ export const useVerifyOtp = () => {
 export const useResendOtp = () => {
   return useMutation({
     mutationFn: (credentials: ResendOtpCredentials) => resendOtp(credentials),
+  });
+};
+
+/** Mot de passe oublié : envoie le lien. Aucun cache à toucher, rien n'est connecté. */
+export const useForgotPassword = () => {
+  return useMutation({
+    mutationFn: (credentials: ForgotPasswordCredentials) => forgotPassword(credentials),
+  });
+};
+
+/**
+ * Réinitialisation : le jeton et le nouveau mot de passe.
+ *
+ * Au succès, tout jeton local est purgé — le mot de passe vient de changer, une session
+ * ouverte avec l'ancien n'a plus de raison de rester sur cet appareil.
+ */
+export const useResetPassword = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (credentials: ResetPasswordCredentials) => resetPassword(credentials),
+    onSuccess: () => {
+      localStorage.removeItem("ACCESS_TOKEN");
+      localStorage.removeItem("REFRESH_TOKEN");
+      queryClient.setQueryData(queryKeys.users.currentUser, null);
+    },
   });
 };
 

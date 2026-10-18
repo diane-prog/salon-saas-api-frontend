@@ -88,6 +88,15 @@ export default function LoginPage() {
           disabled={login.isPending}
         />
 
+        {/* Le lien est HORS du champ, pas dans son `hint` : un indice se lit, un lien se
+            clique, et il doit rester atteignable au clavier. */}
+        <Link
+          href={`/${locale}/forgot-password`}
+          className="-mt-1 w-fit text-xs text-muted underline-offset-4 transition-colors hover:text-brand hover:underline"
+        >
+          {auth.login.forgot}
+        </Link>
+
         {errors.form && (
           <p
             role="alert"

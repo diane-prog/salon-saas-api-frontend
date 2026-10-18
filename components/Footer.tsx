@@ -5,6 +5,16 @@ import { socialIcon, socialLinks } from "@/components/SocialIcons";
 import { useDictionary } from "@/components/DictionaryProvider";
 import { LABEL } from "@/lib/editorial";
 
+/**
+ * Réseaux retirés du PIED DE PAGE uniquement (2026-10-18).
+ *
+ * YouTube : la maison n'y publie pas. WhatsApp : c'est un numéro de contact, pas un
+ * profil, et le pied de page porte déjà le téléphone — l'y répéter en pastille brouillait
+ * la rangée. La page contact, elle, garde la liste complète (`socialLinks`) : c'est une
+ * rangée d'actions, pas une signature de bas de page.
+ */
+const HIDDEN_IN_FOOTER = new Set(["YouTube", "WhatsApp"]);
+
 export default function Footer() {
   const { dict, locale } = useDictionary();
   const href = (p: string) => `/${locale}${p === "/" ? "" : p}`;
@@ -20,28 +30,31 @@ export default function Footer() {
               <span aria-hidden className="ml-1.5 inline-block h-2 w-2 rounded-full bg-brand" />
             </span>
             <p className="mt-5 max-w-sm text-sm leading-relaxed text-paper/60">{dict.site.tagline}</p>
-            {/* Les VRAIS logos des réseaux (WhatsApp compris, déduit du téléphone) : deux
-                lettres dans une pastille ne disent pas de quel réseau il s'agit, une marque si.
-                Huit réseaux à ce jour — la liste vit dans le dictionnaire, les tracés dans
-                `SocialIcons` ; ajouter un réseau ne touche donc qu'à ces deux endroits. */}
+            {/* Les VRAIS logos des réseaux : deux lettres dans une pastille ne disent pas de
+                quel réseau il s'agit, une marque si. La liste vient du dictionnaire (plus
+                WhatsApp, déduit du téléphone) et les tracés de `SocialIcons` ; le pied de
+                page en retire deux — voir `HIDDEN_IN_FOOTER` ci-dessus. Ajouter un réseau ne
+                touche donc qu'à ces endroits. */}
             <h3 className={`${LABEL} mt-10 text-paper/45`}>{dict.ui.socials}</h3>
             <div className="mt-4 flex flex-wrap gap-2">
-              {socialLinks(dict.site).map((s) => {
-                const Icon = socialIcon(s.label);
-                return (
-                  <a
-                    key={s.label}
-                    href={s.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label={s.label}
-                    title={s.label}
-                    className="grid h-10 w-10 place-items-center text-paper/70 ring-1 ring-paper/15 transition-colors duration-300 hover:text-turquoise hover:ring-turquoise/40"
-                  >
-                    {Icon ? <Icon className="h-[1.1rem] w-[1.1rem]" /> : s.label.slice(0, 2)}
-                  </a>
-                );
-              })}
+              {socialLinks(dict.site)
+                .filter((s) => !HIDDEN_IN_FOOTER.has(s.label))
+                .map((s) => {
+                  const Icon = socialIcon(s.label);
+                  return (
+                    <a
+                      key={s.label}
+                      href={s.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={s.label}
+                      title={s.label}
+                      className="grid h-10 w-10 place-items-center text-paper/70 ring-1 ring-paper/15 transition-colors duration-300 hover:text-turquoise hover:ring-turquoise/40"
+                    >
+                      {Icon ? <Icon className="h-[1.1rem] w-[1.1rem]" /> : s.label.slice(0, 2)}
+                    </a>
+                  );
+                })}
             </div>
           </div>
 

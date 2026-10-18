@@ -34,8 +34,18 @@ export type AuthMessages = {
   passwordMin: string;
   passwordLetter: string;
   passwordDigit: string;
+  passwordConfirm: string;
+  passwordMismatch: string;
   code: string;
 };
+
+/** La règle de mot de passe du backend, écrite UNE fois : 8 caractères, une lettre, un chiffre. */
+const passwordRule = (m: AuthMessages) =>
+  z
+    .string()
+    .min(8, m.passwordMin)
+    .regex(/[A-Za-z]/, m.passwordLetter)
+    .regex(/\d/, m.passwordDigit);
 
 export const createEmailSchema = (m: AuthMessages) =>
   z.string().trim().toLowerCase().pipe(z.email(m.email));
@@ -76,16 +86,45 @@ export const createRegisterSchema = (m: AuthMessages) =>
     lastName: z.string().trim().min(2, m.lastNameMin),
     email: createEmailSchema(m),
     phone: z.string().trim().optional(),
-    password: z
-      .string()
-      .min(8, m.passwordMin)
-      .regex(/[A-Za-z]/, m.passwordLetter)
-      .regex(/\d/, m.passwordDigit),
+    password: passwordRule(m),
   });
+
+/**
+ * Demande de lien de réinitialisation.
+ *
+ * Aucune contrainte nouvelle : la même adresse que celle de la connexion, validée de la
+ * même façon. Le backend répond 200 même si le compte n'existe pas — la page ne doit donc
+ * jamais en déduire quoi que ce soit.
+ */
+export const createForgotPasswordSchema = (m: AuthMessages) =>
+  z.object({
+    email: createEmailSchema(m),
+  });
+
+/**
+ * Nouveau mot de passe.
+ *
+ * Le jeton ne figure pas dans le schéma : il ne se saisit pas, il vient de l'URL, et le
+ * valider ici laisserait croire que c'est un champ à corriger. La confirmation, elle, est
+ * contrôlée à la saisie (c'est le seul endroit où une faute de frappe est invisible) et
+ * l'erreur est attachée au champ `confirm` pour s'afficher sous lui.
+ */
+export const createResetPasswordSchema = (m: AuthMessages) =>
+  z
+    .object({
+      password: passwordRule(m),
+      confirm: z.string().min(1, m.passwordConfirm),
+    })
+    .refine((values) => values.password === values.confirm, {
+      message: m.passwordMismatch,
+      path: ["confirm"],
+    });
 
 export type LoginInput = z.infer<ReturnType<typeof createLoginSchema>>;
 export type VerifyOtpInput = z.infer<ReturnType<typeof createVerifyOtpSchema>>;
 export type RegisterInput = z.infer<ReturnType<typeof createRegisterSchema>>;
+export type ForgotPasswordInput = z.infer<ReturnType<typeof createForgotPasswordSchema>>;
+export type ResetPasswordInput = z.infer<ReturnType<typeof createResetPasswordSchema>>;
 
 /**
  * Aplati les erreurs d'un schéma zod en `{ champ: message }` — la forme que consomment les

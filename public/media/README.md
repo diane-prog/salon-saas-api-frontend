@@ -11,6 +11,12 @@ soit fini sans configuration — et pour être **remplacés**.
 | `why.jpg`    | illustration de la section « pourquoi »  | ~4:3, cadrage serré           | `NEXT_PUBLIC_WHY_IMAGE`           |
 | `demo.mp4`   | bloc de démonstration (colonne gauche)   | cadré en 4:5 par la page      | `NEXT_PUBLIC_DEMO_VIDEO`          |
 | `demo.jpg`   | bloc de démonstration (colonne droite)   | portrait ~4:5                 | `NEXT_PUBLIC_DEMO_IMAGE`          |
+| `hero.jpg`, `why.jpg`, `demo.jpg` | carrousel de la colonne d'accès (connexion, code, mot de passe) | paysage, cadrage large | `NEXT_PUBLIC_AUTH_IMAGES` |
+
+`NEXT_PUBLIC_AUTH_IMAGES` prend une **liste** de chemins ou d'URL séparés par des virgules
+(`/media/salon-1.jpg,/media/salon-2.jpg,/media/salon-3.jpg`). L'ordre est celui du carrousel ;
+la première image est chargée en priorité, les suivantes à la demande. Une seule image
+fournie = pas de carrousel du tout (et rien ne tourne).
 
 ## Remplacer un média
 

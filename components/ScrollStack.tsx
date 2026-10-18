@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, type CSSProperties, type ReactNode } from "react";
 
+import { prefersReducedMotion } from "@/lib/motion";
+
 /**
  * Grille qui se déplie au défilement : les cases partent EMPILÉES AU CENTRE — une seule
  * fiche visible, les autres derrière — puis rejoignent leur place dans la trame.
@@ -12,8 +14,11 @@ import { useEffect, useRef, type CSSProperties, type ReactNode } from "react";
  *      (`position: sticky` dans `globals.css`) : les fiches s'ouvrent sous les yeux, sur
  *      ~100 vh de défilement. Avant, l'ouverture se jouait pendant la simple entrée de la
  *      section dans l'écran — terminée avant qu'on ait pu la regarder.
- *   2. ELLE S'APPLIQUE À TOUTES LES LARGEURS. Le premier jet la réservait au desktop
- *      (`min-width: 640px`) : sur une fenêtre étroite, il n'y avait rien du tout.
+ *   2. ELLE RESTE RÉSERVÉE AU GRAND ÉCRAN (revu le 2026-10-18). Sur téléphone, la grille
+ *      empilée sur une colonne est plus haute que la fenêtre : la scène épinglée ne
+ *      montrait qu'une fiche au milieu d'un écran blanc, pendant 130 vh de défilement.
+ *      Sous `lg`, la section affiche donc directement la grille finale — pas de hauteur
+ *      supplémentaire, pas d'épinglage, pas de vide.
  *   3. LA PILE EST EXACTE ET DÉCALÉE DANS LE TEMPS. Les fiches convergent vers le MÊME
  *      point (plus de décalage latéral ni d'inclinaison : ça ressemblait à une grille
  *      cassée), et chacune part avec un temps de retard sur la précédente — c'est ce
@@ -31,10 +36,26 @@ import { useEffect, useRef, type CSSProperties, type ReactNode } from "react";
  * transformation n'est qu'un habillage — rien n'est déplacé dans le DOM.
  */
 
-/** Hauteur de la scène épinglée, en hauteurs de fenêtre (voir `globals.css`). */
-const STAGE_VH = 170;
+/**
+ * Hauteur de la scène épinglée, en hauteurs de fenêtre (voir `globals.css`).
+ *
+ * ELLE A ÉTÉ RAMENÉE DE 170 à 120 : la grille ne mesure qu'environ 40 vh, donc la scène
+ * passait plus de 100 vh à faire défiler du vide sous une composition immobile. Le
+ * défilement nécessaire à l'ouverture est toujours là, la partie morte a disparu.
+ */
+const STAGE_VH = 120;
 
-/** Position du collage, en fraction de la hauteur de fenêtre (doit valoir le `top` du CSS). */
+/** Largeur en dessous de laquelle l'ouverture ne se joue pas (voir la note ci-dessus). */
+const PIN_QUERY = "(min-width: 1024px)";
+
+/**
+ * Position du collage, en fraction de la hauteur de fenêtre — SECOURS uniquement.
+ *
+ * La vraie valeur est calculée à la mesure pour que la grille soit CENTRÉE dans la
+ * fenêtre (`(innerHeight − hauteur de la grille) / 2`) : épinglée à 12 vh, elle restait
+ * collée en haut avec tout le bas de l'écran vide, et c'est ce vide qu'on prenait pour un
+ * trou avant l'animation. La valeur est écrite dans `--stack-pin`, lue par le CSS.
+ */
 const PIN = 0.12;
 
 /** Part de la course d'épinglage pendant laquelle l'ouverture se joue. */
@@ -59,8 +80,14 @@ export default function ScrollStack({ children, className = "" }: ScrollStackPro
 
     const items = Array.from(grid.children) as HTMLElement[];
     let frame = 0;
+    /** Position de collage utilisée par le calcul de progression (px depuis le haut). */
+    let pin = 0;
 
-    /** Distance entre le centre de chaque case et celui de la grille (valeurs de mise en page). */
+    /**
+     * Distance entre le centre de chaque case et celui de la grille, ET position de
+     * collage. Les deux dépendent de la taille de la fenêtre : à chaque changement, on
+     * remesure plutôt que de garder un cadrage faux.
+     */
     const measure = () => {
       const cx = grid.clientWidth / 2;
       const cy = grid.clientHeight / 2;
@@ -71,12 +98,17 @@ export default function ScrollStack({ children, className = "" }: ScrollStackPro
         item.style.setProperty("--stack-x", `${Math.round(dx)}px`);
         item.style.setProperty("--stack-y", `${Math.round(dy)}px`);
       });
+
+      /* Centrage vertical : la grille épinglée occupe le milieu de l'écran, pas son bord
+         haut. Même valeur des deux côtés — ici pour le calcul, dans le CSS pour le sticky. */
+      pin = Math.max(0, (window.innerHeight - grid.offsetHeight) / 2);
+      grid.style.setProperty("--stack-pin", `${Math.round(pin)}px`);
     };
 
     const update = () => {
       frame = 0;
       const rect = stage.getBoundingClientRect();
-      const pinTop = window.innerHeight * PIN;
+      const pinTop = pin || window.innerHeight * PIN;
       /* Course utile : ce que la scène mesure au-delà de la grille, c'est-à-dire le temps
          pendant lequel la grille reste collée. */
       const travel = Math.max(1, (stage.offsetHeight - grid.offsetHeight) * TRAVEL);
@@ -102,8 +134,15 @@ export default function ScrollStack({ children, className = "" }: ScrollStackPro
       if (!frame) frame = window.requestAnimationFrame(update);
     };
 
+    /* Deux cas où l'on ne joue PAS l'ouverture, et la grille est rendue d'emblée dans sa
+       forme finale (aucune hauteur en plus, aucun épinglage) :
+         · `prefers-reduced-motion` — le réglage refuse le mouvement, pas la page ;
+         · sous `lg` — la grille y tient sur une colonne, plus haute que la fenêtre ;
+           épinglée, elle ne montrait qu'une fiche au milieu d'un écran blanc. */
+    const wide = window.matchMedia(PIN_QUERY);
+
     const setup = () => {
-      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      if (prefersReducedMotion() || !wide.matches) {
         stage.dataset.stack = "off";
         stage.dataset.open = "true";
         items.forEach((item) => item.style.setProperty("--stack", "1"));
@@ -117,8 +156,16 @@ export default function ScrollStack({ children, className = "" }: ScrollStackPro
 
     setup();
 
+    /* Au redimensionnement, la hauteur de fenêtre change donc le centrage aussi : on
+       remesure avant de recalculer. */
+    const onResize = () => {
+      setup();
+      schedule();
+    };
+
     window.addEventListener("scroll", schedule, { passive: true });
-    window.addEventListener("resize", schedule);
+    window.addEventListener("resize", onResize);
+    wide.addEventListener("change", onResize);
 
     /* Les retours à la ligne du titre, le chargement des images et la restauration de la
        position de défilement changent la hauteur des cases : on remesure plutôt que de
@@ -132,7 +179,8 @@ export default function ScrollStack({ children, className = "" }: ScrollStackPro
 
     return () => {
       window.removeEventListener("scroll", schedule);
-      window.removeEventListener("resize", schedule);
+      window.removeEventListener("resize", onResize);
+      wide.removeEventListener("change", onResize);
       observer.disconnect();
       if (frame) window.cancelAnimationFrame(frame);
     };

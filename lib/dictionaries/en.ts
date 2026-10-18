@@ -673,6 +673,8 @@ export const ui = {
       passwordMin: "The password needs at least 8 characters.",
       passwordLetter: "The password needs at least one letter.",
       passwordDigit: "The password needs at least one digit.",
+      passwordConfirm: "Confirm the password.",
+      passwordMismatch: "The two passwords do not match.",
       code: "The code is exactly 6 digits.",
     },
     login: {
@@ -680,9 +682,41 @@ export const ui = {
       title: "Your salon is waiting",
       body: "Enter your email and password: we send a 6-digit code to confirm it's really you.",
       submit: "Send me the code",
+      forgot: "Forgot your password?",
       noAccount: "No salon yet?",
       createAccount: "Open a salon",
       error: "Sign-in failed. Check your credentials and try again.",
+    },
+    /* Forgotten password, then reset: two screens, two moments — ASK for the link
+       (`forgot`), then SET the new password (`reset`). The contract of the two expected
+       routes is written in `docs/backend-password-reset.md`. */
+    forgot: {
+      eyebrow: "Lost access",
+      title: "Get a reset link",
+      body: "Give the address of your account: we send a link to choose a new password. It stays valid for 15 minutes.",
+      submit: "Send the link",
+      sentTitle: "Check your inbox",
+      sentBody:
+        "If an account exists for that address, a link has just gone out. Have a look in spam: the sender is not in your address book.",
+      sentAgain: "Use another address",
+      note: "The link never shows up here — it goes by email, to the address on the account.",
+      backToLogin: "Back to sign-in",
+      error: "The request failed. Try again in a moment.",
+    },
+    reset: {
+      eyebrow: "New password",
+      title: "Choose a new password",
+      body: "A long, unique password beats a complicated one you reuse elsewhere.",
+      password: "New password",
+      confirm: "Confirm the password",
+      submit: "Save the password",
+      doneTitle: "Password saved",
+      doneBody: "You can now sign in with this password. All your other sessions have been closed.",
+      signIn: "Go to sign-in",
+      missingToken: "Incomplete link: the token is missing. Start the request again from the beginning.",
+      expired: "This link has expired or was already used. Ask for a new one.",
+      requestAnother: "Request a new link",
+      error: "The reset failed. The link may have expired — ask for a new one.",
     },
     otp: {
       eyebrow: "Verification",
@@ -1415,8 +1449,15 @@ export const ui = {
   demo: {
     eyebrow: "Live",
     title: "A real salon, read live",
+    /* The line under the title DESCRIBES what the section shows — it is written here, not
+       read from the API. A sentence taken from the demo salon's record would be empty
+       every other day (every account writes its own) and the section would have nothing
+       left to say under its title.
+
+       LENGTH: about seven lines (≈ 330 characters) — the height of the photo beside it.
+       Any longer, the text column outgrows the image and the row breaks. */
     body:
-      "Nothing is staged: the name, colours, services and team belong to the demo salon and are served by the product's API while the page loads.",
+      "This is not a mock-up: it is a real salon's storefront, served by the API while you read. Services, durations, prices, team, opening hours, photos and reviews come from the product's database — a booking lands straight in its calendar, and the salon changes a price or closes a slot in one move, with no developer.",
     servicesLabel: "Services",
     teamLabel: "Team",
     bookingLabel: "Booking",

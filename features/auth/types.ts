@@ -32,6 +32,24 @@ export interface ResendOtpCredentials {
   readonly email: string;
 }
 
+/**
+ * `POST /auth/password/forgot` — demande d'un lien de réinitialisation.
+ *
+ * La route reste **à implémenter côté backend** : voir `docs/backend-password-reset.md`.
+ */
+export interface ForgotPasswordCredentials {
+  readonly email: string;
+}
+
+/**
+ * `POST /auth/password/reset` — le jeton vient du lien reçu par courriel, le mot de passe
+ * est le nouveau. Le jeton est à usage unique : un second envoi du même formulaire échoue.
+ */
+export interface ResetPasswordCredentials {
+  readonly token: string;
+  readonly password: string;
+}
+
 /** `POST /auth/register` — crée le salon (tenant) **et** son compte propriétaire. */
 export interface RegisterCredentials {
   readonly tenantName: string;
@@ -85,6 +103,29 @@ export interface OtpSentResponse {
     readonly email: string;
     /** Durée de vie du code, en secondes (600 = 10 minutes). */
     readonly expiresIn: number;
+  };
+}
+
+/**
+ * `POST /auth/password/forgot` — même forme que `OtpSentResponse` : un message, l'adresse
+ * concernée, et la durée de vie du lien en secondes (900 = 15 minutes).
+ */
+export interface PasswordResetRequestedResponse {
+  readonly success?: boolean;
+  readonly statusCode: number;
+  readonly data: {
+    readonly message: string;
+    readonly email: string;
+    readonly expiresIn: number;
+  };
+}
+
+/** `POST /auth/password/reset` — accusé de réception ; la session n'est pas ouverte. */
+export interface PasswordResetResponse {
+  readonly success?: boolean;
+  readonly statusCode: number;
+  readonly data: {
+    readonly message: string;
   };
 }
 

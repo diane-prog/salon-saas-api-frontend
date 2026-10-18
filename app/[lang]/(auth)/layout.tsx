@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import AuthLocaleSwitch from "./auth-locale-switch";
+import AuthShowcase from "@/components/AuthShowcase";
 import { getDictionary, isLocale } from "@/lib/dictionaries";
 import { LABEL } from "@/lib/editorial";
 
@@ -64,12 +65,16 @@ export default async function AuthLayout({
         </footer>
       </div>
 
-      {/* ——— Colonne encre. Le grand « B » en filigrane donne l'échelle ; il
-              n'est jamais lu par un lecteur d'écran. */}
+      {/* ——— Colonne encre, posée sur un CARROUSEL D'IMAGES (`AuthShowcase`) : les plans
+              du salon défilent derrière par un balayage `clip-path`, et le voile du
+              carrousel garde le texte lisible dessus. Le grand « B » en filigrane donne
+              l'échelle ; il n'est jamais lu par un lecteur d'écran. */}
       <aside className="relative hidden flex-col justify-between overflow-hidden bg-ink px-14 py-12 text-paper lg:flex xl:px-20">
+        <AuthShowcase />
+
         <span
           aria-hidden
-          className="pointer-events-none absolute -bottom-24 -right-10 select-none font-display text-[26rem] leading-none text-paper/[0.035]"
+          className="pointer-events-none absolute -bottom-24 -right-10 select-none font-display text-[26rem] leading-none text-paper/[0.05]"
         >
           B
         </span>

@@ -694,6 +694,8 @@ export const ui = {
       passwordMin: "Le mot de passe fait au moins 8 caractères.",
       passwordLetter: "Le mot de passe contient au moins une lettre.",
       passwordDigit: "Le mot de passe contient au moins un chiffre.",
+      passwordConfirm: "Confirmez le mot de passe.",
+      passwordMismatch: "Les deux mots de passe ne sont pas identiques.",
       code: "Le code fait exactement 6 chiffres.",
     },
     login: {
@@ -701,9 +703,42 @@ export const ui = {
       title: "Votre salon vous attend",
       body: "Entrez votre e-mail et votre mot de passe : nous vous envoyons un code à 6 chiffres pour confirmer que c'est bien vous.",
       submit: "Recevoir mon code",
+      forgot: "Mot de passe oublié ?",
       noAccount: "Vous n'avez pas encore de salon ?",
       createAccount: "Ouvrir un salon",
       error: "La connexion a échoué. Vérifiez vos identifiants et réessayez.",
+    },
+    /* Mot de passe oublié puis réinitialisation. Deux écrans, deux temps : on DEMANDE le
+       lien (`forgot`), puis on POSE le nouveau mot de passe (`reset`). Le contrat des deux
+       routes attendues est écrit dans `docs/backend-password-reset.md`. */
+    forgot: {
+      eyebrow: "Accès perdu",
+      title: "Recevoir un lien de réinitialisation",
+      body: "Indiquez l'adresse de votre compte : nous vous envoyons un lien pour choisir un nouveau mot de passe. Il reste valable 15 minutes.",
+      submit: "Envoyer le lien",
+      sentTitle: "Regardez votre boîte",
+      sentBody:
+        "Si un compte existe pour cette adresse, un lien vient de partir. Pensez aux indésirables : l'expéditeur n'est pas dans votre carnet.",
+      sentAgain: "Utiliser une autre adresse",
+      note: "Le lien ne s'affiche jamais ici — il part par courriel, et à la même adresse que celle du compte.",
+      backToLogin: "Revenir à la connexion",
+      error: "La demande a échoué. Réessayez dans un instant.",
+    },
+    reset: {
+      eyebrow: "Nouveau mot de passe",
+      title: "Choisissez un nouveau mot de passe",
+      body: "Un mot de passe long et unique vaut mieux qu'un mot de passe compliqué que vous réutilisez ailleurs.",
+      password: "Nouveau mot de passe",
+      confirm: "Confirmer le mot de passe",
+      submit: "Enregistrer le mot de passe",
+      doneTitle: "Mot de passe enregistré",
+      doneBody:
+        "Vous pouvez maintenant vous connecter avec ce mot de passe. Toutes vos autres sessions ont été fermées.",
+      signIn: "Aller à la connexion",
+      missingToken: "Lien incomplet : il manque le jeton. Reprenez la demande depuis le début.",
+      expired: "Ce lien a expiré ou a déjà servi. Demandez-en un nouveau.",
+      requestAnother: "Demander un nouveau lien",
+      error: "La réinitialisation a échoué. Le lien est peut-être expiré — demandez-en un nouveau.",
     },
     otp: {
       eyebrow: "Vérification",
@@ -1439,8 +1474,15 @@ export const ui = {
   demo: {
     eyebrow: "En direct",
     title: "Un vrai salon, lu en direct",
+    /* Le texte sous le titre DÉCRIT ce que la section montre, il ne le RÉSUME pas : il est
+       écrit ici, pas lu sur l'API. Une phrase tirée de la fiche du salon de démonstration
+       serait vide un jour sur deux (chaque compte écrit la sienne) et la section n'aurait
+       plus rien à dire sous son titre.
+
+       LONGUEUR : environ sept lignes (≈ 330 caractères) — autant que la hauteur de la
+       photo en regard. Plus long, la colonne de texte dépasse l'image et la rangée casse. */
     body:
-      "Rien n'est mis en scène : le nom, les couleurs, les prestations et l'équipe sont ceux du salon de démonstration, servis par l'API du produit pendant que la page s'affiche.",
+      "Ce n'est pas une maquette : c'est la vitrine d'un vrai salon, servie par l'API pendant que vous lisez. Prestations, durées, tarifs, équipe, horaires, photos et avis viennent de la base du produit — la réservation tombe directement dans son agenda, et le salon change un prix ou ferme un créneau en un geste, sans développeur.",
     servicesLabel: "Prestations",
     teamLabel: "Équipe",
     bookingLabel: "Réservation",
