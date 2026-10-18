@@ -262,6 +262,9 @@ export const hero = {
     "The calendar, online booking and client files in one place — including when the salon is closed.",
   manifesto: ["Calendar & booking", "Clients, services, team", "Your salon, held in one hand"],
   liveLabel: "Live demonstration",
+  /* Discreet hero link to the demo page: it moved here when the sign-in column was
+     trimmed down — that surface is a door, not a landing page. */
+  demo: "See a demo salon page",
   reassurances: [
     { value: "24/7", label: "Online booking" },
     { value: "One", label: "Appointment book" },
@@ -762,16 +765,11 @@ export const ui = {
       error: "Creation failed. Check your details or try again.",
       terms: "By creating your salon you accept our terms of use.",
     },
-    /* Right-hand column, on the ink: three short claims, never a sales pitch —
-       the sign-in screen is not a landing page. */
+    /* Right-hand column, on the ink: one line only, never a sales pitch —
+       the sign-in screen is not a landing page. The feature list was noise under
+       the images; it lives on the site, where it belongs. */
     panel: {
       title: "Your calendar, your clients and your till, in one place.",
-      points: [
-        "Online booking, 24/7",
-        "Client file and visit history",
-        "Till, team and today's numbers",
-      ],
-      demo: "See a demo salon page",
     },
   },
 

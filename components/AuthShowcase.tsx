@@ -5,20 +5,21 @@ import { useEffect, useState } from "react";
 import { prefersReducedMotion } from "@/lib/motion";
 
 /**
- * Le fond de la colonne d'accès : un carrousel d'images, révélées par un BALAYAGE.
+ * Le fond de la colonne d'accès : un CARROUSEL VERTICAL d'images.
  *
  * POURQUOI CE MOUVEMENT, ET PAS UN FONDU : la colonne portait un aplat d'encre avec un
  * grand « B » en filigrane. Beau, mais mort — et la page de connexion est le premier écran
  * qu'un salon voit de nous. Un fondu d'une image à l'autre se lit comme un diaporama : on
- * voit deux images se superposer. Ici, l'image suivante ARRIVE en découvrant la précédente
- * (`clip-path` qui part du bord droit et balaie vers la gauche, 1,4 s, courbe d'entrée et de
- * sortie franches) : le regard suit une ligne, pas une dissolution.
+ * voit deux images se superposer. Ici, la photo suivante MONTE depuis le bas et recouvre
+ * la précédente d'un seul geste continu (1,25 s, courbe expo : départ franc, longue
+ * décélération), comme un film qui avance d'un plan. Le panneau voyage, l'image grandit
+ * dessous : deux mouvements distincts, sur deux éléments distincts, qui se composent.
  *
- * LES IMAGES SONT TOUTES MONTÉES, empilées par `z-index`. C'est ce qui permet le balayage :
+ * LES IMAGES SONT TOUTES MONTÉES, empilées par `z-index`. C'est ce qui permet ce passage :
  * la nouvelle image glisse PAR-DESSUS l'ancienne, qui reste visible dessous pendant le
- * mouvement. L'image active reçoit l'animation par un remontage (`key`) — aucune minuterie
- * par image, aucune coordonnée calculée en JavaScript, donc rien à recalculer au
- * redimensionnement.
+ * mouvement — aucun trou, aucun fond à découvert. L'image active reçoit l'animation par un
+ * remontage (`key`) — aucune minuterie par image, aucune coordonnée calculée en
+ * JavaScript, donc rien à recalculer au redimensionnement.
  *
  * ELLES SONT LIVRÉES AVEC LE DÉPÔT (`public/media/`) et remplacées par
  * `NEXT_PUBLIC_AUTH_IMAGES` (liste séparée par des virgules, chemins locaux ou URL
@@ -85,16 +86,20 @@ export default function AuthShowcase() {
             className="absolute inset-0"
             style={{ zIndex: isActive ? IMAGES.length + run : index }}
           >
-            {/* Deux animations sur deux éléments, jamais sur le même : le BALAYAGE
-                (`clip-path`) découvre le cadre, la DÉRIVE (échelle) anime l'image à
-                l'intérieur. Superposées sur un seul élément, la seconde aurait écrasé la
-                première (`animation` est une propriété raccourcie).
+            {/* Deux animations sur deux éléments, jamais sur le même : le PANNEAU
+                monte (`auth-rise`), la DÉRIVE (échelle) anime l'image à l'intérieur.
+                Superposées sur un seul élément, la seconde aurait écrasé la première
+                (`animation` est une propriété raccourcie).
 
                 Le remontage par `key` est ce qui rejoue les deux : la clé change à
-                l'instant où l'image devient active, et seulement là. */}
+                l'instant où l'image devient active, et seulement là.
+
+                L'ombre portée reste sur le panneau : pendant la montée, elle dessine le
+                bord supérieur du tirage qui arrive et le détache de l'image précédente ;
+                au repos, elle est hors du cadre et ne se voit pas. */}
             <div
               key={isActive ? `active-${run}` : source}
-              className={`absolute inset-0 ${isActive ? "auth-wipe" : ""}`}
+              className={`absolute inset-0 ${isActive ? "auth-rise shadow-[0_-30px_60px_rgba(0,0,0,0.45)]" : ""}`}
             >
               {/* eslint-disable-next-line @next/next/no-img-element -- images fournies par l'exploitant (chemins locaux ou URL), hors liste blanche de `next/image` */}
               <img
@@ -110,9 +115,14 @@ export default function AuthShowcase() {
         );
       })}
 
-      {/* Le voile : il tient le texte de la colonne lisible SUR les images, sans les
-          éteindre — plus dense en bas (où vit la promesse), à peine posé en haut. */}
-      <div className="absolute inset-0 z-50 bg-[linear-gradient(to_top,rgba(21,17,14,0.94)_0%,rgba(21,17,14,0.72)_38%,rgba(21,17,14,0.42)_72%,rgba(21,17,14,0.3)_100%)]" />
+      {/* UN SEUL VOILE, ET SEULEMENT EN BAS.
+
+          L'image reste pleine et nette sur toute sa hauteur ; le voile ne commence qu'à
+          mi-hauteur et s'épaissit vers le bas, là où vivent le titre et le nom du salon.
+          C'est une légende de photo, pas un filtre : en haut, on doit voir la photo telle
+          qu'elle est. Le dégradé s'éteint complètement à 58 % pour ne laisser aucune
+          teinte sur la partie haute. */}
+      <div className="absolute inset-0 z-50 bg-[linear-gradient(to_top,rgba(21,17,14,0.94)_0%,rgba(21,17,14,0.82)_18%,rgba(21,17,14,0.55)_34%,rgba(21,17,14,0.18)_48%,rgba(21,17,14,0)_58%)]" />
 
       {/* Le grain dans son propre cadre : `grain` pose `position: relative`. */}
       <div className="absolute inset-0 z-50">

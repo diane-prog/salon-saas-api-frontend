@@ -21,8 +21,8 @@ import { LABEL } from "@/lib/editorial";
  * téléphone, la page reprend un flux normal (`min-h-[100dvh]`) : le clavier
  * virtuel ne doit jamais enfermer l'utilisateur.
  *
- * La colonne encre reste un écran d'accès, pas une page de vente : trois
- * promesses, un lien vers la vitrine de démonstration, rien d'autre.
+ * La colonne encre reste un écran d'accès, pas une page de vente : le nom en haut,
+ * une phrase en bas, rien d'autre.
  */
 export default async function AuthLayout({
   children,
@@ -65,44 +65,23 @@ export default async function AuthLayout({
         </footer>
       </div>
 
-      {/* ——— Colonne encre, posée sur un CARROUSEL D'IMAGES (`AuthShowcase`) : les plans
-              du salon défilent derrière par un balayage `clip-path`, et le voile du
-              carrousel garde le texte lisible dessus. Le grand « B » en filigrane donne
-              l'échelle ; il n'est jamais lu par un lecteur d'écran. */}
+      {/* ——— Colonne encre, posée sur un CARROUSEL VERTICAL (`AuthShowcase`) : les plans
+              du salon montent un à un derrière le texte, et le voile du bas garde le titre
+              lisible dessus. Rien d'autre : ni filigrane, ni signature — l'image suffit. */}
       <aside className="relative hidden flex-col justify-between overflow-hidden bg-ink px-14 py-12 text-paper lg:flex xl:px-20">
         <AuthShowcase />
-
-        <span
-          aria-hidden
-          className="pointer-events-none absolute -bottom-24 -right-10 select-none font-display text-[26rem] leading-none text-paper/[0.05]"
-        >
-          B
-        </span>
 
         <div className="relative">
           <span className={`${LABEL} text-paper/35`}>{dict.site.name}</span>
         </div>
 
+        {/* Le titre vit EN BAS : il ferme la colonne comme une légende de photo, et
+            laisse toute la hauteur aux images. */}
         <div className="relative max-w-md">
           <p className="font-display text-[clamp(2rem,3vw,2.9rem)] leading-[1.06] tracking-[-0.01em]">
             {auth.panel.title}
           </p>
-
-          <ul className="mt-10 grid gap-0">
-            {auth.panel.points.map((point) => (
-              <li key={point} className="border-t border-paper/10 py-4 last:border-b">
-                <span className="block text-sm leading-relaxed text-paper/65">{point}</span>
-              </li>
-            ))}
-          </ul>
         </div>
-
-        <Link
-          href={`/${lang}#demo`}
-          className="relative inline-flex w-fit items-center border-b border-paper/25 pb-1 text-[0.66rem] uppercase tracking-[0.16em] text-paper/60 transition-colors hover:border-turquoise hover:text-turquoise"
-        >
-          {auth.panel.demo}
-        </Link>
       </aside>
     </div>
   );

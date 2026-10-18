@@ -170,7 +170,7 @@ export default function HomeHero() {
             href={demoHref}
             className="mt-5 hidden w-fit text-[0.62rem] uppercase tracking-[0.16em] text-paper/55 underline decoration-paper/25 underline-offset-[6px] transition-colors hover:text-paper hover:decoration-paper/60 lg:block"
           >
-            {ui.auth.panel.demo}
+            {hero.demo}
           </Link>
         </div>
 

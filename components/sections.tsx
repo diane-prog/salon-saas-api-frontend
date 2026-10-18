@@ -76,6 +76,12 @@ export function HeroBackdrop() {
           au niveau du texte, ce qui suffit sur un plan clair sans repeindre l'image. */}
       <div className="absolute inset-0 bg-[linear-gradient(to_top,rgba(21,17,14,0.94)_0%,rgba(21,17,14,0.84)_28%,rgba(21,17,14,0.55)_48%,rgba(21,17,14,0.18)_66%,rgba(21,17,14,0)_76%)]" />
 
+      {/* Le voile de TÊTE, celui de la barre transparente : le haut du plan est clair
+          (183 à 210 sur 255 mesurés dans la bande du nom, sur le fichier livré), un nom en
+          papier n'y tenait pas. Il s'éteint avant le quart haut, donc le plan reste à sa
+          couleur partout où il n'y a rien à lire. */}
+      <div className="absolute inset-x-0 top-0 h-[30vh] bg-[linear-gradient(to_bottom,rgba(21,17,14,0.62)_0%,rgba(21,17,14,0.42)_34%,rgba(21,17,14,0.16)_68%,rgba(21,17,14,0)_100%)]" />
+
       {/* Le grain vit dans son propre cadre : `grain` pose `position: relative`, ce qui
           écraserait l'`absolute` du calque. */}
       <div className="absolute inset-0">

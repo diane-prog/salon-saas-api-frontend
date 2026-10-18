@@ -142,12 +142,16 @@ export default function Header() {
      désormais celle de tout le site. Les liens, la langue et les actions de compte ne
      disparaissent pas : ils vivent dans la barre latérale que le bouton ouvre.
 
-     SEUL L'ACCUEIL a la barre transparente. Sur les pages internes, le plan vidéo est
-     clair : une barre transparente y demandait un voile pour que le nom reste lisible, et
-     ce voile faisait une bande sale sur le haut du plan. La barre y est donc OPAQUE — le
-     plan commence juste dessous, intact, et la barre est lisible sans rien poser dessus. */
-  const path = pathname === `/${locale}` ? "/" : pathname.slice(`/${locale}`.length);
-  const overHero = path === "/" && !scrolled;
+     LA BARRE EST TRANSPARENTE SUR TOUTES LES PAGES : toutes ouvrent sur le même plan vidéo,
+     et une barre de papier posée dessus coupait le plan d'une bande claire dès le premier
+     pixel. Le nom et le bouton passent donc au papier tant qu'on est en haut de la page — et
+     le plan gagne en échange un voile de tête (`HeroBackdrop`), sans quoi un nom clair sur un
+     haut de plan clair ne se lirait pas. Dès qu'on défile, la barre reprend son papier à
+     95 % et son encre : à ce moment-là, on a quitté le plan.
+
+     Aucune exception à prévoir pour la 404 : elle est rendue hors de la coquille du site,
+     donc sans cette barre. */
+  const overHero = !scrolled;
 
   const changeLocale = (next: Locale) => {
     /* Les panneaux du header se referment AVANT de partir. Changer de langue depuis le menu
@@ -167,11 +171,10 @@ export default function Header() {
     <>
       {/* La barre est la même sur toutes les pages : nom à gauche, bouton à droite.
 
-          ELLE S'EFFACE AU-DESSUS D'UN PLAN : sur une page qui ouvre sur un hero vidéo (toutes
-          les pages du site, sauf la 404), elle est transparente et son texte passe au papier,
-          pour ne pas poser une bande claire sur le plan. Une fois la page défilée, elle
-          reprend son fond de papier à 95 % et son texte d'encre ; les pages sans plan la
-          prennent d'emblée.
+          ELLE S'EFFACE AU-DESSUS D'UN PLAN : les pages du site ouvrent toutes sur un hero
+          vidéo, elle est donc transparente et son texte passe au papier, pour ne pas poser une
+          bande claire sur le plan. Une fois la page défilée, elle reprend son fond de papier à
+          95 % et son texte d'encre.
 
           POURQUOI PLUS DE FLOU D'ARRIÈRE-PLAN : la barre est FIXE, donc un `backdrop-filter`
           la force à re-flouter toute la largeur de l'écran à chaque image défilée, par-dessus
@@ -181,9 +184,7 @@ export default function Header() {
         className={`fixed inset-x-0 top-0 z-50 transition-[background-color,border-color,padding] duration-300 ${
           overHero
             ? "border-b border-transparent bg-transparent py-4 lg:py-6"
-            : scrolled
-              ? "border-b border-ink/10 bg-paper/95 py-2"
-              : "border-b border-ink/10 bg-paper/95 py-3 lg:py-4"
+            : "border-b border-ink/10 bg-paper/95 py-2"
         }`}
       >
         {/* Aucun voile dans la barre : le plan reste intact jusqu'en haut, y compris

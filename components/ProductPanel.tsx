@@ -19,12 +19,18 @@ import { prefersReducedMotion } from "@/lib/motion";
  *
  * LE PANEL VIT, MAINTENANT (ce qui a changé) : une capture d'écran est morte, et c'est
  * justement ce qui la trahit. Le panneau se comporte donc comme un écran allumé —
- *   · toutes les 3,2 s, UNE valeur change (statut, chargement, étiquette, créneau, KPI) :
- *     la valeur sortante s'efface en glissant de quelques pixels et la nouvelle prend sa
- *     place, sur 460 ms. Une seule ligne bouge à la fois : c'est un écran qu'on consulte,
- *     pas un carrousel ;
- *   · toutes les ~19 s (une fois sur six), la LISTE ENTIÈRE se rafraîchit : les lignes
- *     reviennent en cascade (55 ms d'écart), comme un tableau de départs qui se réaffiche.
+ *   · toutes les 3,2 s, UNE ligne change de valeur (statut, chargement, étiquette, créneau,
+ *     KPI). Mais ce n'est plus le TEXTE seul qui bouge : la ligne entière se relève sous
+ *     son masque (la nouvelle valeur monte du bas du cadre, elle n'apparaît pas en fondu),
+ *     et le repère de laiton se déplace d'une ligne à l'autre en se déployant — la ligne
+ *     active s'éclaire et s'indente de 3 px pendant que la précédente s'éteint. Le regard
+ *     suit un mouvement de ligne, pas un clignotement de caractères ;
+ *   · toutes les ~19 s (une fois sur six), la LISTE ENTIÈRE se rafraîchit : toutes les
+ *     lignes remontent sous leur masque en cascade (55 ms d'écart), comme un tableau de
+ *     départs qui se réaffiche, et la carte imprime un très léger basculement (1,1°) ;
+ *   · en continu, un reflet traverse la carte de haut en bas (7 s), et les barres du
+ *     pilotage respirent. C'est ce qui distingue un écran allumé d'une image posée —
+ *     même quand aucune donnée ne change, quelque chose vit.
  *
  * LE HASARD EST DÉTERMINISTE. La valeur d'une frame se calcule à partir du numéro de
  * battement (`chance(seed)`), jamais de `Math.random()` au rendu : le serveur et le client
@@ -157,17 +163,81 @@ const isSwipe = (tick: number) => tick > 0 && tick % SWIPE_EVERY === 0;
 /** La clé de la liste : elle change au rafraîchissement complet, et seulement là. */
 const listKey = (tick: number) => (isSwipe(tick) ? `swipe-${tick}` : "list");
 
+/** La classe qui fait basculer la liste au rafraîchissement complet — et seulement là. */
+const flipClass = (tick: number) => (isSwipe(tick) ? "live-flip" : undefined);
+
 function Frame({ variant, children }: { variant: Variant; children: ReactNode }) {
   const { title, caption } = LABELS[variant];
 
   return (
-    <div aria-hidden className="border border-ink/15 bg-white text-ink">
+    <div aria-hidden className="relative overflow-hidden border border-ink/15 bg-white text-ink">
       <div className="flex items-baseline justify-between gap-4 border-b border-ink/10 px-4 py-3">
         <span className="text-[0.6rem] uppercase tracking-[0.18em] text-ink/40">{caption}</span>
         <span className="font-display text-[0.8rem] leading-none text-ink/70">{title}</span>
       </div>
       {children}
+
+      {/* Le reflet qui traverse la carte : une bande d'encre à 8 %, qui descend lentement
+          puis laisse la carte au repos avant de revenir. Elle est au-dessus du contenu mais
+          ne prend pas les clics et ne touche qu'à une transformation — rien d'autre à
+          recalculer pendant qu'elle passe. */}
+      <div className="pointer-events-none absolute inset-0">
+        <div className="live-sheen absolute inset-x-0 top-0 h-1/2 bg-[linear-gradient(to_bottom,transparent,rgba(21,17,14,0.08),transparent)]" />
+      </div>
     </div>
+  );
+}
+
+/**
+ * UNE LIGNE QUI SE DÉPLACE, et non un texte qui change.
+ *
+ * Trois mouvements, tous en CSS, tous sur le compositeur :
+ *   1. le repère de laiton se déploie en haut de la ligne active (`scale-y`), donc le
+ *      regard voit le repère PASSER d'une ligne à l'autre au lieu de sauter ;
+ *   2. la ligne active s'indente de 3 px et prend le papier chaud de la page — la
+ *      précédente s'éteint en 700 ms, en même temps ;
+ *   3. quand les données de la ligne changent (`resetKey`), son contenu REMONTE depuis le
+ *      bas de son propre cadre (`live-row`, masqué par `overflow-hidden`) : c'est une
+ *      transition de ligne, pas un fondu de caractères.
+ *
+ * Le masque est porté par la boîte qui s'indente, le mouvement par l'enfant qui remonte :
+ * les deux transformations ne se disputent pas le même élément.
+ */
+function Row({
+  active,
+  resetKey,
+  delay,
+  children,
+}: {
+  active: boolean;
+  /** Change quand les données changent : c'est ce qui rejoue la remontée. */
+  resetKey: string;
+  delay: number;
+  children: ReactNode;
+}) {
+  return (
+    <li
+      className={`relative border-b border-ink/[0.07] transition-colors duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] last:border-0 motion-reduce:transition-none ${
+        active ? "bg-paper" : "bg-white"
+      }`}
+    >
+      <span
+        aria-hidden
+        className={`absolute inset-y-0 left-0 w-[2px] origin-top bg-brand transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${
+          active ? "scale-y-100" : "scale-y-0"
+        }`}
+      />
+
+      <div
+        className={`overflow-hidden px-4 transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${
+          active ? "translate-x-[3px]" : ""
+        }`}
+      >
+        <div key={resetKey} style={{ animationDelay: `${delay}ms` }} className="live-row py-2.5">
+          {children}
+        </div>
+      </div>
+    </li>
   );
 }
 
@@ -185,27 +255,28 @@ function AgendaPanel() {
   );
 
   return (
-    <ul key={listKey(tick)}>
+    <ul key={listKey(tick)} className={flipClass(tick)}>
       {rows.map((row, i) => (
-        <li
+        <Row
           key={row.time}
-          style={{ animationDelay: `${i * 55}ms` }}
-          className="live-row grid grid-cols-[3.2rem_minmax(0,1fr)_auto] items-baseline gap-3 border-b border-ink/[0.07] px-4 py-2.5 last:border-0"
+          active={i === changed}
+          resetKey={`${row.state}-${row.price}`}
+          delay={i * 55}
         >
-          <span className="font-display text-[0.8rem] tabular-nums text-ink/55">{row.time}</span>
-          <span className="min-w-0">
-            <span className="block truncate text-[0.8rem] text-ink">{row.name}</span>
-            <span className="block truncate text-[0.68rem] text-ink/45">{row.service}</span>
-          </span>
-          <span className="text-right">
-            <span className="block text-[0.7rem] tabular-nums text-ink/70">{money(row.price)}</span>
-            <Swap
-              className="block text-[0.55rem] uppercase tracking-[0.12em] text-brand"
-            >
-              {row.state}
-            </Swap>
-          </span>
-        </li>
+          <div className="grid grid-cols-[3.2rem_minmax(0,1fr)_auto] items-baseline gap-3">
+            <span className="font-display text-[0.8rem] tabular-nums text-ink/55">{row.time}</span>
+            <span className="min-w-0">
+              <span className="block truncate text-[0.8rem] text-ink">{row.name}</span>
+              <span className="block truncate text-[0.68rem] text-ink/45">{row.service}</span>
+            </span>
+            <span className="text-right">
+              <span className="block text-[0.7rem] tabular-nums text-ink/70">{money(row.price)}</span>
+              <span className="block text-[0.55rem] uppercase tracking-[0.12em] text-brand">
+                {row.state}
+              </span>
+            </span>
+          </div>
+        </Row>
       ))}
     </ul>
   );
@@ -219,23 +290,24 @@ function TeamPanel() {
   );
 
   return (
-    <ul key={listKey(tick)}>
+    <ul key={listKey(tick)} className={flipClass(tick)}>
       {rows.map((row, i) => (
-        <li
+        <Row
           key={row.name}
-          style={{ animationDelay: `${i * 55}ms` }}
-          className="live-row grid grid-cols-[minmax(0,1fr)_auto] items-baseline gap-3 border-b border-ink/[0.07] px-4 py-3 last:border-0"
+          active={i === changed}
+          resetKey={`${row.load}`}
+          delay={i * 55}
         >
-          <span>
-            <span className="block text-[0.8rem] text-ink">{row.name}</span>
-            <span className="block text-[0.68rem] tabular-nums text-ink/45">{row.hours}</span>
-          </span>
-          <Swap
-            className="text-[0.6rem] uppercase tracking-[0.12em] text-ink/40"
-          >
-            {row.load} rendez-vous
-          </Swap>
-        </li>
+          <div className="grid grid-cols-[minmax(0,1fr)_auto] items-baseline gap-3">
+            <span>
+              <span className="block text-[0.8rem] text-ink">{row.name}</span>
+              <span className="block text-[0.68rem] tabular-nums text-ink/45">{row.hours}</span>
+            </span>
+            <span className="text-[0.6rem] uppercase tracking-[0.12em] text-ink/40">
+              {row.load} rendez-vous
+            </span>
+          </div>
+        </Row>
       ))}
     </ul>
   );
@@ -328,27 +400,26 @@ function ClientsPanel() {
   );
 
   return (
-    <ul key={listKey(tick)}>
+    <ul key={listKey(tick)} className={flipClass(tick)}>
       {rows.map((row, i) => (
-        <li
+        <Row
           key={row.name}
-          style={{ animationDelay: `${i * 55}ms` }}
-          className="live-row flex items-baseline justify-between gap-3 border-b border-ink/[0.07] px-4 py-2.5 last:border-0"
+          active={i === changed}
+          resetKey={`${row.tag}-${row.visits}-${row.total}`}
+          delay={i * 55}
         >
-          <span className="min-w-0">
-            <span className="block truncate text-[0.8rem] text-ink">{row.name}</span>
-            <Swap
-              className="block text-[0.68rem] tabular-nums text-ink/45"
-            >
-              {row.visits} visites · {row.total}
-            </Swap>
-          </span>
-          <Swap
-            className="shrink-0 text-[0.55rem] uppercase tracking-[0.12em] text-brand"
-          >
-            {row.tag}
-          </Swap>
-        </li>
+          <div className="flex items-baseline justify-between gap-3">
+            <span className="min-w-0">
+              <span className="block truncate text-[0.8rem] text-ink">{row.name}</span>
+              <span className="block text-[0.68rem] tabular-nums text-ink/45">
+                {row.visits} visites · {row.total}
+              </span>
+            </span>
+            <span className="shrink-0 text-[0.55rem] uppercase tracking-[0.12em] text-brand">
+              {row.tag}
+            </span>
+          </div>
+        </Row>
       ))}
     </ul>
   );
@@ -362,26 +433,26 @@ function CataloguePanel() {
   );
 
   return (
-    <ul key={listKey(tick)}>
+    <ul key={listKey(tick)} className={flipClass(tick)}>
       {rows.map((row, i) => (
-        <li
+        <Row
           key={row.name}
-          style={{ animationDelay: `${i * 55}ms` }}
-          className="live-row grid grid-cols-[minmax(0,1fr)_auto] items-baseline gap-3 border-b border-ink/[0.07] px-4 py-2.5 last:border-0"
+          active={i === changed}
+          resetKey={row.channel}
+          delay={i * 55}
         >
-          <span className="min-w-0">
-            <span className="block truncate text-[0.8rem] text-ink">{row.name}</span>
-            <span className="block text-[0.66rem] uppercase tracking-[0.1em] text-ink/40">
-              {row.meta} ·{" "}
-              <Swap className="inline">
-                {row.channel}
-              </Swap>
+          <div className="grid grid-cols-[minmax(0,1fr)_auto] items-baseline gap-3">
+            <span className="min-w-0">
+              <span className="block truncate text-[0.8rem] text-ink">{row.name}</span>
+              <span className="block text-[0.66rem] uppercase tracking-[0.1em] text-ink/40">
+                {row.meta} · {row.channel}
+              </span>
             </span>
-          </span>
-          <span className="font-display text-[0.82rem] tabular-nums text-ink/75">
-            {money(row.price)}
-          </span>
-        </li>
+            <span className="font-display text-[0.82rem] tabular-nums text-ink/75">
+              {money(row.price)}
+            </span>
+          </div>
+        </Row>
       ))}
     </ul>
   );
@@ -404,15 +475,28 @@ function NumbersPanel() {
         ];
   const deltas = tick === 0 ? NUMBERS.map((row) => row.delta) : ["+12 %", "+11 %", "+6 pts"];
 
+  /* Le repère des KPI : une colonne s'allume à son tour, de gauche à droite, à chaque
+     battement. C'est la même écriture que le repère des lignes, tournée à l'horizontale. */
+  const active = tick === 0 ? -1 : tick % NUMBERS.length;
+
   return (
     <>
-      <dl key={listKey(tick)} className="grid grid-cols-3 gap-px bg-ink/10">
+      <dl key={listKey(tick)} className={`grid grid-cols-3 gap-px bg-ink/10 ${flipClass(tick) ?? ""}`}>
         {NUMBERS.map((row, i) => (
           <div
             key={row.label}
             style={{ animationDelay: `${i * 55}ms` }}
-            className="live-row bg-white px-3 py-4"
+            className={`live-row relative px-3 py-4 transition-colors duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${
+              i === active ? "bg-paper" : "bg-white"
+            }`}
           >
+            <span
+              aria-hidden
+              className={`absolute inset-x-0 top-0 h-[2px] origin-left bg-brand transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${
+                i === active ? "scale-x-100" : "scale-x-0"
+              }`}
+            />
+
             <dt className="text-[0.55rem] uppercase tracking-[0.14em] text-ink/40">{row.label}</dt>
             <dd className="mt-2 font-display text-lg leading-none tabular-nums text-ink">
               <Swap className="inline">

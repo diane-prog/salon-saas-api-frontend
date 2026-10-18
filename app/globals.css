@@ -271,49 +271,51 @@
   color: transparent;
 }
 
-/* Balayage du carrousel d'images des écrans d'accès (components/AuthShowcase.tsx) :
-   l'image qui entre est DÉCOUVERTE depuis le bord droit, elle ne se dissout pas dans la
-   précédente. `inset()` s'interpole proprement (contrairement à un `polygon` à nombre de
-   points variable) et la courbe entre et sort franchement — c'est elle qui fait lire une
-   ligne qui balaie, et non un fondu de plus. */
-@keyframes auth-wipe {
+/* ————— Carrousel des écrans d'accès (components/AuthShowcase.tsx) —————
+
+   Le changement d'image est un CARROUSEL VERTICAL : la photo suivante monte depuis le
+   bas et recouvre la précédente dans un même geste continu, comme un film qui avance
+   d'un plan. Rien ne se dissout, rien ne se découvre par un masque : c'est le panneau
+   entier qui se déplace, et c'est ce qui donne la sensation de défilement plutôt que de
+   diaporama.
+
+   Pourquoi le vertical, et pas l'horizontal habituel : la colonne est un portrait plein
+   écran. Un glissement latéral y lit comme un bandeau publicitaire ; un glissement vers
+   le haut lit comme une pile de tirages qu'on fait défiler.
+
+   La courbe `cubic-bezier(0.16, 1, 0.3, 1)` (expo out) démarre vite puis se pose très
+   longuement : c'est cette longue décélération qui fait le prix du mouvement — la photo
+   arrive, puis s'installe, au lieu de s'arrêter net.
+
+   `will-change: transform` : le panneau voyage sur sa propre couche compositeur pendant
+   la seconde que dure le passage. Une seule vue porte la classe à la fois (l'active).
+*/
+@keyframes auth-rise {
   from {
-    clip-path: inset(0 0 0 100%);
+    transform: translate3d(0, 100%, 0);
   }
   to {
-    clip-path: inset(0);
+    transform: translate3d(0, 0, 0);
   }
 }
 
-/*
-  Balayage du carrousel des écrans d'accès (`components/AuthShowcase.tsx`).
-
-  `inset(0 0 0 100%)` : le cadre est réduit à un trait sur le bord DROIT ; l'animation
-  élargit les deux bords gauche et droit vers 0, donc l'image se découvre de droite à
-  gauche. La courbe est franche au départ et à l'arrivée : le regard suit une ligne qui
-  accélère puis se pose, au lieu d'un fondu qui superpose deux photos.
-
-  `will-change: clip-path` : le navigateur garde le cadre sur sa propre couche pendant
-  la seconde que dure le mouvement — sans lui, chaque image plein écran repeint la
-  colonne entière. Une seule vue porte la classe à la fois (l'active), donc une seule
-  couche est réservée.
-*/
-@utility auth-wipe {
-  will-change: clip-path;
-  animation: auth-wipe 1200ms cubic-bezier(0.76, 0, 0.24, 1) both;
+@utility auth-rise {
+  will-change: transform;
+  animation: auth-rise 1250ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 /*
   Dérive lente de l'image pendant sa pose : 2 % d'échelle en trop au départ, 9 % à
-  l'arrivée. C'est ce qui distingue une image « posée » d'une image « morte » — et c'est
-  ce qui donne au balayage suivant l'impression de pousser un plan déjà en mouvement.
+  l'arrivée. C'est ce qui distingue une image « posée » d'une image « morte » — la photo
+  continue de respirer sous le voile, et le panneau suivant a l'air de pousser un plan
+  déjà en mouvement.
 
   5,6 s pour une pose de 5,2 s : la dérive dépasse volontairement la pose, pour que
-  l'image ne s'immobilise jamais juste avant d'être remplacée. Mise à l'échelle pour la
-  pose, elle aurait marqué un temps d'arrêt d'une demi-seconde à chaque tour.
+  l'image ne s'immobilise jamais juste avant d'être remplacée.
 
-  Elle vit sur l'`img`, pas sur le cadre : le `clip-path` du cadre reste net pendant que
-  l'image grandit dessous. `transform` est composé par le GPU, elle ne coûte rien.
+  Elle vit sur l'`img`, pas sur le panneau : le panneau monte, l'image grandit dessous,
+  et les deux mouvements se composent sans se combattre (deux animations distinctes sur
+  deux éléments distincts). `scale` est composé par le GPU.
 */
 @keyframes auth-drift {
   from {
@@ -329,7 +331,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .auth-wipe,
+  .auth-rise,
   .auth-drift {
     animation: none;
   }
@@ -352,9 +354,13 @@
 
 /* ————— Le pouls des panneaux produit (components/ProductPanel.tsx) —————
    Une valeur qui change glisse de quelques pixels en apparaissant ; au rafraîchissement
-   complet, les lignes reviennent en cascade — le décalage est posé en ligne, ligne par
-   ligne, parce qu'il change avec leur nombre. `both` garde l'état d'arrivée : sans lui,
-   la valeur repasserait une frame invisible avant que la règle ne s'applique. */
+   complet, les lignes REMONTENT sous leur masque en cascade — le décalage est posé en
+   ligne, ligne par ligne, parce qu'il change avec leur nombre.
+
+   `live-row` n'a plus d'opacité : le contenu monte de 108 % et c'est le cadre
+   (`overflow-hidden`, dans `Row`) qui le découpe. Un fondu aurait laissé voir la ligne
+   apparaître sur place ; là, elle ENTRE dans la ligne, comme un tableau de départs.
+   `both` garde l'état d'arrivée, sinon le contenu repasserait une frame sous le masque. */
 @keyframes live-swap {
   from {
     opacity: 0;
@@ -368,11 +374,9 @@
 
 @keyframes live-row {
   from {
-    opacity: 0;
-    transform: translateY(0.5rem);
+    transform: translateY(108%);
   }
   to {
-    opacity: 1;
     transform: translateY(0);
   }
 }
@@ -385,11 +389,51 @@
   animation: live-row 620ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
+/* Le reflet qui traverse la carte : il descend en 3,2 s, puis la carte respire à nouveau
+   vide pendant 3,8 s. Une bande de la moitié de la carte suffit — au-delà, on lirait un
+   voile. */
+@keyframes live-sheen {
+  0% {
+    transform: translateY(-120%);
+  }
+  45%,
+  100% {
+    transform: translateY(320%);
+  }
+}
+
+@utility live-sheen {
+  animation: live-sheen 7s cubic-bezier(0.45, 0, 0.25, 1) infinite;
+  will-change: transform;
+}
+
+/* Le basculement d'une carte qu'on rafraîchit : 1,1° et 2 px, joués une fois. Assez pour
+   que l'œil sente que la surface vient d'être rechargée, trop peu pour qu'on lise un
+   défaut d'alignement. */
+@keyframes live-flip {
+  0% {
+    transform: perspective(900px) rotateX(1.1deg) translateY(2px);
+  }
+  100% {
+    transform: perspective(900px) rotateX(0deg) translateY(0);
+  }
+}
+
+@utility live-flip {
+  animation: live-flip 900ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  transform-origin: top center;
+}
+
 /* Moins d'animation : le panneau reste complet et fixe. */
 @media (prefers-reduced-motion: reduce) {
   .live-swap,
-  .live-row {
+  .live-row,
+  .live-flip {
     animation: none;
+  }
+
+  .live-sheen {
+    display: none;
   }
 }
 

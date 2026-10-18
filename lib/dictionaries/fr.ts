@@ -265,6 +265,9 @@ export const hero = {
     "L'agenda, la réservation en ligne et les fiches clientes du salon, au même endroit — y compris quand le salon est fermé.",
   manifesto: ["Agenda & réservation", "Clientes, prestations, équipe", "Le salon tenu d'une main"],
   liveLabel: "Démonstration en direct",
+  /* Lien discret du hero vers la vitrine : il a suivi son libellé ici quand la colonne
+     des écrans d'accès a été allégée — c'est une affiche d'accueil, pas un écran d'accès. */
+  demo: "Voir une vitrine de démonstration",
   reassurances: [
     { value: "24 h/24", label: "Réservation en ligne" },
     { value: "1 seul", label: "Carnet de rendez-vous" },
@@ -784,16 +787,12 @@ export const ui = {
       error: "La création a échoué. Vérifiez vos informations ou réessayez.",
       terms: "En créant votre salon, vous acceptez nos conditions d'utilisation.",
     },
-    /* Colonne de droite, sur l'encre : trois affirmations courtes, jamais un
-       argumentaire — l'écran d'accès n'est pas une page de vente. */
+    /* Colonne de droite, sur l'encre : une seule phrase, jamais un
+       argumentaire — l'écran d'accès n'est pas une page de vente. Les listes de
+       fonctionnalités y faisaient du bruit sous les images : elles sont sur le
+       site, à leur place. */
     panel: {
       title: "Votre agenda, vos clients et votre caisse, au même endroit.",
-      points: [
-        "Réservation en ligne, 24 h/24",
-        "Fiche client et historique des visites",
-        "Caisse, équipe et chiffres du jour",
-      ],
-      demo: "Voir une vitrine de démonstration",
     },
   },
 
