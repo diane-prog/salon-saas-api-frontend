@@ -236,7 +236,7 @@
   width: 100%;
   margin-inline: auto;
   padding-inline: 1.25rem;
-  max-width: 80rem;
+  max-width: 90rem;
 
   @media (width >= 48rem) {
     padding-inline: 2rem;
@@ -630,6 +630,14 @@ html[data-js] .page-enter {
 [data-stack="on"] > .stack-grid {
   position: sticky;
   top: 12vh;
+}
+
+/* La vidéo de l'illustration ne sert QUE empilée : ouverte, la grille montre la photo, et
+   rien ne justifie de continuer à décoder le plan animé derrière elle. `display: none`
+   coupe le rendu ; le lecteur retrouve son état à la fermeture (`data-open` repasse à
+   "false`). */
+[data-stack="on"][data-open="true"] video {
+  display: none;
 }
 
 [data-stack="on"] > .stack-grid > * {

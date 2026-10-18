@@ -3,6 +3,7 @@
 import Link from "next/link";
 import type { CSSProperties } from "react";
 
+import AmbientVideo from "@/components/AmbientVideo";
 import Reveal from "@/components/Reveal";
 import ScrollStack from "@/components/ScrollStack";
 import { useDictionary } from "@/components/DictionaryProvider";
@@ -43,8 +44,20 @@ import { useDictionary } from "@/components/DictionaryProvider";
  * la REMPLACE quand elle est posée (chemin local ou URL absolue), sans toucher au reste.
  * Sans image du tout, le champ est dessiné (soleil + grain). La pastille reste au-dessus dans
  * tous les cas.
+ *
+ * LA VIDÉO D'ABORD, LA PHOTO ENSUITE (2026-10-18) : tant que les fiches sont empilées, le
+ * champ montre un PLAN ANIMÉ (`NEXT_PUBLIC_WHY_VIDEO`, muet et en boucle) ; c'est la photo
+ * qui prend sa place quand la grille s'ouvre, en fondu croisé avec `--stack`. Le
+ * `poster` est la photo elle-même, donc aucune image noire ne s'affiche pendant le
+ * chargement du média.
+ *
+ * LES CARTES DE TEXTE N'EXISTENT QU'UNE FOIS OUVERTES : leur opacité vaut `--stack`, la
+ * même variable que leur déplacement. Empilé, on ne voit donc QUE la fiche illustrée —
+ * pas de titre, pas de paragraphe — et chaque carte de texte se révèle en arrivant à sa
+ * place.
  */
 const IMAGE = process.env.NEXT_PUBLIC_WHY_IMAGE ?? "/media/why.jpg";
+const VIDEO = process.env.NEXT_PUBLIC_WHY_VIDEO ?? "/media/hero4.mp4";
 
 export default function WhyStatements() {
   const { dict, locale } = useDictionary();
@@ -92,7 +105,15 @@ export default function WhyStatements() {
               <li
                 key={card.title}
                 className={placement}
-                style={{ "--stack-s": depth, zIndex: why.whyCards.length + 1 - index } as CSSProperties}
+                style={
+                  {
+                    "--stack-s": depth,
+                    zIndex: why.whyCards.length + 1 - index,
+                    /* Empilée, la carte n'a pas de texte : son opacité suit son ouverture,
+                       donc le contenu n'apparaît qu'avec le mouvement. */
+                    opacity: "var(--stack, 1)",
+                  } as CSSProperties
+                }
               >
                 <Reveal as="div" delay={index * 60} className="h-full">
                   <article className="flex h-full min-h-[12.5rem] flex-col border border-ink/12 p-5 sm:min-h-[16rem] sm:p-6 lg:min-h-[18rem] lg:p-7">
@@ -117,10 +138,23 @@ export default function WhyStatements() {
                   `03`, laissant le coin bas gauche vide. La pastille est posée dessus. */}
           <li
             className="min-h-[12.5rem] sm:col-start-3 sm:row-start-2 sm:min-h-[16rem] lg:min-h-[18rem]"
-            style={{ "--stack-s": 1, zIndex: 1 } as CSSProperties}
+            /* Au-dessus de toutes les fiches : pendant l'ouverture, le texte passe
+               DERRIÈRE l'illustration au lieu de la traverser. */
+            style={{ "--stack-s": 1, zIndex: 10 } as CSSProperties}
           >
             <Reveal as="div" delay={why.whyCards.length * 60} className="h-full">
               <div className="relative h-full min-h-[12.5rem] overflow-hidden bg-ink sm:min-h-[16rem] lg:min-h-[18rem]">
+                {/* La vidéo occupe le champ tant que la pile est fermée ; elle s'arrête
+                    d'être rendue quand la grille est ouverte (voir `data-open` dans
+                    `globals.css`) pour ne pas décoder des images cachées. */}
+                {VIDEO && (
+                  <AmbientVideo
+                    src={VIDEO}
+                    poster={IMAGE || undefined}
+                    className="absolute inset-0 h-full w-full object-cover"
+                  />
+                )}
+
                 {IMAGE ? (
                   // eslint-disable-next-line @next/next/no-img-element -- image fournie par l'exploitant (chemin local ou URL), hors liste blanche de `next/image`
                   <img
@@ -129,12 +163,15 @@ export default function WhyStatements() {
                     loading="lazy"
                     decoding="async"
                     className="absolute inset-0 h-full w-full object-cover"
+                    style={{ opacity: VIDEO ? "var(--stack, 1)" : 1 }}
                   />
                 ) : (
-                  <>
-                    <div className="absolute inset-0 bg-[linear-gradient(150deg,#e8cda4_0%,#cfa271_42%,#96693e_78%,#5d422b_100%)]" />
-                    <div className="absolute inset-0 bg-[radial-gradient(58%_58%_at_68%_18%,rgba(255,242,216,0.8),transparent_72%)]" />
-                  </>
+                  !VIDEO && (
+                    <>
+                      <div className="absolute inset-0 bg-[linear-gradient(150deg,#e8cda4_0%,#cfa271_42%,#96693e_78%,#5d422b_100%)]" />
+                      <div className="absolute inset-0 bg-[radial-gradient(58%_58%_at_68%_18%,rgba(255,242,216,0.8),transparent_72%)]" />
+                    </>
+                  )
                 )}
 
                 {/* Le grain dans son propre cadre : `grain` pose `position: relative`. */}

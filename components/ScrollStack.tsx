@@ -82,6 +82,11 @@ export default function ScrollStack({ children, className = "" }: ScrollStackPro
       const travel = Math.max(1, (stage.offsetHeight - grid.offsetHeight) * TRAVEL);
       const progress = Math.min(1, Math.max(0, (pinTop - rect.top) / travel));
 
+      /* Grille ouverte : la vidéo de l'illustration est retirée du rendu (voir
+         `globals.css`). Elle n'a plus rien à montrer sous la photo, et un média qui decode
+         des images invisibles est exactement le coût qu'on évite partout ailleurs. */
+      stage.dataset.open = progress >= 0.99 ? "true" : "false";
+
       /* Chaque case a sa propre course : elle démarre quand la précédente est déjà en
          route, et se pose en douceur (sortie cubique). La première part à 0, la dernière
          finit exactement à 1. */
@@ -100,6 +105,7 @@ export default function ScrollStack({ children, className = "" }: ScrollStackPro
     const setup = () => {
       if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
         stage.dataset.stack = "off";
+        stage.dataset.open = "true";
         items.forEach((item) => item.style.setProperty("--stack", "1"));
         return;
       }

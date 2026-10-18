@@ -57,7 +57,7 @@ export default async function ContactPage({ params }: PageProps<"/[lang]/contact
       <HeroSection eyebrow={ui.talkToUs} title={contactPage.title} body={contactPage.lead} />
 
       {/* ——— La fiche : actions à gauche, coordonnées à droite. */}
-      <section className="bg-white text-ink">
+      <section className="bg-white text-ink lg:pt-16 pt-7">
         <div className="container-x pb-16 pt-4 sm:pb-20 sm:pt-6 lg:pb-24">
           <div className="grid gap-12 lg:grid-cols-12 lg:gap-16">
             <div className="lg:col-span-5">
