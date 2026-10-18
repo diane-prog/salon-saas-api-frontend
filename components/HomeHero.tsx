@@ -150,8 +150,14 @@ export default function HomeHero() {
       <div className="container-x relative flex min-h-svh flex-col pb-7 pt-28 sm:pb-9 lg:pb-11 lg:pt-32">
         {/* ——— L'action, à droite : une phrase, un bouton, une sortie discrète vers la
                 démonstration. C'est le seul endroit du premier écran qui demande un geste. */}
-        <div className="ml-auto w-full max-w-[21rem] lg:absolute lg:right-0 lg:top-[22%] lg:mt-0">
-          <p className="text-[0.95rem] leading-[1.6] text-paper/85">{hero.aside}</p>
+        {/* SUR TÉLÉPHONE, l'affiche se réduit à trois éléments posés en bas : les trois
+            lignes de petites capitales, le titre, et l'unique bouton. Le paragraphe d'à-côté,
+            le lien vers la démonstration et la signature du bas sont retirés : sur 390 px de
+            large, ils repoussaient le titre hors de l'écran et faisaient un hero bavard. Le
+            bouton prend la place du bloc de droite et descend avec le texte — même
+            composition que le hero de Contact sur mobile. */}
+        <div className="ml-auto w-full max-w-[21rem] max-lg:order-3 max-lg:mt-8 max-lg:ml-0 max-lg:max-w-none lg:absolute lg:right-0 lg:top-[22%] lg:mt-0">
+          <p className="hidden text-[0.95rem] leading-[1.6] text-paper/85 lg:block">{hero.aside}</p>
 
           <Link
             href={href("/register")}
@@ -162,14 +168,14 @@ export default function HomeHero() {
 
           <Link
             href={demoHref}
-            className="mt-5 block w-fit text-[0.62rem] uppercase tracking-[0.16em] text-paper/55 underline decoration-paper/25 underline-offset-[6px] transition-colors hover:text-paper hover:decoration-paper/60"
+            className="mt-5 hidden w-fit text-[0.62rem] uppercase tracking-[0.16em] text-paper/55 underline decoration-paper/25 underline-offset-[6px] transition-colors hover:text-paper hover:decoration-paper/60 lg:block"
           >
             {ui.auth.panel.demo}
           </Link>
         </div>
 
         {/* ——— Trois lignes de petites capitales : la définition, pas le slogan. */}
-        <p className="mt-16 text-[0.6rem] uppercase leading-[2.1] tracking-[0.26em] text-paper/65 sm:mt-20 lg:mt-auto lg:pb-12">
+        <p className="mt-auto max-lg:order-1 text-[0.6rem] uppercase leading-[2.1] tracking-[0.26em] text-paper/65 lg:pb-12">
           {hero.manifesto.map((line) => (
             <span key={line} className="block">
               {line}
@@ -182,7 +188,7 @@ export default function HomeHero() {
         <h1
           id="hero-title"
           aria-label={hero.lead}
-          className="mt-7 max-w-[16ch] font-display text-[clamp(1.9rem,4.4vw,4.2rem)] leading-[1.02] tracking-[-0.02em] text-paper"
+          className="mt-7 max-w-[16ch] max-lg:order-2 font-display text-[clamp(1.9rem,4.4vw,4.2rem)] leading-[1.02] tracking-[-0.02em] text-paper"
         >
           <span aria-hidden>{hero.leadStatic}</span>
 
@@ -213,7 +219,7 @@ export default function HomeHero() {
         </h1>
 
         {/* ——— La signature : le vocabulaire du produit d'un côté, la maison de l'autre. */}
-        <div className="mt-9 flex flex-wrap items-center justify-between gap-x-8 gap-y-2 border-t border-paper/20 pt-4 text-[0.56rem] uppercase tracking-[0.2em] text-paper/50 sm:mt-11">
+        <div className="mt-9 flex flex-wrap items-center justify-between gap-x-8 gap-y-2 border-t border-paper/20 pt-4 text-[0.56rem] uppercase tracking-[0.2em] text-paper/50 sm:mt-11 max-lg:hidden">
           <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
             {hero.ticker.map((item, index) => (
               <span key={item} className="flex items-center gap-3">
