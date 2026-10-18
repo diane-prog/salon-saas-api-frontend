@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import CtaBand from "@/components/CtaBand";
 import PricingSection from "@/components/PricingSection";
+import { HERO_HEIGHT, HeroBackdrop } from "@/components/sections";
 import { getDictionary, isLocale, localePath } from "@/lib/dictionaries";
 
 /**
@@ -43,30 +44,41 @@ export default async function PricingPage({ params }: { params: Promise<{ lang: 
 
   return (
     <>
-      <header className="relative overflow-hidden border-b border-ink/10 bg-paper pt-32 text-ink sm:pt-40">
+      {/* Le plan vidéo commun des pages internes sert de fond à l'ouverture : le texte
+          passe au papier, les filets de la fiche de contrat aussi. */}
+      <header
+        className={`relative isolate flex ${HERO_HEIGHT} flex-col justify-end overflow-hidden border-b border-ink/10 bg-ink pt-32 text-paper sm:pt-40`}
+      >
+        <HeroBackdrop />
+
         {/* Le grand chiffre de la maison, en filigrane : un repère de page, pas un décor. */}
         <span
           aria-hidden
-          className="pointer-events-none absolute -right-6 top-24 select-none font-display text-[13rem] leading-none text-ink/[0.035] sm:text-[19rem]"
+          className="pointer-events-none absolute -right-6 top-24 select-none font-display text-[13rem] leading-none text-paper/[0.05] sm:text-[19rem]"
         >
           02
         </span>
 
         <div className="container-x relative grid gap-10 pb-14 sm:pb-20 lg:grid-cols-12">
           <div className="lg:col-span-8">
-            <span className="text-[0.64rem] uppercase tracking-[0.22em] text-ink/40">
+            <span className="text-[0.64rem] uppercase tracking-[0.22em] text-paper/60">
               {pricing.eyebrow}
             </span>
             <h1 className="mt-5 max-w-2xl font-display text-[clamp(2.6rem,6vw,4.8rem)] leading-[0.98] tracking-[-0.02em]">
               {pricing.title}
             </h1>
-            <p className="mt-6 max-w-xl text-base leading-relaxed text-ink/60">{pricing.lead}</p>
+            <p className="mt-6 max-w-xl text-base leading-relaxed text-paper/70">{pricing.lead}</p>
           </div>
 
-          <dl className="flex flex-col justify-end gap-px self-end bg-ink/15 lg:col-span-4">
+          {/* La fiche de contrat : une carte BLANCHE sur le plan sombre, avec ses propres
+              marges intérieures — les trois lignes ne touchent jamais le bord de la carte. */}
+          <dl className="flex flex-col justify-end gap-px self-end bg-ink/10 text-ink lg:col-span-4">
             {pricing.facts.map((fact) => (
-              <div key={fact.label} className="flex items-baseline justify-between gap-4 bg-paper py-3">
-                <dt className="text-[0.62rem] uppercase tracking-[0.16em] text-ink/40">
+              <div
+                key={fact.label}
+                className="flex items-baseline justify-between gap-4 bg-white px-5 py-4 sm:px-6"
+              >
+                <dt className="text-[0.62rem] uppercase tracking-[0.16em] text-ink/50">
                   {fact.label}
                 </dt>
                 <dd className="font-display text-lg leading-none text-ink">{fact.value}</dd>

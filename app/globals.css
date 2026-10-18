@@ -286,6 +286,49 @@
   }
 }
 
+/* ————— Le pouls des panneaux produit (components/ProductPanel.tsx) —————
+   Une valeur qui change glisse de quelques pixels en apparaissant ; au rafraîchissement
+   complet, les lignes reviennent en cascade — le décalage est posé en ligne, ligne par
+   ligne, parce qu'il change avec leur nombre. `both` garde l'état d'arrivée : sans lui,
+   la valeur repasserait une frame invisible avant que la règle ne s'applique. */
+@keyframes live-swap {
+  from {
+    opacity: 0;
+    transform: translateY(0.45em);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes live-row {
+  from {
+    opacity: 0;
+    transform: translateY(0.5rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@utility live-swap {
+  animation: live-swap 460ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@utility live-row {
+  animation: live-row 620ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Moins d'animation : le panneau reste complet et fixe. */
+@media (prefers-reduced-motion: reduce) {
+  .live-swap,
+  .live-row {
+    animation: none;
+  }
+}
+
 @utility glow-card {
   position: relative;
   border-radius: var(--radius-card);

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowRight, ArrowUpRight } from "@/components/Icons";
 import { ProductPanel } from "@/components/ProductPanel";
 import Reveal from "@/components/Reveal";
+import { HERO_HEIGHT, HeroBackdrop } from "@/components/sections";
 import { useDictionary } from "@/components/DictionaryProvider";
 import type { Service } from "@/lib/dictionaries/fr";
 import { LABEL } from "@/lib/editorial";
@@ -54,62 +55,80 @@ export default function ServicePageTemplate({ service }: { service: Service }) {
 
   return (
     <>
-      {/* ——— 1. Ouverture : le numéro, le titre, le sous-titre, l'écran du produit. */}
-      <section className="relative overflow-hidden border-b border-ink/10 bg-paper text-ink">
+      {/* ——— 1. Ouverture : le numéro, le titre, le sous-titre, l'écran du produit.
+              Le fond est le plan vidéo commun aux pages internes (voir `HeroBackdrop`) ; le
+              texte passe donc au papier, et le panneau produit reste la seule surface claire. */}
+      <section
+        className={`relative isolate flex ${HERO_HEIGHT} flex-col justify-end overflow-hidden bg-ink pb-16 pt-32 text-paper sm:pt-36 lg:pb-24 lg:pt-40`}
+      >
+        <HeroBackdrop />
+
         {/* Le numéro en filigrane : la page porte son rang dans la série. */}
         <span
           aria-hidden
-          className="pointer-events-none absolute -right-2 -top-6 select-none font-display text-[clamp(9rem,26vw,22rem)] leading-none tracking-[-0.05em] text-ink/[0.045]"
+          className="pointer-events-none absolute -right-2 -top-6 select-none font-display text-[clamp(9rem,26vw,22rem)] leading-none tracking-[-0.05em] text-paper/[0.06]"
         >
           {num(index)}
         </span>
 
-        <div className="container-x relative pb-16 pt-32 sm:pt-36 lg:pb-24 lg:pt-40">
+        <div className="container-x relative lg:flex lg:flex-1 lg:flex-col lg:justify-between">
           <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
-            <span className={`${LABEL} text-ink/40`}>
+            <span className={`${LABEL} text-paper/50`}>
               {num(index)} / {num(dict.services.length - 1)} · {ui.expertise}
             </span>
 
             <Link
               href={href("/services")}
-              className={`${LABEL} text-ink/40 transition-colors hover:text-ink`}
+              className={`${LABEL} text-paper/50 transition-colors hover:text-paper`}
             >
               {ui.ourOffer}
             </Link>
           </div>
 
-          <h1 className="mt-8 max-w-[15ch] text-[clamp(2.5rem,6vw,5rem)] font-light leading-[0.95] tracking-[-0.035em]">
-            {service.heroTitle}
-          </h1>
+          {/* LE TITRE EST COUCHÉ CONTRE LE BORD GAUCHE, CENTRÉ EN HAUTEUR, SUR GRAND ÉCRAN.
+              En pleine largeur, il passait au milieu du plan — c'est-à-dire sur le visage du
+              sujet filmé. Ici il sort du flux : une tranche verticale à l'extrémité gauche
+              de la section, centrée sur la hauteur du hero, et le contenu prend la place
+              restante. Le bloc est en `justify-between` et `flex-1` pour que le centre de la
+              tranche soit celui de la section, pas celui du bloc de texte.
+              Sur téléphone, il reste horizontal au-dessus du texte : une colonne verticale
+              y prendrait toute la hauteur pour trois mots. */}
+          <div className="mt-8 lg:mt-0 lg:pl-24">
+            <h1 className="max-w-[15ch] text-[clamp(2.5rem,6vw,5rem)] font-light leading-[0.95] tracking-[-0.035em] text-paper lg:absolute lg:left-0 lg:top-1/2 lg:max-w-none lg:-translate-y-1/2 lg:text-[clamp(1.6rem,2.2vw,2.1rem)] lg:leading-none lg:tracking-[-0.01em] lg:[writing-mode:vertical-rl] lg:rotate-180">
+              {service.heroTitle}
+            </h1>
 
-          <div className="mt-12 grid gap-10 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:items-end lg:gap-16">
-            <div>
-              <p className="max-w-md text-[1.02rem] leading-[1.65] text-ink/60">
-                {service.heroSubtitle}
-              </p>
+            <div className="mt-12 min-w-0 lg:mt-0">
+              <div className="grid gap-10 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:items-end lg:gap-16">
+                <div>
+                  <p className="max-w-md text-[1.02rem] leading-[1.65] text-paper/70">
+                    {service.heroSubtitle}
+                  </p>
 
-              <div className="mt-8 flex flex-wrap items-center gap-x-8 gap-y-3">
-                <Link
-                  href={href("/register")}
-                  className="inline-flex items-center gap-2 bg-ink px-6 py-3.5 text-[0.64rem] font-medium uppercase tracking-[0.16em] text-paper transition-colors hover:bg-brand"
-                >
-                  {ui.freeQuote}
-                  <ArrowUpRight className="h-4 w-4" />
-                </Link>
+                  <div className="mt-8 flex flex-wrap items-center gap-x-8 gap-y-3">
+                    <Link
+                      href={href("/register")}
+                      className="inline-flex items-center gap-2 bg-paper px-6 py-3.5 text-[0.64rem] font-medium uppercase tracking-[0.16em] text-ink transition-colors hover:bg-brand hover:text-paper"
+                    >
+                      {ui.freeQuote}
+                      <ArrowUpRight className="h-4 w-4" />
+                    </Link>
 
-                <Link
-                  href={href("/realisations")}
-                  className="text-[0.64rem] uppercase tracking-[0.16em] text-ink/50 underline decoration-ink/20 underline-offset-[6px] transition-colors hover:text-ink"
-                >
-                  {ui.viewAllProjects}
-                </Link>
+                    <Link
+                      href={href("/realisations")}
+                      className="text-[0.64rem] uppercase tracking-[0.16em] text-paper/60 underline decoration-paper/25 underline-offset-[6px] transition-colors hover:text-paper"
+                    >
+                      {ui.viewAllProjects}
+                    </Link>
+                  </div>
+                </div>
+
+                {/* L'écran dont parle la page, montré plutôt que décrit. */}
+                <Reveal className="w-full justify-self-end lg:max-w-lg">
+                  <ProductPanel variant={PANEL[service.slug] ?? "agenda"} />
+                </Reveal>
               </div>
             </div>
-
-            {/* L'écran dont parle la page, montré plutôt que décrit. */}
-            <Reveal className="w-full justify-self-end lg:max-w-lg">
-              <ProductPanel variant={PANEL[service.slug] ?? "agenda"} />
-            </Reveal>
           </div>
         </div>
       </section>

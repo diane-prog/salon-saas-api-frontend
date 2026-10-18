@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import CtaBand from "@/components/CtaBand";
 import { ProductShowcase } from "@/components/ProductShowcase";
+import { HERO_HEIGHT, HeroBackdrop } from "@/components/sections";
 import { getDictionary, isLocale, localePath } from "@/lib/dictionaries";
 
 /**
@@ -38,10 +39,16 @@ export default async function ProductPage({ params }: PageProps<"/[lang]/realisa
 
   return (
     <>
-      <header className="border-b border-ink/10 bg-paper pt-32 text-ink sm:pt-40">
-        <div className="container-x grid gap-8 pb-14 sm:pb-20 lg:grid-cols-12">
+      {/* Le plan vidéo commun des pages internes : la même ouverture que Services, Contact
+          et Tarifs. Texte au papier sur le voile sombre. */}
+      <header
+        className={`relative isolate flex ${HERO_HEIGHT} flex-col justify-end overflow-hidden border-b border-ink/10 bg-ink pt-32 text-paper sm:pt-40`}
+      >
+        <HeroBackdrop />
+
+        <div className="container-x relative grid gap-8 pb-14 sm:pb-20 lg:grid-cols-12">
           <div className="lg:col-span-7">
-            <span className="text-[0.64rem] uppercase tracking-[0.22em] text-ink/40">
+            <span className="text-[0.64rem] uppercase tracking-[0.22em] text-paper/60">
               {t.eyebrow}
             </span>
             <h1 className="mt-5 max-w-2xl font-display text-[clamp(2.4rem,5.4vw,4.2rem)] leading-[1] tracking-[-0.02em]">
@@ -49,7 +56,7 @@ export default async function ProductPage({ params }: PageProps<"/[lang]/realisa
             </h1>
           </div>
           <div className="flex items-end lg:col-span-5">
-            <p className="max-w-md text-base leading-relaxed text-ink/60">{t.lead}</p>
+            <p className="max-w-md text-base leading-relaxed text-paper/70">{t.lead}</p>
           </div>
         </div>
       </header>
