@@ -177,16 +177,21 @@ export default function Header() {
           pages internes ; et la page ne « saute » plus au premier scroll, puisque le fond ne
           change pas.
 
-          Sur GRAND ÉCRAN : le comportement d'origine — transparent au repos, blanc translucide
-          une fois la page défilée — parce que le hero de l'accueil est sombre et que la barre y
-          doit s'effacer. */}
+          Sur GRAND ÉCRAN : le comportement d'origine — transparent au repos, papier à 95 %
+          une fois la page défilée — parce que le hero de l'accueil est sombre et que la barre
+          y doit s'effacer.
+
+          POURQUOI PLUS DE FLOU D'ARRIÈRE-PLAN : la barre est FIXE, donc un `backdrop-filter`
+          la force à re-flouter toute la largeur de l'écran à chaque image défilée, par-dessus
+          une page entière.          C'était le poste le plus cher du défilement, pour un effet qu'on ne
+          voyait presque pas sous un fond déjà translucide. `bg-paper/95` suffit. */}
       <header
-        className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${
+        className={`fixed inset-x-0 top-0 z-50 transition-[background-color,border-color,padding] duration-300 ${
           overHero
             ? "border-b border-transparent bg-transparent py-4 lg:py-6"
             : scrolled
-              ? "border-b border-ink/10 bg-paper/90 py-2 backdrop-blur-xl"
-              : "border-b border-ink/10 bg-paper/70 py-3 backdrop-blur-md lg:py-4"
+              ? "border-b border-ink/10 bg-paper/95 py-2"
+              : "border-b border-ink/10 bg-paper/95 py-3 lg:py-4"
         }`}
       >
         <div className="max-w-[91rem] mx-auto flex items-center justify-between gap-4 px-4 sm:gap-6 sm:px-6 lg:px-0">

@@ -335,8 +335,9 @@ export const filters: string[] = [];
  * their own — before any campaign or public claim. An invented quote is a mock-up until
  * it is published, and a false testimonial the day it is.
  *
- * The visuals in `public/temoignages/` are DRAWN FIELDS (warm gradient + grain, see
- * `scripts/make-testimonials.py`), not portraits: nobody has supplied a photo yet.
+ * The visuals in `public/temoignages/` are STOCK PORTRAITS (Unsplash, 4:5, provenance in
+ * `public/temoignages/README.md`), standing in for the drawn fields they replaced: nobody
+ * has supplied a photo yet, so they do not depict the people quoted.
  *
  * Without an entry, the section is not rendered at all.
  */

@@ -348,10 +348,11 @@ export const filters: string[] = [];
  * `image` est le chemin d'une photo (dans `public/`) ou une URL absolue. Vide (`""`), la
  * case affiche un aplat chaud à la place du portrait — jamais un visage fabriqué.
  *
- * Les six visuels de `public/temoignages/` sont des CHAMPS DESSINÉS (dégradé chaud + grain,
- * voir `scripts/make-testimonials.py`), pas des portraits : personne n'a encore fourni sa
- * photo. Le jour où c'est le cas, on dépose le fichier sous le nom attendu et on change
- * le chemin ici — aucun autre code à toucher.
+ * Les six visuels de `public/temoignages/` sont des PORTRAITS DE BANQUE D'IMAGES (Unsplash,
+ * 4:5, provenance dans `public/temoignages/README.md`), posés en remplacement des champs
+ * dessinés d'origine : personne n'a encore fourni sa photo. Ils ne représentent pas les
+ * personnes citées — le jour où l'une d'elles fournit la sienne, on dépose le fichier sous
+ * le nom attendu et on change le chemin ici — aucun autre code à toucher.
  *
  * Sans entrée, la section n'est pas rendue du tout : pas de bandeau sans personne dedans.
  */

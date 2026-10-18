@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 """Génère les visuels des témoignages de l'accueil — des CHAMPS DESSINÉS, pas des visages.
 
+⚠️ NE PAS LANCER SANS RAISON : `public/temoignages/01.jpg … 06.jpg` sont aujourd'hui des
+portraits de banque d'images (Unsplash, voir `public/temoignages/README.md`). Ce script les
+écrase par les dessins ci-dessous — il ne sert plus qu'à revenir à une section sans visage.
+
     python3 scripts/make-testimonials.py      # ou : pnpm testimonials
 
 Ce qu'il produit :

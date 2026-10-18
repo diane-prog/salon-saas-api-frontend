@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 
+import AmbientVideo from "@/components/AmbientVideo";
 import { useDictionary } from "@/components/DictionaryProvider";
 import { prefersReducedMotion } from "@/lib/motion";
 
@@ -60,13 +61,6 @@ import { prefersReducedMotion } from "@/lib/motion";
  */
 const PHOTO = process.env.NEXT_PUBLIC_HERO_PHOTO ?? "/media/hero.jpg";
 const VIDEO = process.env.NEXT_PUBLIC_HERO_VIDEO ?? "/media/hero.mp4";
-
-/** Le type MIME suit l'extension : un `.webm` annoncé en `mp4` n'est pas lu par Safari. */
-const VIDEO_TYPE = VIDEO?.endsWith(".webm")
-  ? "video/webm"
-  : VIDEO?.endsWith(".mov")
-    ? "video/quicktime"
-    : "video/mp4";
 
 export default function HomeHero() {
   const { dict, locale } = useDictionary();
@@ -133,22 +127,15 @@ export default function HomeHero() {
         )}
 
         {/* La vidéo, au-dessus de l'image qui lui sert d'affiche : muette, en boucle,
-            sans commandes (elle est décorative), et retirée si l'on a demandé moins
-            d'animation. */}
+            sans commandes (elle est décorative), retirée si l'on a demandé moins
+            d'animation, et arrêtée dès qu'on a dépassé le premier écran — voir
+            `AmbientVideo` : c'est ce qui rend le reste du défilement plus léger. */}
         {VIDEO && (
-          <video
-            className="absolute inset-0 h-full w-full object-cover motion-reduce:hidden"
-            autoPlay
-            muted
-            loop
-            playsInline
-            preload="metadata"
+          <AmbientVideo
+            src={VIDEO}
             poster={PHOTO}
-            aria-hidden
-            tabIndex={-1}
-          >
-            <source src={VIDEO} type={VIDEO_TYPE} />
-          </video>
+            className="absolute inset-0 h-full w-full object-cover motion-reduce:hidden"
+          />
         )}
 
         {/* Le voile : bas sombre pour le titre, haut à peine touché pour l'en-tête. */}
@@ -215,7 +202,7 @@ export default function HomeHero() {
                 return (
                   <span
                     key={line}
-                    className={`col-start-1 row-start-1 block will-change-[opacity,transform] transition-[opacity,transform] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${state}`}
+                    className={`col-start-1 row-start-1 block transition-[opacity,transform] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${state}`}
                   >
                     {line}
                   </span>

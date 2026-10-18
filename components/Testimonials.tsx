@@ -42,10 +42,16 @@ const GAP = 12;
 /** Cadence du défilement automatique, en millisecondes. */
 const AUTOPLAY_MS = 6000;
 
-/** Durée d'un déplacement : une base, puis une part proportionnelle à la distance. */
-const GLIDE_BASE_MS = 620;
-const GLIDE_PER_PX = 0.28;
-const GLIDE_MAX_MS = 1800;
+/**
+ * Durée d'un déplacement : une base, puis une part proportionnelle à la distance.
+ * Allongée le 2026-10-18 : à 620 ms, une case partait avant qu'on ait fini de lire le
+ * début de son trajet — le rail avait l'air de sauter d'une case à l'autre. Ici une case
+ * ordinaire met près de 1,7 s à se poser, et le trajet passe l'essentiel de son temps
+ * dans ses extrémités (départ et arrivée), là où l'œil juge la douceur.
+ */
+const GLIDE_BASE_MS = 1100;
+const GLIDE_PER_PX = 0.6;
+const GLIDE_MAX_MS = 2800;
 
 /** Copies de la liste rendues à la suite. Trois : une avant, une à l'écran, une après. */
 const COPIES = 3;
@@ -53,7 +59,21 @@ const COPIES = 3;
 /** Délai avant de recaler un rail déplacé à la main. */
 const SETTLE_MS = 260;
 
-/** `easeInOutCubic` : démarre doucement, accélère au milieu, se pose sans à-coup. */
+/**
+ * Durée du changement de fond (rideau `clip-path` + fondu), en millisecondes.
+ * DOIT rester égale à l'animation de `app/globals.css` (`.quote-bg-in` / `.quote-bg-out`) :
+ * c'est le minuteur qui décide du démontage du calque sortant, donc une valeur plus courte
+ * couperait la fin du fondu, une plus longue garderait une image invisible en mémoire.
+ */
+const BG_FADE_MS = 1800;
+
+/**
+ * `easeInOutCubic` : départ et arrivée progressifs, sommet à trois fois la vitesse moyenne.
+ * Le quintique a été essayé le 2026-10-18 puis retiré : ses extrémités étaient bien plus
+ * douces, mais son milieu filait à cinq fois la moyenne — un à-coup au centre du trajet,
+ * exactement ce qu'on cherchait à supprimer. Avec une durée plus longue, le cubique donne
+ * un mouvement continu du début à la fin.
+ */
 const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 
 export default function Testimonials() {
@@ -88,6 +108,28 @@ export default function Testimonials() {
 
   /** La citation active : la position, ramenée aux citations elles-mêmes. */
   const active = count ? activeRail % count : 0;
+
+  /*
+   * LE FOND NE GARDE QUE DEUX CALQUES : celle qui s'installe et celle qui s'en va.
+   *
+   * Chaque citation a son image de fond, floutée (`blur-[6px]`) sur tout l'écran. Les monter
+   * toutes, c'est payer cinq (ou dix) images plein cadre floutées en mémoire graphique et
+   * autant de rastérisations à l'entrée de la section — pour des calques qui restent à
+   * opacité 0. On ne garde donc que la sortante le temps de son changement (1,8 s, voir
+   * `BG_FADE_MS`), puis on la démonte : le fondu croisé reste intact, et la section ne pèse
+   * plus qu'une image.
+   */
+  const [leaving, setLeaving] = useState<number | null>(null);
+  const shownIndex = useRef(active);
+
+  useEffect(() => {
+    if (shownIndex.current === active) return;
+    const previous = shownIndex.current;
+    shownIndex.current = active;
+    setLeaving(previous);
+    const timer = window.setTimeout(() => setLeaving(null), BG_FADE_MS + 100);
+    return () => window.clearTimeout(timer);
+  }, [active]);
 
   /** Une case + son écart. Mesuré sur la première case : elles ont toutes la même largeur. */
   const step = useCallback(() => {
@@ -274,8 +316,9 @@ export default function Testimonials() {
         if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setPaused(false);
       }}
     >
-      {/* ——— Le fond : l'image de la citation active, floutée. Toutes les couches restent
-              montées et se croisent en opacité — changer d'image ne recharge rien. */}
+      {/* ——— Le fond : l'image de la citation active, floutée. Seules l'entrante et la
+              sortante sont montées (voir `leaving`) : cinq images plein cadre floutées en
+              permanence coûtaient cher à la rastérisation, pour des calques invisibles. */}
       <div aria-hidden className="absolute inset-0">
         <div
           className="absolute inset-0 opacity-70 blur-2xl"
@@ -286,14 +329,13 @@ export default function Testimonials() {
         />
 
         {quotes.map((item, index) =>
-          item.image ? (
+          item.image && (index === active || index === leaving) ? (
             <div
               key={`${item.name}-bg`}
-              className="absolute inset-0 scale-110 transform-gpu bg-cover bg-center blur-xl transition-opacity duration-[1100ms] ease-in-out motion-reduce:transition-none"
-              style={{
-                backgroundImage: `url(${item.image})`,
-                opacity: index === active ? 1 : 0,
-              }}
+              className={`absolute inset-0 scale-[1.03] transform-gpu bg-cover bg-center blur-[6px] ${
+                index === active ? "quote-bg-in" : "quote-bg-out"
+              }`}
+              style={{ backgroundImage: `url(${item.image})` }}
             />
           ) : null,
         )}
@@ -367,7 +409,13 @@ export default function Testimonials() {
               <div className="relative aspect-[4/5] overflow-hidden bg-ink/[0.08] sm:aspect-auto sm:min-h-[24rem] lg:min-h-[28rem]">
                 {item.image ? (
                   // eslint-disable-next-line @next/next/no-img-element -- photo fournie par l'exploitant (chemin local ou URL), hors liste blanche de `next/image`
-                  <img src={item.image} alt="" className="absolute inset-0 h-full w-full object-cover" />
+                  <img
+                    src={item.image}
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                    className="absolute inset-0 h-full w-full object-cover"
+                  />
                 ) : (
                   <span className="grain absolute inset-0 block bg-[linear-gradient(150deg,#e8cda4_0%,#cfa271_42%,#96693e_78%,#5d422b_100%)]" />
                 )}

@@ -539,6 +539,109 @@ html[data-js] .page-enter {
   animation: page-enter 0.26s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
+/* Fond des témoignages (accueil) : l'image de la citation active se DÉCOUVRE au `clip-path`
+   — elle monte depuis le bas — pendant que la sortante s'efface. Voir
+   `components/Testimonials.tsx`, qui ne monte que ces deux calques-là au lieu de toutes les
+   images floutées de la section.
+
+   Deux animations et non une transition d'opacité : le calque entrant vient d'être monté,
+   il n'a donc pas d'état de départ à interpoler ; et la sortante ne peut pas être pilotée
+   par un état React sans peindre une image à opacité nulle entre les deux. Ici chaque
+   calque joue sa course et le résultat est le même à l'image près.
+
+   LE RIDEAU EST UN `clip-path`, pas un `translateY` : la même image est déjà en place
+   derrière (le fond assombri reste fixe), donc la seule chose qui bouge est la fenêtre par
+   laquelle on la voit. Un `inset()` s'anime sans re-rastériser toute la section à chaque
+   image, contrairement à un déplacement du calque flouté.
+
+   Le fondu d'opacité accompagne le rideau, sinon le bord du `clip` se voit (coupe nette sur
+   une image floutée). 1,8 s pour que le changement ne claque pas : la section reste à
+   l'écran, ce n'est pas une transition de page. */
+.quote-bg-in {
+  /* Au-dessus de la sortante (qui recule d'un cran) et sous l'assombrissement, qui suit
+     dans le DOM : le rideau ne doit jamais passer devant le voile sombre. */
+  z-index: 0;
+  animation: quote-bg-in 1.8s cubic-bezier(0.65, 0, 0.35, 1) both;
+}
+
+.quote-bg-out {
+  z-index: -1;
+  animation: quote-bg-out 1.8s cubic-bezier(0.4, 0, 0.6, 1) both;
+}
+
+@keyframes quote-bg-in {
+  from {
+    opacity: 0;
+    clip-path: inset(100% 0 0 0);
+  }
+  /* Pleine opacité au tiers du trajet : au-delà, le bord du rideau ne se voit plus. */
+  33% {
+    opacity: 1;
+  }
+  to {
+    opacity: 1;
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@keyframes quote-bg-out {
+  /* La sortante RESTE OPAQUE derrière le rideau : elle n'est recouverte qu'à mesure que le
+     `clip` s'ouvre. Deux calques à demi transparents l'un sur l'autre feraient baisser la
+     luminosité au milieu du trajet (le fond sombre apparaîtrait par transparence). */
+  from,
+  80% {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* Un mouvement qu'on n'a pas demandé est exactement ce que ce réglage refuse : le fond
+   change alors d'un coup, sans rideau ni fondu. */
+@media (prefers-reduced-motion: reduce) {
+  .quote-bg-in,
+  .quote-bg-out {
+    animation: none;
+  }
+}
+
+/* Grille « Pourquoi » (accueil) : ouverture pilotée par le défilement — voir
+   `components/ScrollStack.tsx`, qui ne pose qu'une variable, `--stack` (0 = cases
+   empilées au centre, 1 = grille en place). Chaque case porte son décalage de repos
+   (`--stack-x` / `--stack-y`) et son échelle (`--stack-s`) ; son `--stack` propre lui est
+   écrit par le composant, avec un retard sur la case précédente.
+
+   LA SCÈNE EST ÉPINGLÉE : elle fait `--stage-vh` hauteurs de fenêtre et la grille reste
+   collée à `top` pendant qu'on la traverse. Sans cet épinglage, l'ouverture se jouait
+   pendant les quelques centaines de pixels qui séparent l'entrée de la section de sa mise
+   en place — on ne la voyait pas (constaté le 2026-10-18). `top` et la constante `PIN` du
+   composant doivent rester d'accord : c'est la même position, lue des deux côtés.
+
+   `--open` vaut `1 - --stack` : c'est le seul calcul de la règle. `translate3d` et `scale`
+   sont pris en charge par le compositeur, donc le défilement ne provoque ni recalcul de
+   mise en page ni repeint de la section. Les cases convergent vers le même point — c'est
+   le décalage d'échelle (`--stack-s`) qui fait dépasser les bords de la pile, pas un
+   décalage de position, qui donnait l'impression d'une grille cassée. */
+[data-stack="on"] {
+  height: calc(var(--stage-vh, 170) * 1vh);
+}
+
+[data-stack="on"] > .stack-grid {
+  position: sticky;
+  top: 12vh;
+}
+
+[data-stack="on"] > .stack-grid > * {
+  --open: calc(1 - var(--stack, 1));
+  transform: translate3d(
+      calc(var(--stack-x, 0px) * var(--open)),
+      calc(var(--stack-y, 0px) * var(--open)),
+      0
+    )
+    scale(calc(var(--stack-s, 1) + (1 - var(--stack-s, 1)) * var(--stack, 1)));
+}
+
 /* Sheet (panneau latéral des formulaires) — voir components/ui/sheet.tsx.
 
    L'animation vit ici et non dans le composant : Radix monte le panneau avec

@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import type { CSSProperties } from "react";
 
 import Reveal from "@/components/Reveal";
+import ScrollStack from "@/components/ScrollStack";
 import { useDictionary } from "@/components/DictionaryProvider";
 
 /**
@@ -29,6 +31,13 @@ import { useDictionary } from "@/components/DictionaryProvider";
  *
  * Pas d'ombre, pas d'arrondi, pas de carte flottante, pas de grande case d'en-tête dans la
  * grille : l'en-tête est HORS grille, comme sur la référence.
+ *
+ * L'OUVERTURE EST PILOTÉE PAR LE DÉFILEMENT (`ScrollStack`) : à l'approche de la section,
+ * les quatre cases sont empilées au centre de la trame — on ne voit qu'une fiche, les
+ * autres dépassant de quelques pixels — puis elles rejoignent leur place à mesure qu'on
+ * descend. La trame définitive est celle décrite ci-dessus : elle ne dépend pas de
+ * l'animation, qui n'est qu'un habillage (et qui s'éteint sur mobile comme sous
+ * `prefers-reduced-motion`).
  *
  * L'illustration est livrée avec le dépôt (`public/media/why.jpg`) ; `NEXT_PUBLIC_WHY_IMAGE`
  * la REMPLACE quand elle est posée (chemin local ou URL absolue), sans toucher au reste.
@@ -63,7 +72,7 @@ export default function WhyStatements() {
                 Positions posées à la main — `01` (1,1), `02` (1,2), `03` (2,2),
                 image (2,3). Les cases vides ne sont pas rendues : le blanc les tient.
                 Sur téléphone, tout s'empile dans l'ordre de lecture 01 → 02 → 03 → image. */}
-        <ol className="mt-8 grid grid-cols-1 gap-2.5 sm:mt-10 sm:grid-cols-[1fr_1fr_1.15fr] sm:gap-3">
+        <ScrollStack className="mt-8 grid grid-cols-1 gap-2.5 sm:mt-10 sm:grid-cols-[1fr_1fr_1.15fr] sm:gap-3">
           {why.whyCards.map((card, index) => {
             /* L'escalier : la première au coin haut gauche, les suivantes une colonne plus
                loin, en descendant d'une ligne à chaque fois. */
@@ -73,8 +82,18 @@ export default function WhyStatements() {
               "sm:col-start-2 sm:row-start-2",
             ][index];
 
+            /* Profondeur de la pile : chaque fiche recule de 2 % par rapport à la suivante,
+               si bien que leurs bords dépassent en escalier au repos. L'ordre d'empilement
+               est inverse (`zIndex`) : la fiche du dessus est « 01 », la première de la
+               lecture — c'est elle qu'on voit quand tout est regroupé. */
+            const depth = 0.94 + index * 0.02;
+
             return (
-              <li key={card.title} className={placement}>
+              <li
+                key={card.title}
+                className={placement}
+                style={{ "--stack-s": depth, zIndex: why.whyCards.length + 1 - index } as CSSProperties}
+              >
                 <Reveal as="div" delay={index * 60} className="h-full">
                   <article className="flex h-full min-h-[12.5rem] flex-col border border-ink/12 p-5 sm:min-h-[16rem] sm:p-6 lg:min-h-[18rem] lg:p-7">
                     <span className="text-[0.62rem] font-medium tabular-nums tracking-[0.14em] text-ink/40">
@@ -96,12 +115,21 @@ export default function WhyStatements() {
 
           {/* ——— L'illustration : elle ferme la grille en bas à droite, à la hauteur de
                   `03`, laissant le coin bas gauche vide. La pastille est posée dessus. */}
-          <li className="min-h-[12.5rem] sm:col-start-3 sm:row-start-2 sm:min-h-[16rem] lg:min-h-[18rem]">
+          <li
+            className="min-h-[12.5rem] sm:col-start-3 sm:row-start-2 sm:min-h-[16rem] lg:min-h-[18rem]"
+            style={{ "--stack-s": 1, zIndex: 1 } as CSSProperties}
+          >
             <Reveal as="div" delay={why.whyCards.length * 60} className="h-full">
               <div className="relative h-full min-h-[12.5rem] overflow-hidden bg-ink sm:min-h-[16rem] lg:min-h-[18rem]">
                 {IMAGE ? (
                   // eslint-disable-next-line @next/next/no-img-element -- image fournie par l'exploitant (chemin local ou URL), hors liste blanche de `next/image`
-                  <img src={IMAGE} alt="" className="absolute inset-0 h-full w-full object-cover" />
+                  <img
+                    src={IMAGE}
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                    className="absolute inset-0 h-full w-full object-cover"
+                  />
                 ) : (
                   <>
                     <div className="absolute inset-0 bg-[linear-gradient(150deg,#e8cda4_0%,#cfa271_42%,#96693e_78%,#5d422b_100%)]" />
@@ -124,7 +152,7 @@ export default function WhyStatements() {
               </div>
             </Reveal>
           </li>
-        </ol>
+        </ScrollStack>
       </div>
     </section>
   );

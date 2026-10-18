@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 
+import AmbientVideo from "@/components/AmbientVideo";
 import { useDictionary } from "@/components/DictionaryProvider";
 import { BODY, LABEL } from "@/lib/editorial";
 import { useSalonInfo, useSalonServices, useSalonStaff } from "@/features/public-salon/queries";
@@ -9,10 +10,10 @@ import { useSalonInfo, useSalonServices, useSalonStaff } from "@/features/public
 /**
  * Section « En direct » de l'accueil (`#demo`).
  *
- * LA COMPOSITION : deux moitiés, bord à bord. À GAUCHE, un média vertical (une VIDÉO),
+ * LA COMPOSITION : deux moitiés, bord à bord. À GAUCHE, un média vertical (une IMAGE),
  * le texte à sa droite, puis les lignes de données ; à DROITE, un grand champ plein
- * cadre, à la couleur primaire du salon. Rien n'est encadré, rien n'est arrondi : les
- * filets d'un pixel et le blanc font tout le travail.
+ * cadre (la VIDÉO, muette et en boucle), à la couleur primaire du salon. Rien n'est
+ * encadré, rien n'est arrondi : les filets d'un pixel et le blanc font tout le travail.
  *
  * CE QUE LA SECTION MONTRE : les données réelles du salon de démonstration, lues sur
  * l'API pendant que la page s'affiche — ses prestations, son équipe, l'état de sa
@@ -21,9 +22,9 @@ import { useSalonInfo, useSalonServices, useSalonStaff } from "@/features/public
  *
  * LES MÉDIAS sont livrés avec le dépôt (`public/media/demo.mp4`, `public/media/demo.jpg`),
  * et remplacés par les variables d'environnement quand elles sont posées :
- *   - `NEXT_PUBLIC_DEMO_VIDEO`  : la vidéo de gauche (mp4/webm). Lecture en boucle,
- *     sans son, sans commandes — un plan, pas un lecteur ;
- *   - `NEXT_PUBLIC_DEMO_IMAGE`  : l'image du champ de droite.
+ *   - `NEXT_PUBLIC_DEMO_IMAGE`  : l'image de la colonne de gauche (cadre 4:5) ;
+ *   - `NEXT_PUBLIC_DEMO_VIDEO`  : la vidéo du grand champ de droite (mp4/webm). Lecture en
+ *     boucle, sans son, sans commandes — un plan, pas un lecteur.
  * Sans aucun des deux, le cadre garde un champ dessiné (dégradé chaud + grain) : on ne pose
  * jamais une balise média vide, qui afficherait un rectangle noir.
  *
@@ -81,17 +82,16 @@ export default function SalonDemo() {
         {/* ———————————————— Moitié gauche : média, texte, données. */}
         <div className="flex flex-col px-5 py-16 sm:px-8 sm:py-20 lg:px-12 lg:py-24">
           <div className="grid gap-8 sm:grid-cols-2 sm:items-start sm:gap-8 lg:gap-10">
-            {/* Le média vertical — une vidéo muette, en boucle, sans commandes. */}
+            {/* Le média vertical — l'IMAGE du salon, cadre 4:5. */}
             <div className="relative aspect-[4/5] overflow-hidden bg-ink/5 sm:col-start-1 sm:row-start-1">
-              {VIDEO ? (
-                <video
+              {IMAGE ? (
+                // eslint-disable-next-line @next/next/no-img-element -- image fournie par l'exploitant (chemin local ou URL), hors liste blanche de `next/image`
+                <img
+                  src={IMAGE}
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
                   className="absolute inset-0 h-full w-full object-cover"
-                  src={VIDEO}
-                  autoPlay
-                  muted
-                  loop
-                  playsInline
-                  preload="metadata"
                 />
               ) : (
                 <FallbackField />
@@ -143,15 +143,20 @@ export default function SalonDemo() {
         </div>
 
         {/* ———————————————— Moitié droite : le champ plein cadre, aux couleurs du salon.
-                          Une image si elle est fournie, sinon la couleur primaire du
-                          salon et le grain — la personnalisation se voit. */}
+                          La vidéo d'ambiance si elle est fournie, sinon la couleur
+                          primaire du salon et le grain — la personnalisation se voit.
+                          Elle ne tourne que lorsqu'elle est à l'écran (`AmbientVideo`) :
+                          la section est loin sous le pli, elle n'a rien à décoder
+                          pendant qu'on lit le haut de page. */}
         <div
           className="relative min-h-[24rem] overflow-hidden lg:min-h-[38rem]"
           style={salon ? { background: salon.colors.primary } : undefined}
         >
-          {IMAGE ? (
-            // eslint-disable-next-line @next/next/no-img-element -- image fournie par l'exploitant (chemin local ou URL), hors liste blanche de `next/image`
-            <img src={IMAGE} alt="" className="absolute inset-0 h-full w-full object-cover" />
+          {VIDEO ? (
+            <AmbientVideo
+              src={VIDEO}
+              className="absolute inset-0 h-full w-full object-cover"
+            />
           ) : (
             !salon && <FallbackField />
           )}
