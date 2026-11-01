@@ -2,9 +2,11 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import CtaBand from "@/components/CtaBand";
+import { JsonLd } from "@/components/JsonLd";
 import PricingSection from "@/components/PricingSection";
 import { HERO_HEIGHT, HeroBackdrop } from "@/components/sections";
 import { getDictionary, isLocale, localePath } from "@/lib/dictionaries";
+import { breadcrumbJsonLd, pageMetadata } from "@/lib/seo";
 
 /**
  * Page Tarifs.
@@ -28,11 +30,12 @@ export async function generateMetadata({
 
   const dict = await getDictionary(lang);
 
-  return {
+  return pageMetadata({
     title: dict.pricing.title,
     description: dict.pricing.lead,
-    alternates: { canonical: localePath(lang, "/tarifs") },
-  };
+    path: "/tarifs",
+    locale: lang,
+  });
 }
 
 export default async function PricingPage({ params }: { params: Promise<{ lang: string }> }) {
@@ -42,8 +45,15 @@ export default async function PricingPage({ params }: { params: Promise<{ lang: 
   const dict = await getDictionary(lang);
   const { pricing } = dict;
 
+  const breadcrumbs = breadcrumbJsonLd([
+    { name: dict.nav[0].label, path: localePath(lang) },
+    { name: pricing.eyebrow, path: localePath(lang, "/tarifs") },
+  ]);
+
   return (
     <>
+      <JsonLd data={breadcrumbs} />
+
       {/* Le plan vidéo commun des pages internes sert de fond à l'ouverture : le texte
           passe au papier, les filets de la fiche de contrat aussi. */}
       <header

@@ -2,7 +2,7 @@ import Providers from "@/app/providers";
 import { DictionaryProvider } from "@/components/DictionaryProvider";
 import { JsonLd } from "@/components/JsonLd";
 import { getDictionary, isLocale, localePath, locales, localeTags } from "@/lib/dictionaries";
-import { SITE_URL } from "@/lib/seo";
+import { AUTHOR, SITE_URL } from "@/lib/seo";
 import type { Metadata } from "next";
 import { Sora } from "next/font/google";
 import { notFound } from "next/navigation";
@@ -55,9 +55,14 @@ export async function generateMetadata({ params }: LayoutProps<"/[lang]">): Prom
       "agenda coiffeur",
       "logiciel barbier",
       dict.site.name,
+      "Armel Dakayao",
+      "développeur React",
+      "développeur Next.js",
+      "React Native",
     ],
-    authors: [{ name: dict.site.name, url: localePath(lang) }],
-    creator: dict.site.name,
+    authors: [{ name: AUTHOR.name, url: AUTHOR.url }],
+    creator: AUTHOR.name,
+    publisher: dict.site.name,
     alternates: {
       canonical: localePath(lang),
       languages: alternates,
@@ -88,6 +93,9 @@ export async function generateMetadata({ params }: LayoutProps<"/[lang]">): Prom
       googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1 },
     },
     formatDetection: { telephone: false },
+    verification: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION
+      ? { google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION }
+      : undefined,
   };
 }
 
@@ -96,6 +104,8 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[la
   if (!isLocale(lang)) notFound();
 
   const dict = await getDictionary(lang);
+  const pageUrl = `${SITE_URL}${localePath(lang)}`;
+  const personId = `${AUTHOR.url}/#person`;
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -110,7 +120,7 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[la
         applicationCategory: "BusinessApplication",
         operatingSystem: "Web",
         name: dict.site.name,
-        url: localePath(lang),
+        url: pageUrl,
         logo: `${SITE_URL}/icon.png`,
         image: `${SITE_URL}/icon.png`,
         description: dict.site.tagline,
@@ -123,14 +133,42 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[la
         },
         areaServed: { "@type": "Country", name: "Senegal" },
         sameAs: dict.site.socials.map((s) => s.href),
+        author: { "@id": personId },
       },
       {
         "@type": "WebSite",
         "@id": `${SITE_URL}/#website`,
         name: dict.site.name,
-        url: localePath(lang),
+        url: pageUrl,
         inLanguage: localeTags[lang],
         publisher: { "@id": `${SITE_URL}/#organization` },
+        creator: { "@id": personId },
+      },
+      {
+        /* Le développeur du produit : le crédit visible n'existe pas, mais le
+           lien entre le portfolio et le site doit rester lisible par les moteurs. */
+        "@type": "Person",
+        "@id": personId,
+        name: AUTHOR.name,
+        url: AUTHOR.url,
+        jobTitle: AUTHOR.jobTitle,
+        description:
+          "Armel Dakayao is a Senior Front-End Developer specialising in React, Next.js, TypeScript and React Native. He developed the Belora website and product interface.",
+        knowsAbout: [
+          "React",
+          "Next.js",
+          "TypeScript",
+          "React Native",
+          "Front-end development",
+          "Web design",
+          "UI/UX design",
+        ],
+        hasOccupation: {
+          "@type": "Occupation",
+          name: AUTHOR.jobTitle,
+          skills: "React, Next.js, TypeScript, React Native",
+        },
+        sameAs: AUTHOR.sameAs,
       },
     ],
   };

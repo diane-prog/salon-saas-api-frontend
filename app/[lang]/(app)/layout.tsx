@@ -1,9 +1,16 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import WorkspaceGuard from "./_guard";
 import WorkspaceHeader from "@/components/workspace/WorkspaceHeader";
 import WorkspaceNav, { type WorkspaceGroup } from "./_nav";
 import { isLocale } from "@/lib/dictionaries";
+
+/* Espace privé : rien à indexer. `follow: false` évite aussi de faire suivre aux
+   moteurs les liens internes d'un tableau de bord inaccessible sans compte. */
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
 
 /**
  * Coquille de l'ESPACE SALON.

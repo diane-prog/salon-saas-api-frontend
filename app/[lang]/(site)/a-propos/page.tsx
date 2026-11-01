@@ -2,22 +2,25 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import type { CSSProperties } from "react";
 import CtaBand from "@/components/CtaBand";
+import { JsonLd } from "@/components/JsonLd";
 import { ProductPanel } from "@/components/ProductPanel";
 import Reveal from "@/components/Reveal";
 import { HeroSection } from "@/components/sections";
 import { TextLink } from "@/components/ui";
 import { isLocale, getDictionary, localePath } from "@/lib/dictionaries";
 import { BODY, LABEL, LEAD, ROW, RULE, TITLE } from "@/lib/editorial";
+import { breadcrumbJsonLd, pageMetadata } from "@/lib/seo";
 
 export async function generateMetadata({ params }: PageProps<"/[lang]/a-propos">): Promise<Metadata> {
   const { lang } = await params;
   if (!isLocale(lang)) return {};
   const dict = await getDictionary(lang);
-  return {
+  return pageMetadata({
     title: dict.aboutPage.title,
     description: dict.aboutPage.lead,
-    alternates: { canonical: localePath(lang, "/a-propos") },
-  };
+    path: "/a-propos",
+    locale: lang,
+  });
 }
 
 /* L'échelle typographique et le filet viennent de `lib/editorial` : c'est le vocabulaire
@@ -50,8 +53,15 @@ export default async function AboutPage({ params }: PageProps<"/[lang]/a-propos"
   const href = (p: string) => `/${lang}${p === "/" ? "" : p}`;
   const { mission, vision, why } = aboutPage;
 
+  const breadcrumbs = breadcrumbJsonLd([
+    { name: dict.nav[0].label, path: localePath(lang) },
+    { name: dict.about.title, path: localePath(lang, "/a-propos") },
+  ]);
+
   return (
     <div className="bg-paper text-ink">
+      <JsonLd data={breadcrumbs} />
+
       {/* Le hero est celui des autres pages internes (même bandeau photo, même échelle de
           titre). Son titre est celui du site de référence, et il n'a pas de chapô : comme
           là-bas, les deux phrases d'ouverture vivent dans le premier bloc de contenu. */}

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -5,6 +6,12 @@ import AuthLocaleSwitch from "./auth-locale-switch";
 import AuthShowcase from "@/components/AuthShowcase";
 import { getDictionary, isLocale } from "@/lib/dictionaries";
 import { LABEL } from "@/lib/editorial";
+
+/* Connexion, inscription, mot de passe : aucune de ces pages n'a sa place dans
+   un index de recherche. */
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
 
 /**
  * Coquille des écrans d'accès — connexion, vérification du code, ouverture d'un salon.

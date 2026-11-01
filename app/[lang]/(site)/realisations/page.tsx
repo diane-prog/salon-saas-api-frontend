@@ -2,9 +2,11 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import CtaBand from "@/components/CtaBand";
+import { JsonLd } from "@/components/JsonLd";
 import { ProductShowcase } from "@/components/ProductShowcase";
 import { HERO_HEIGHT, HeroBackdrop } from "@/components/sections";
 import { getDictionary, isLocale, localePath } from "@/lib/dictionaries";
+import { breadcrumbJsonLd, pageMetadata } from "@/lib/seo";
 
 /**
  * « Le produit en vrai » — ancienne page Réalisations.
@@ -24,11 +26,12 @@ export async function generateMetadata({ params }: PageProps<"/[lang]/realisatio
   const { lang } = await params;
   if (!isLocale(lang)) return {};
   const dict = await getDictionary(lang);
-  return {
+  return pageMetadata({
     title: dict.showcase.title,
     description: dict.showcase.lead,
-    alternates: { canonical: localePath(lang, "/realisations") },
-  };
+    path: "/realisations",
+    locale: lang,
+  });
 }
 
 export default async function ProductPage({ params }: PageProps<"/[lang]/realisations">) {
@@ -37,8 +40,15 @@ export default async function ProductPage({ params }: PageProps<"/[lang]/realisa
   const dict = await getDictionary(lang);
   const t = dict.showcase;
 
+  const breadcrumbs = breadcrumbJsonLd([
+    { name: dict.nav[0].label, path: localePath(lang) },
+    { name: t.eyebrow, path: localePath(lang, "/realisations") },
+  ]);
+
   return (
     <>
+      <JsonLd data={breadcrumbs} />
+
       {/* Le plan vidéo commun des pages internes : la même ouverture que Services, Contact
           et Tarifs. Texte au papier sur le voile sombre. */}
       <header

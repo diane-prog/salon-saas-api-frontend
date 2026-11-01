@@ -1,19 +1,22 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
+import { JsonLd } from "@/components/JsonLd";
 import { HeroSection } from "@/components/sections";
 import { isLocale, getDictionary, localePath } from "@/lib/dictionaries";
 import { LABEL } from "@/lib/editorial";
+import { breadcrumbJsonLd, pageMetadata } from "@/lib/seo";
 
 export async function generateMetadata({ params }: PageProps<"/[lang]/contact">): Promise<Metadata> {
   const { lang } = await params;
   if (!isLocale(lang)) return {};
   const dict = await getDictionary(lang);
-  return {
+  return pageMetadata({
     title: dict.contactPage.title,
     description: dict.contactPage.lead,
-    alternates: { canonical: localePath(lang, "/contact") },
-  };
+    path: "/contact",
+    locale: lang,
+  });
 }
 
 /**
@@ -51,8 +54,15 @@ export default async function ContactPage({ params }: PageProps<"/[lang]/contact
   const mailto = contactPage.info.find((item) => item.href?.startsWith("mailto:"))?.href;
   const tel = contactPage.info.find((item) => item.href?.startsWith("tel:"))?.href;
 
+  const breadcrumbs = breadcrumbJsonLd([
+    { name: dict.nav[0].label, path: localePath(lang) },
+    { name: contactPage.title, path: localePath(lang, "/contact") },
+  ]);
+
   return (
     <>
+      <JsonLd data={breadcrumbs} />
+
       {/* Le hero des pages internes : étiquette, titre, chapô. */}
       <HeroSection eyebrow={ui.talkToUs} title={contactPage.title} body={contactPage.lead} />
 

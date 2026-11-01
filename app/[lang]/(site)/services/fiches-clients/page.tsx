@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { JsonLd } from "@/components/JsonLd";
 import ServicePageTemplate from "@/components/ServicePageTemplate";
 import { isLocale, getDictionary, localePath } from "@/lib/dictionaries";
+import { breadcrumbJsonLd, pageMetadata } from "@/lib/seo";
 
 const SLUG = "fiches-clients";
 
@@ -11,11 +13,12 @@ export async function generateMetadata({ params }: PageProps<"/[lang]/services/f
   const dict = await getDictionary(lang);
   const service = dict.services.find((s) => s.slug === SLUG);
   if (!service) return {};
-  return {
+  return pageMetadata({
     title: service.heroTitle,
     description: service.short,
-    alternates: { canonical: localePath(lang, `/services/${SLUG}`) },
-  };
+    path: `/services/${SLUG}`,
+    locale: lang,
+  });
 }
 
 export default async function Page({ params }: PageProps<"/[lang]/services/fiches-clients">) {
@@ -25,5 +28,16 @@ export default async function Page({ params }: PageProps<"/[lang]/services/fiche
   const service = dict.services.find((s) => s.slug === SLUG);
   if (!service) notFound();
 
-  return <ServicePageTemplate service={service} />;
+  const breadcrumbs = breadcrumbJsonLd([
+    { name: dict.nav[0].label, path: localePath(lang) },
+    { name: dict.nav[1].label, path: localePath(lang, "/services") },
+    { name: service.title, path: localePath(lang, `/services/${SLUG}`) },
+  ]);
+
+  return (
+    <>
+      <JsonLd data={breadcrumbs} />
+      <ServicePageTemplate service={service} />
+    </>
+  );
 }
